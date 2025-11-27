@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateGallery } from '@/hooks/useGalleries';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Client } from '@/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,9 +10,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ClientPicker } from '@/components/admin/ClientPicker';
+import { FormSection } from '@/components/admin/FormSection';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { MapPin, Package, MessageSquare, Building2 } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
@@ -52,7 +54,6 @@ export default function GalleryCreate() {
       const result = await createGalleryMutation.mutateAsync(submitData);
       
       if (result) {
-        // Link clients to gallery
         const galleryClients = selectedClients.map(client => ({
           gallery_id: result.id,
           client_id: client.id,
@@ -83,138 +84,196 @@ export default function GalleryCreate() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin/galleries')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-3xl font-bold text-foreground">Galerie erstellen</h1>
-      </div>
+    <PageContainer size="full">
+      <PageHeader
+        title="Neue Galerie erstellen"
+        breadcrumbs={[
+          { label: 'Galerien', href: '/admin/galleries' },
+          { label: 'Neue Galerie' },
+        ]}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Galerie-Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Galerie-Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="z.B. Sonnenuntergang Villa Shooting"
-                required
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Content - Left Side */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Objekt-Details */}
+            <FormSection
+              icon={<MapPin className="h-5 w-5" />}
+              title="Objekt-Details"
+              description="Grundinformationen zur Immobilie"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="name" className="flex items-center gap-2">
+                  Galerie-Name
+                  <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="z.B. Moderne Villa am See"
+                  required
+                  disabled={createGalleryMutation.isPending}
+                  className="text-base"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ein URL-freundlicher Slug wird automatisch generiert
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Immobilien-Adresse</Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Musterstraße 123, 12345 Musterstadt"
+                  rows={3}
+                  disabled={createGalleryMutation.isPending}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Die Adresse der Immobilie hilft bei der Organisation
+                </p>
+              </div>
+            </FormSection>
+
+            {/* Paket-Einstellungen */}
+            <FormSection
+              icon={<Package className="h-5 w-5" />}
+              title="Paket-Einstellungen"
+              description="Foto-Anzahl und Kommunikationsform"
+            >
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="target" className="flex items-center gap-2">
+                    Ziel-Paketanzahl
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="target"
+                    type="number"
+                    min={1}
+                    value={formData.package_target_count}
+                    onChange={(e) =>
+                      setFormData({ ...formData, package_target_count: parseInt(e.target.value) })
+                    }
+                    required
+                    disabled={createGalleryMutation.isPending}
+                    className="text-base"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Anzahl der Fotos im Kundenpaket
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Anredeform
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <RadioGroup
+                    value={formData.salutation_type}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
+                    }
+                    disabled={createGalleryMutation.isPending}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Du" id="du" />
+                      <Label htmlFor="du" className="font-normal cursor-pointer">
+                        Du (informell)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Sie" id="sie" />
+                      <Label htmlFor="sie" className="font-normal cursor-pointer">
+                        Sie (formell)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+            </FormSection>
+          </div>
+
+          {/* Sidebar - Right Side */}
+          <div className="space-y-6">
+            {/* Kunden */}
+            <FormSection
+              title="Kunden"
+              description="Wer erhält Zugriff auf diese Galerie?"
+              className="border-primary/20"
+            >
+              <ClientPicker
+                selectedClients={selectedClients}
+                onClientsChange={setSelectedClients}
                 disabled={createGalleryMutation.isPending}
               />
-              <p className="text-xs text-muted-foreground">
-                Ein URL-freundlicher Slug wird automatisch generiert
-              </p>
-            </div>
+              {selectedClients.length > 0 && (
+                <div className="pt-2 text-xs text-muted-foreground">
+                  ✓ {selectedClients.length} {selectedClients.length === 1 ? 'Kunde' : 'Kunden'} ausgewählt
+                </div>
+              )}
+              {selectedClients.length === 0 && (
+                <div className="pt-2 text-xs text-destructive">
+                  Mindestens 1 Kunde erforderlich
+                </div>
+              )}
+            </FormSection>
 
-            <div className="space-y-2">
-              <Label htmlFor="address">Adresse (Optional)</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Musterstraße 123, 12345 Musterstadt"
-                rows={2}
-                disabled={createGalleryMutation.isPending}
-              />
-              <p className="text-xs text-muted-foreground">
-                Die Adresse der Immobilie oder des Shooting-Ortes
-              </p>
-            </div>
+            {/* Organisation */}
+            <FormSection
+              icon={<Building2 className="h-5 w-5" />}
+              title="Organisation"
+              description="Optional einem Unternehmen zuweisen"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="company">Unternehmen</Label>
+                <Select
+                  value={formData.company_id}
+                  onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
+                  disabled={createGalleryMutation.isPending}
+                >
+                  <SelectTrigger id="company">
+                    <SelectValue placeholder="Keines" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Keines</SelectItem>
+                    {companies?.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </FormSection>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="target">Ziel-Paketanzahl *</Label>
-              <Input
-                id="target"
-                type="number"
-                min={1}
-                value={formData.package_target_count}
-                onChange={(e) =>
-                  setFormData({ ...formData, package_target_count: parseInt(e.target.value) })
-                }
-                required
-                disabled={createGalleryMutation.isPending}
-              />
-              <p className="text-xs text-muted-foreground">
-                Anzahl der Fotos im Kundenpaket
-              </p>
-            </div>
-
-            <ClientPicker
-              selectedClients={selectedClients}
-              onClientsChange={setSelectedClients}
+        {/* Sticky Footer with Actions */}
+        <div className="sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-neu-float p-4 -mx-4 rounded-t-[2rem]">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/admin/galleries')}
               disabled={createGalleryMutation.isPending}
-            />
-
-            <div className="space-y-3">
-              <Label>Anredeform (Standard für Kunden-Kommunikation) *</Label>
-              <RadioGroup
-                value={formData.salutation_type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
-                }
-                disabled={createGalleryMutation.isPending}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Du" id="du" />
-                  <Label htmlFor="du" className="font-normal cursor-pointer">
-                    Du (informell)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Sie" id="sie" />
-                  <Label htmlFor="sie" className="font-normal cursor-pointer">
-                    Sie (formell)
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="company">Unternehmen (Optional)</Label>
-              <Select
-                value={formData.company_id}
-                onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
-                disabled={createGalleryMutation.isPending}
-              >
-                <SelectTrigger id="company">
-                  <SelectValue placeholder="Unternehmen auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Keines</SelectItem>
-                  {companies?.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Diese Galerie einem Unternehmen zur Organisation zuweisen
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/admin/galleries')}
-                disabled={createGalleryMutation.isPending}
-              >
-                Abbrechen
-              </Button>
-              <Button type="submit" disabled={createGalleryMutation.isPending}>
-                {createGalleryMutation.isPending ? 'Wird erstellt...' : 'Galerie erstellen'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            >
+              Abbrechen
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createGalleryMutation.isPending || selectedClients.length === 0}
+              size="lg"
+            >
+              {createGalleryMutation.isPending ? 'Wird erstellt...' : 'Galerie erstellen →'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </PageContainer>
   );
 }
