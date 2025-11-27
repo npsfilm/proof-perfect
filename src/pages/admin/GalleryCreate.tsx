@@ -109,14 +109,14 @@ export default function GalleryCreate() {
               <Label htmlFor="company">Unternehmen (Optional)</Label>
               <Select
                 value={formData.company_id}
-                onValueChange={(value) => setFormData({ ...formData, company_id: value })}
+                onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
                 disabled={createGallery.isPending}
               >
                 <SelectTrigger id="company">
                   <SelectValue placeholder="Unternehmen auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Keines</SelectItem>
+                  <SelectItem value="none">Keines</SelectItem>
                   {companies?.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
