@@ -251,15 +251,15 @@ export default function GalleryDetail() {
                 Unternehmen
               </Label>
               <Select
-                value={gallery.company_id || ''}
-                onValueChange={handleCompanyChange}
+                value={gallery.company_id || 'none'}
+                onValueChange={(value) => handleCompanyChange(value === 'none' ? '' : value)}
                 disabled={gallery.status !== 'Draft'}
               >
                 <SelectTrigger id="company-select" className="mt-2">
                   <SelectValue placeholder="Unternehmen auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Keines</SelectItem>
+                  <SelectItem value="none">Keines</SelectItem>
                   {companies?.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
