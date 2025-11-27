@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PhotoUploader } from '@/components/admin/PhotoUploader';
+import { PhotoGrid } from '@/components/admin/gallery/PhotoGrid';
+import { PhotoBatchActions } from '@/components/admin/gallery/PhotoBatchActions';
+import { useBatchPhotoOperations } from '@/hooks/useBatchPhotoOperations';
 import { Photo } from '@/types/database';
+import { useToast } from '@/hooks/use-toast';
 
 interface GalleryPhotosSectionProps {
   galleryId: string;
@@ -10,6 +15,65 @@ interface GalleryPhotosSectionProps {
 }
 
 export function GalleryPhotosSection({ galleryId, gallerySlug, photos, onUploadComplete }: GalleryPhotosSectionProps) {
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const { deletePhotos, reorderPhotos } = useBatchPhotoOperations(galleryId);
+  const { toast } = useToast();
+
+  const handlePhotoToggle = (photoId: string) => {
+    const newSelection = new Set(selectedPhotos);
+    if (newSelection.has(photoId)) {
+      newSelection.delete(photoId);
+    } else {
+      newSelection.add(photoId);
+    }
+    setSelectedPhotos(newSelection);
+  };
+
+  const handleSelectAll = () => {
+    if (!photos) return;
+    setSelectedPhotos(new Set(photos.map(p => p.id)));
+  };
+
+  const handleClearSelection = () => {
+    setSelectedPhotos(new Set());
+  };
+
+  const handleDelete = async () => {
+    if (selectedPhotos.size === 0) return;
+    await deletePhotos.mutateAsync({
+      photoIds: Array.from(selectedPhotos),
+      gallerySlug,
+    });
+    setSelectedPhotos(new Set());
+  };
+
+  const handleDownload = () => {
+    if (!photos || selectedPhotos.size === 0) return;
+
+    const selectedPhotoData = photos.filter(p => selectedPhotos.has(p.id));
+    const filenames = selectedPhotoData.map(p => p.filename).join(' ');
+
+    navigator.clipboard.writeText(filenames);
+    toast({
+      title: 'Dateinamen kopiert',
+      description: `${selectedPhotos.size} Dateinamen in die Zwischenablage kopiert.`,
+    });
+  };
+
+  const handleReorder = (photoId: string, newIndex: number) => {
+    if (!photos) return;
+
+    // Calculate new order values for affected photos
+    const updates = photos.map((photo, index) => {
+      if (photo.id === photoId) {
+        return { photoId: photo.id, newOrder: newIndex + 1 };
+      }
+      return { photoId: photo.id, newOrder: index + 1 };
+    });
+
+    reorderPhotos.mutate(updates);
+  };
+
   return (
     <>
       <Card>
@@ -30,22 +94,30 @@ export function GalleryPhotosSection({ galleryId, gallerySlug, photos, onUploadC
         <Card>
           <CardHeader>
             <CardTitle>Fotos ({photos.length})</CardTitle>
+            <CardDescription>
+              Klicke und ziehe Fotos zum Neuanordnen. Wähle mehrere aus für Batch-Aktionen.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border">
-                  <img
-                    src={photo.storage_url}
-                    alt={photo.filename}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+            <PhotoGrid
+              photos={photos}
+              selectedPhotos={selectedPhotos}
+              onPhotoToggle={handlePhotoToggle}
+              onSelectAll={handleSelectAll}
+              onClearSelection={handleClearSelection}
+              onReorder={handleReorder}
+            />
           </CardContent>
         </Card>
       )}
+
+      <PhotoBatchActions
+        selectedCount={selectedPhotos.size}
+        onDelete={handleDelete}
+        onDownload={handleDownload}
+        onClearSelection={handleClearSelection}
+        isDeleting={deletePhotos.isPending}
+      />
     </>
   );
 }
