@@ -5,9 +5,10 @@ interface ClientGalleryHeaderProps {
   galleryName: string;
   onSignOut: () => void;
   onShowHelp?: () => void;
+  children?: React.ReactNode;
 }
 
-export function ClientGalleryHeader({ galleryName, onSignOut, onShowHelp }: ClientGalleryHeaderProps) {
+export function ClientGalleryHeader({ galleryName, onSignOut, onShowHelp, children }: ClientGalleryHeaderProps) {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-30">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -16,6 +17,7 @@ export function ClientGalleryHeader({ galleryName, onSignOut, onShowHelp }: Clie
           <p className="text-sm text-muted-foreground">Wählen Sie Ihre Lieblingsfotos</p>
         </div>
         <div className="flex items-center gap-2">
+          {children}
           {onShowHelp && (
             <Button variant="ghost" size="sm" onClick={onShowHelp}>
               <HelpCircle className="h-4 w-4 md:mr-2" />
