@@ -1,6 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { SelectionCelebration } from './SelectionCelebration';
-import { useState, useEffect } from 'react';
 
 interface SelectionFooterProps {
   selectedCount: number;
@@ -10,20 +8,8 @@ interface SelectionFooterProps {
 }
 
 export function SelectionFooter({ selectedCount, targetCount, onFinalize, disabled }: SelectionFooterProps) {
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [previousCount, setPreviousCount] = useState(selectedCount);
-
-  useEffect(() => {
-    // Show celebration when reaching target for the first time
-    if (selectedCount === targetCount && previousCount < targetCount) {
-      setShowCelebration(true);
-    }
-    setPreviousCount(selectedCount);
-  }, [selectedCount, targetCount, previousCount]);
-
   return (
     <>
-      <SelectionCelebration show={showCelebration} />
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
