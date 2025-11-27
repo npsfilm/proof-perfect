@@ -55,12 +55,12 @@ export function SelectionSummary({
       {/* Expandable Content */}
       {isExpanded && (
         <ScrollArea className="h-48 px-4 pb-4">
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
             {selectedPhotos.map((photo) => {
               return (
                 <div
                   key={photo.id}
-                  className="relative group cursor-pointer aspect-square rounded-md overflow-hidden border-2 border-primary"
+                  className="relative group cursor-pointer aspect-[3/2] rounded-md overflow-hidden border-2 border-primary"
                   onClick={() => onPhotoClick(photo.id)}
                 >
                   <img
