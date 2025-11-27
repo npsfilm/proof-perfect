@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import GalleriesList from "./pages/admin/GalleriesList";
 import GalleryCreate from "./pages/admin/GalleryCreate";
 import GalleryDetail from "./pages/admin/GalleryDetail";
+import GalleryReview from "./pages/admin/GalleryReview";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ClientGallery from "./pages/client/ClientGallery";
 import NotFound from "./pages/NotFound";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="galleries" element={<GalleriesList />} />
               <Route path="galleries/new" element={<GalleryCreate />} />
               <Route path="galleries/:id" element={<GalleryDetail />} />
+              <Route path="galleries/:id/review" element={<GalleryReview />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
