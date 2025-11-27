@@ -14,6 +14,7 @@ import { Copy, Send, Loader2, MessageSquare, Wand2, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { TimeElapsed } from '@/components/admin/TimeElapsed';
 
 export default function GalleryReview() {
   const { id } = useParams<{ id: string }>();
@@ -200,9 +201,18 @@ export default function GalleryReview() {
             { label: 'Überprüfung' }
           ]}
           actions={
-            <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
-              {gallery.status}
-            </Badge>
+            <div className="flex items-center gap-3">
+              {gallery.reviewed_at && (
+                <TimeElapsed 
+                  startTime={gallery.reviewed_at} 
+                  label="seit Freigabe"
+                  variant="secondary"
+                />
+              )}
+              <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
+                {gallery.status}
+              </Badge>
+            </div>
           }
         />
 
