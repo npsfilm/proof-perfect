@@ -10,14 +10,14 @@ import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { GalleryInfoCard } from '@/components/admin/gallery/GalleryInfoCard';
+import { EditableGalleryInfo } from '@/components/admin/gallery/EditableGalleryInfo';
 import { GalleryClientsCard } from '@/components/admin/gallery/GalleryClientsCard';
 import { GalleryPhotosSection } from '@/components/admin/gallery/GalleryPhotosSection';
 import { GallerySendActions } from '@/components/admin/gallery/GallerySendActions';
-import { Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryDetailSkeleton } from '@/components/admin/skeletons/GalleryDetailSkeleton';
+import { Copy } from 'lucide-react';
 
 export default function GalleryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -38,23 +38,12 @@ export default function GalleryDetail() {
     }
   }, [galleryClients]);
 
-  const handleCompanyChange = async (companyId: string) => {
-    try {
-      await supabase.rpc('assign_gallery_to_company', {
-        p_gallery_id: id!,
-        p_company_id: companyId || null,
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['gallery', id] });
-      toast({
-        title: 'Unternehmen aktualisiert',
-        description: 'Unternehmens-Zuweisung der Galerie erfolgreich aktualisiert',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Fehler',
-        description: error.message,
-        variant: 'destructive',
+  const handleCopyUrl = () => {
+    if (gallery) {
+      navigator.clipboard.writeText(`${window.location.origin}/gallery/${gallery.slug}`);
+      toast({ 
+        title: 'URL kopiert!', 
+        description: 'Die Galerie-URL wurde in die Zwischenablage kopiert.' 
       });
     }
   };
@@ -74,8 +63,10 @@ export default function GalleryDetail() {
     );
   }
 
+  const isDraft = gallery.status === 'Draft';
+
   return (
-    <PageContainer size="lg">
+    <PageContainer size="full">
       <div className="space-y-6">
         <PageHeader
           title={gallery.name}
@@ -86,44 +77,62 @@ export default function GalleryDetail() {
           ]}
           actions={
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyUrl}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                URL kopieren
+              </Button>
               {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
                 <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
                   Überprüfung ansehen
                 </Button>
               )}
-              <Badge>{gallery.status}</Badge>
+              <Badge variant={isDraft ? 'secondary' : 'default'}>
+                {gallery.status}
+              </Badge>
             </div>
           }
         />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <GalleryInfoCard
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Content - Left Side (2 columns) */}
+          <div className="lg:col-span-2 space-y-6">
+            <EditableGalleryInfo
+              gallery={gallery}
+              companies={companies}
+              photoCount={photos?.length ?? 0}
+              isDraft={isDraft}
+            />
+          </div>
+
+          {/* Sidebar - Right Side (1 column) */}
+          <div className="space-y-6">
+            <GalleryClientsCard
+              selectedClients={selectedClients}
+              onClientsChange={setSelectedClients}
+              disabled={!isDraft}
+            />
+          </div>
+        </div>
+
+        {/* Photos Section - Full Width */}
+        <GalleryPhotosSection
+          galleryId={gallery.id}
+          gallerySlug={gallery.slug}
+          photos={photos}
+          onUploadComplete={() => refetchPhotos()}
+        />
+
+        {/* Send Actions - Full Width */}
+        <GallerySendActions
           gallery={gallery}
-          photoCount={photos?.length ?? 0}
-          companies={companies}
-          onCompanyChange={handleCompanyChange}
-        />
-
-        <GalleryClientsCard
           selectedClients={selectedClients}
-          onClientsChange={setSelectedClients}
-          disabled={gallery.status !== 'Draft'}
+          photos={photos}
+          galleryClients={galleryClients}
         />
-      </div>
-
-      <GalleryPhotosSection
-        galleryId={gallery.id}
-        gallerySlug={gallery.slug}
-        photos={photos}
-        onUploadComplete={() => refetchPhotos()}
-      />
-
-      <GallerySendActions
-        gallery={gallery}
-        selectedClients={selectedClients}
-        photos={photos}
-        galleryClients={galleryClients}
-      />
       </div>
     </PageContainer>
   );
