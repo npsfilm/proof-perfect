@@ -166,6 +166,24 @@ export default function GalleryDetail() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
+              <p className="text-sm text-muted-foreground">Gallery URL</p>
+              <div className="flex items-center gap-2 mt-1">
+                <code className="text-xs bg-muted px-2 py-1 rounded flex-1 overflow-x-auto">
+                  {window.location.origin}/gallery/{gallery.slug}
+                </code>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/gallery/${gallery.slug}`);
+                    toast({ title: 'Copied!', description: 'Gallery URL copied to clipboard' });
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+            <div>
               <p className="text-sm text-muted-foreground">Package Target</p>
               <p className="font-medium">{gallery.package_target_count} photos</p>
             </div>
