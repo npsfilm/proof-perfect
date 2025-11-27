@@ -1,13 +1,22 @@
 import { Photo } from '@/types/database';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Heart } from 'lucide-react';
+import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 
 interface ClientPhotoGridProps {
   photos?: Photo[];
   isLoading: boolean;
   onPhotoClick: (photoId: string) => void;
+  galleryId?: string;
 }
 
-export function ClientPhotoGrid({ photos, isLoading, onPhotoClick }: ClientPhotoGridProps) {
+export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: ClientPhotoGridProps) {
+  const { toggleSelection } = usePhotoSelection(galleryId);
+
+  const handleHeartClick = (e: React.MouseEvent, photo: Photo) => {
+    e.stopPropagation();
+    toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -29,8 +38,7 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick }: ClientPhoto
       {photos.map((photo) => (
         <div
           key={photo.id}
-          onClick={() => onPhotoClick(photo.id)}
-          className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 transition-all ${
+          className={`relative aspect-square rounded-lg overflow-hidden group border-2 transition-all ${
             photo.is_selected 
               ? 'border-primary shadow-md' 
               : 'border-transparent hover:border-muted'
@@ -39,15 +47,25 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick }: ClientPhoto
           <img
             src={photo.storage_url}
             alt={photo.filename}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform"
+            onClick={() => onPhotoClick(photo.id)}
           />
-          {photo.is_selected && (
-            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1.5">
-              <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </div>
-          )}
+          
+          {/* Heart icon - always visible on hover or when selected */}
+          <button
+            onClick={(e) => handleHeartClick(e, photo)}
+            className={`absolute top-2 right-2 p-2 rounded-full transition-all ${
+              photo.is_selected
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-black/50 text-white opacity-0 group-hover:opacity-100'
+            }`}
+            aria-label={photo.is_selected ? 'Deselektieren' : 'Auswählen'}
+          >
+            <Heart
+              className={`h-4 w-4 ${photo.is_selected ? 'fill-current' : ''}`}
+            />
+          </button>
+
           {photo.client_comment && (
             <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
               Hat Kommentar
