@@ -19,7 +19,7 @@ export default function Analytics() {
   if (!analytics) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No analytics data available</p>
+        <p className="text-muted-foreground">Keine Analysedaten verfügbar</p>
       </div>
     );
   }
@@ -27,8 +27,8 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Performance metrics and insights</p>
+        <h1 className="text-3xl font-bold text-foreground">Analytik-Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Leistungskennzahlen und Einblicke</p>
       </div>
 
       {/* Key Metrics */}
@@ -37,7 +37,7 @@ export default function Analytics() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              Total Galleries
+              Galerien gesamt
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -49,7 +49,7 @@ export default function Analytics() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />
-              Avg Selection Rate
+              Durchschn. Auswahlrate
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -57,7 +57,7 @@ export default function Analytics() {
               {analytics.averageSelectionRate.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              of target package size
+              der Zielpaketgröße
             </p>
           </CardContent>
         </Card>
@@ -66,7 +66,7 @@ export default function Analytics() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              Avg Review Time
+              Durchschn. Prüfzeit
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -76,7 +76,7 @@ export default function Analytics() {
                 : `${analytics.averageReviewTime.toFixed(1)}h`}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              from sent to reviewed
+              von gesendet bis geprüft
             </p>
           </CardContent>
         </Card>
@@ -85,7 +85,7 @@ export default function Analytics() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Wand2 className="h-4 w-4 text-primary" />
-              Staging Requests
+              Staging-Anfragen
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -93,7 +93,7 @@ export default function Analytics() {
               {analytics.stagingRequests.reduce((sum, s) => sum + s.count, 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              total photos with staging
+              Fotos mit Staging gesamt
             </p>
           </CardContent>
         </Card>
@@ -104,8 +104,8 @@ export default function Analytics() {
         {/* Gallery Status Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Gallery Status Distribution</CardTitle>
-            <CardDescription>Breakdown by current status</CardDescription>
+            <CardTitle>Galerie-Statusverteilung</CardTitle>
+            <CardDescription>Aufschlüsselung nach aktuellem Status</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.galleriesByStatus.length > 0 ? (
@@ -129,7 +129,7 @@ export default function Analytics() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-muted-foreground py-12">No data available</p>
+              <p className="text-center text-muted-foreground py-12">Keine Daten verfügbar</p>
             )}
           </CardContent>
         </Card>
@@ -137,8 +137,8 @@ export default function Analytics() {
         {/* Staging Styles */}
         <Card>
           <CardHeader>
-            <CardTitle>Staging Style Preferences</CardTitle>
-            <CardDescription>Most requested staging styles</CardDescription>
+            <CardTitle>Staging-Stil-Präferenzen</CardTitle>
+            <CardDescription>Meistangefragte Staging-Stile</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.stagingRequests.length > 0 ? (
@@ -152,7 +152,7 @@ export default function Analytics() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-muted-foreground py-12">No staging requests yet</p>
+              <p className="text-center text-muted-foreground py-12">Noch keine Staging-Anfragen</p>
             )}
           </CardContent>
         </Card>
@@ -161,8 +161,8 @@ export default function Analytics() {
       {/* Recent Activity Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Gallery Activity (Last 30 Days)</CardTitle>
-          <CardDescription>Sent, reviewed, and delivered galleries over time</CardDescription>
+          <CardTitle>Galerie-Aktivität (Letzte 30 Tage)</CardTitle>
+          <CardDescription>Gesendete, geprüfte und ausgelieferte Galerien im Zeitverlauf</CardDescription>
         </CardHeader>
         <CardContent>
           {analytics.recentActivity.length > 0 ? (
@@ -171,20 +171,20 @@ export default function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  tickFormatter={(date) => new Date(date).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' })}
                 />
                 <YAxis />
                 <Tooltip
-                  labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                  labelFormatter={(date) => new Date(date).toLocaleDateString('de-DE')}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="sent" stroke="#4A90E2" name="Sent" />
-                <Line type="monotone" dataKey="reviewed" stroke="#FFA726" name="Reviewed" />
-                <Line type="monotone" dataKey="delivered" stroke="#7CB342" name="Delivered" />
+                <Line type="monotone" dataKey="sent" stroke="#4A90E2" name="Gesendet" />
+                <Line type="monotone" dataKey="reviewed" stroke="#FFA726" name="Geprüft" />
+                <Line type="monotone" dataKey="delivered" stroke="#7CB342" name="Ausgeliefert" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-center text-muted-foreground py-12">No recent activity</p>
+            <p className="text-center text-muted-foreground py-12">Keine aktuellen Aktivitäten</p>
           )}
         </CardContent>
       </Card>
@@ -192,8 +192,8 @@ export default function Analytics() {
       {/* Top Engaged Clients */}
       <Card>
         <CardHeader>
-          <CardTitle>Top Engaged Clients</CardTitle>
-          <CardDescription>Most active clients by gallery count and selections</CardDescription>
+          <CardTitle>Top engagierte Kunden</CardTitle>
+          <CardDescription>Aktivste Kunden nach Galerie-Anzahl und Auswahlen</CardDescription>
         </CardHeader>
         <CardContent>
           {analytics.topEngagedClients.length > 0 ? (
@@ -210,25 +210,25 @@ export default function Analytics() {
                     <div>
                       <p className="font-medium">{client.email}</p>
                       <p className="text-xs text-muted-foreground">
-                        {client.comments} comment{client.comments !== 1 ? 's' : ''}
+                        {client.comments} {client.comments !== 1 ? 'Kommentare' : 'Kommentar'}
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-4 text-sm">
                     <div className="text-right">
                       <p className="font-semibold">{client.galleries}</p>
-                      <p className="text-xs text-muted-foreground">Galleries</p>
+                      <p className="text-xs text-muted-foreground">Galerien</p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{client.selections}</p>
-                      <p className="text-xs text-muted-foreground">Selections</p>
+                      <p className="text-xs text-muted-foreground">Auswahlen</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-12">No client data available</p>
+            <p className="text-center text-muted-foreground py-12">Keine Kundendaten verfügbar</p>
           )}
         </CardContent>
       </Card>

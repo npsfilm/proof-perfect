@@ -77,12 +77,12 @@ export default function GalleryDetail() {
       
       queryClient.invalidateQueries({ queryKey: ['gallery', id] });
       toast({
-        title: 'Company updated',
-        description: 'Gallery company assignment updated successfully',
+        title: 'Unternehmen aktualisiert',
+        description: 'Unternehmens-Zuweisung der Galerie erfolgreich aktualisiert',
       });
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -92,8 +92,8 @@ export default function GalleryDetail() {
   const handleSendToClient = async () => {
     if (clientEmails.length === 0) {
       toast({
-        title: 'No clients',
-        description: 'Please add at least one client email.',
+        title: 'Keine Kunden',
+        description: 'Bitte fügen Sie mindestens eine Kunden-E-Mail hinzu.',
         variant: 'destructive',
       });
       return;
@@ -101,8 +101,8 @@ export default function GalleryDetail() {
 
     if (!photos || photos.length === 0) {
       toast({
-        title: 'No photos',
-        description: 'Please upload photos before sending to clients.',
+        title: 'Keine Fotos',
+        description: 'Bitte laden Sie Fotos hoch, bevor Sie diese an Kunden senden.',
         variant: 'destructive',
       });
       return;
@@ -153,16 +153,16 @@ export default function GalleryDetail() {
       }
 
       toast({
-        title: 'Gallery sent!',
-        description: `Sent to ${clientEmails.length} client(s). ${
-          result.created?.length > 0 ? `Created ${result.created.length} new account(s).` : ''
+        title: 'Galerie gesendet!',
+        description: `An ${clientEmails.length} Kunde(n) gesendet. ${
+          result.created?.length > 0 ? `${result.created.length} neue(s) Konto(s) erstellt.` : ''
         }`,
       });
 
       queryClient.invalidateQueries({ queryKey: ['gallery', id] });
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -182,9 +182,9 @@ export default function GalleryDetail() {
   if (!gallery) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Gallery not found</p>
+        <p className="text-muted-foreground">Galerie nicht gefunden</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate('/admin/galleries')}>
-          Back to Galleries
+          Zurück zu Galerien
         </Button>
       </div>
     );
@@ -203,7 +203,7 @@ export default function GalleryDetail() {
         <div className="flex items-center gap-3">
           {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
             <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
-              View Review
+              Überprüfung ansehen
             </Button>
           )}
           <Badge>{gallery.status}</Badge>
@@ -213,11 +213,11 @@ export default function GalleryDetail() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Gallery Info</CardTitle>
+            <CardTitle>Galerie-Info</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-sm text-muted-foreground">Gallery URL</p>
+              <p className="text-sm text-muted-foreground">Galerie-URL</p>
               <div className="flex items-center gap-2 mt-1">
                 <code className="text-xs bg-muted px-2 py-1 rounded flex-1 overflow-x-auto">
                   {window.location.origin}/gallery/{gallery.slug}
@@ -227,28 +227,28 @@ export default function GalleryDetail() {
                   size="sm"
                   onClick={() => {
                     navigator.clipboard.writeText(`${window.location.origin}/gallery/${gallery.slug}`);
-                    toast({ title: 'Copied!', description: 'Gallery URL copied to clipboard' });
+                    toast({ title: 'Kopiert!', description: 'Galerie-URL in Zwischenablage kopiert' });
                   }}
                 >
-                  Copy
+                  Kopieren
                 </Button>
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Package Target</p>
-              <p className="font-medium">{gallery.package_target_count} photos</p>
+              <p className="text-sm text-muted-foreground">Paket-Ziel</p>
+              <p className="font-medium">{gallery.package_target_count} Fotos</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Salutation</p>
+              <p className="text-sm text-muted-foreground">Anrede</p>
               <p className="font-medium">{gallery.salutation_type}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Photos Uploaded</p>
-              <p className="font-medium">{photos?.length ?? 0} photos</p>
+              <p className="text-sm text-muted-foreground">Hochgeladene Fotos</p>
+              <p className="font-medium">{photos?.length ?? 0} Fotos</p>
             </div>
             <div className="pt-4 border-t">
               <Label htmlFor="company-select" className="text-sm text-muted-foreground">
-                Company
+                Unternehmen
               </Label>
               <Select
                 value={gallery.company_id || ''}
@@ -256,10 +256,10 @@ export default function GalleryDetail() {
                 disabled={gallery.status !== 'Draft'}
               >
                 <SelectTrigger id="company-select" className="mt-2">
-                  <SelectValue placeholder="Select a company..." />
+                  <SelectValue placeholder="Unternehmen auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">Keines</SelectItem>
                   {companies?.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
@@ -273,8 +273,8 @@ export default function GalleryDetail() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Client Access</CardTitle>
-            <CardDescription>Add client emails to grant gallery access</CardDescription>
+            <CardTitle>Kundenzugriff</CardTitle>
+            <CardDescription>Kunden-E-Mails hinzufügen, um Zugriff auf die Galerie zu gewähren</CardDescription>
           </CardHeader>
           <CardContent>
             <ClientEmailInput
@@ -288,8 +288,8 @@ export default function GalleryDetail() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload Photos</CardTitle>
-          <CardDescription>Drag and drop photos or click to browse</CardDescription>
+          <CardTitle>Fotos hochladen</CardTitle>
+          <CardDescription>Fotos per Drag & Drop ablegen oder klicken zum Durchsuchen</CardDescription>
         </CardHeader>
         <CardContent>
           <PhotoUploader
@@ -303,7 +303,7 @@ export default function GalleryDetail() {
       {photos && photos.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Photos ({photos.length})</CardTitle>
+            <CardTitle>Fotos ({photos.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -327,12 +327,12 @@ export default function GalleryDetail() {
             {sending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending...
+                Wird gesendet...
               </>
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                Send to Client
+                An Kunde senden
               </>
             )}
           </Button>

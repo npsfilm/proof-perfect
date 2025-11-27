@@ -77,7 +77,7 @@ export default function GalleriesList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-foreground">Galleries</h1>
+          <h1 className="text-3xl font-bold text-foreground">Galerien</h1>
           {galleries && galleries.length > 0 && (
             <div className="flex items-center gap-2">
               <Checkbox
@@ -89,21 +89,21 @@ export default function GalleriesList() {
                 htmlFor="select-all"
                 className="text-sm font-medium cursor-pointer"
               >
-                Select all
+                Alle auswählen
               </label>
             </div>
           )}
         </div>
         <Button onClick={() => navigate('/admin/galleries/new')}>
           <Plus className="h-4 w-4 mr-2" />
-          New Gallery
+          Neue Galerie
         </Button>
       </div>
 
       {isLoading ? (
         <Card>
           <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">Loading galleries...</p>
+            <p className="text-center text-muted-foreground">Lade Galerien...</p>
           </CardContent>
         </Card>
       ) : galleries && galleries.length > 0 ? (
@@ -142,11 +142,11 @@ export default function GalleriesList() {
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Target: </span>
-                    <span className="font-medium">{gallery.package_target_count} photos</span>
+                    <span className="text-muted-foreground">Ziel: </span>
+                    <span className="font-medium">{gallery.package_target_count} Fotos</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Salutation: </span>
+                    <span className="text-muted-foreground">Anrede: </span>
                     <span className="font-medium">{gallery.salutation_type}</span>
                   </div>
                   <div className="flex gap-2">
@@ -157,7 +157,7 @@ export default function GalleriesList() {
                       onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      View
+                      Ansehen
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -167,19 +167,19 @@ export default function GalleriesList() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete gallery?</AlertDialogTitle>
+                          <AlertDialogTitle>Galerie löschen?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently delete "{gallery.name}" and all its photos.
-                            This action cannot be undone.
+                            Dies wird "{gallery.name}" und alle zugehörigen Fotos dauerhaft löschen.
+                            Diese Aktion kann nicht rückgängig gemacht werden.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => deleteGallery.mutate(gallery.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Delete
+                            Löschen
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -194,10 +194,10 @@ export default function GalleriesList() {
         <Card>
           <CardContent className="py-12">
             <div className="text-center">
-              <p className="text-muted-foreground mb-4">No galleries yet</p>
+              <p className="text-muted-foreground mb-4">Noch keine Galerien</p>
               <Button onClick={() => navigate('/admin/galleries/new')}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create your first gallery
+                Erste Galerie erstellen
               </Button>
             </div>
           </CardContent>

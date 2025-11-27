@@ -70,7 +70,7 @@ export function BatchActionsBar({
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
         <div className="bg-card border border-border rounded-lg shadow-lg px-4 py-3 flex items-center gap-4">
           <Badge variant="secondary" className="font-semibold">
-            {selectedCount} selected
+            {selectedCount} ausgewählt
           </Badge>
 
           <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export function BatchActionsBar({
               disabled={isProcessing}
             >
               <Copy className="h-4 w-4 mr-2" />
-              Duplicate
+              Duplizieren
             </Button>
 
             <Button
@@ -91,7 +91,7 @@ export function BatchActionsBar({
               disabled={isProcessing}
             >
               <Edit className="h-4 w-4 mr-2" />
-              Change Status
+              Status ändern
             </Button>
 
             <DropdownMenu>
@@ -103,14 +103,14 @@ export function BatchActionsBar({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected
+                  Ausgewählte löschen
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
           <Button size="sm" variant="ghost" onClick={onClearSelection}>
-            Clear
+            Leeren
           </Button>
         </div>
       </div>
@@ -119,15 +119,15 @@ export function BatchActionsBar({
       <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Gallery Status</DialogTitle>
+            <DialogTitle>Galerie-Status aktualisieren</DialogTitle>
             <DialogDescription>
-              Change the status of {selectedCount} selected {selectedCount === 1 ? 'gallery' : 'galleries'}
+              Status von {selectedCount} ausgewählter {selectedCount === 1 ? 'Galerie' : 'Galerien'} ändern
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="status">New Status</Label>
+              <Label htmlFor="status">Neuer Status</Label>
               <Select value={selectedStatus} onValueChange={(v) => setSelectedStatus(v as GalleryStatus)}>
                 <SelectTrigger id="status">
                   <SelectValue />
@@ -144,16 +144,16 @@ export function BatchActionsBar({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowStatusDialog(false)}>
-              Cancel
+              Abbrechen
             </Button>
             <Button onClick={handleStatusUpdate} disabled={isProcessing}>
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Updating...
+                  Wird aktualisiert...
                 </>
               ) : (
-                'Update Status'
+                'Status aktualisieren'
               )}
             </Button>
           </DialogFooter>
@@ -164,27 +164,27 @@ export function BatchActionsBar({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Galleries</DialogTitle>
+            <DialogTitle>Galerien löschen</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedCount} {selectedCount === 1 ? 'gallery' : 'galleries'}? 
-              This action cannot be undone.
+              Sind Sie sicher, dass Sie {selectedCount} {selectedCount === 1 ? 'Galerie' : 'Galerien'} löschen möchten? 
+              Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
+              Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isProcessing}>
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  Wird gelöscht...
                 </>
               ) : (
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  Löschen
                 </>
               )}
             </Button>

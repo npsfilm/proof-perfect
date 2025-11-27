@@ -36,7 +36,7 @@ export function ClientEmailInput({ emails, onChange, disabled }: ClientEmailInpu
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="client-emails">Client Emails</Label>
+      <Label htmlFor="client-emails">Kunden-E-Mails</Label>
       <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-background min-h-[42px]">
         {emails.map((email, index) => (
           <Badge key={index} variant="secondary" className="gap-1 px-2 py-1">
@@ -54,7 +54,7 @@ export function ClientEmailInput({ emails, onChange, disabled }: ClientEmailInpu
         <Input
           id="client-emails"
           type="email"
-          placeholder={emails.length === 0 ? 'Enter email and press Enter' : 'Add another...'}
+          placeholder={emails.length === 0 ? 'E-Mail eingeben und Enter drücken' : 'Weitere hinzufügen...'}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -64,7 +64,7 @@ export function ClientEmailInput({ emails, onChange, disabled }: ClientEmailInpu
         />
       </div>
       <p className="text-xs text-muted-foreground">
-        Press Enter or comma to add multiple emails
+        Enter oder Komma drücken, um mehrere E-Mails hinzuzufügen
       </p>
     </div>
   );

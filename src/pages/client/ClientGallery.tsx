@@ -168,15 +168,15 @@ export default function ClientGallery() {
       queryClient.invalidateQueries({ queryKey: ['gallery-photos', gallery.id] });
 
       toast({
-        title: 'Selection finalized!',
-        description: 'Your selections have been submitted to the admin.',
+        title: 'Auswahl finalisiert!',
+        description: 'Ihre Auswahl wurde dem Admin übermittelt.',
       });
 
       setShowFinalizeModals(false);
     } catch (error: any) {
       console.error('Finalization error:', error);
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -197,8 +197,8 @@ export default function ClientGallery() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-lg text-muted-foreground mb-4">Gallery not found</p>
-          <Button onClick={() => navigate('/')}>Go to Dashboard</Button>
+          <p className="text-lg text-muted-foreground mb-4">Galerie nicht gefunden</p>
+          <Button onClick={() => navigate('/')}>Zum Dashboard</Button>
         </div>
       </div>
     );
@@ -211,10 +211,10 @@ export default function ClientGallery() {
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This gallery has been finalized and is now locked. You can no longer make changes to your selection.
+              Diese Galerie wurde finalisiert und ist nun gesperrt. Sie können keine Änderungen mehr an Ihrer Auswahl vornehmen.
             </AlertDescription>
           </Alert>
-          <Button className="mt-4" onClick={() => navigate('/')}>Go to Dashboard</Button>
+          <Button className="mt-4" onClick={() => navigate('/')}>Zum Dashboard</Button>
         </div>
       </div>
     );
@@ -230,11 +230,11 @@ export default function ClientGallery() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">{gallery.name}</h1>
-            <p className="text-sm text-muted-foreground">Select your favorite photos</p>
+            <p className="text-sm text-muted-foreground">Wählen Sie Ihre Lieblingsfotos</p>
           </div>
           <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-2" />
-            Sign out
+            Abmelden
           </Button>
         </div>
       </header>
@@ -244,7 +244,7 @@ export default function ClientGallery() {
         <div className="container mx-auto px-4">
           <p className="text-sm text-blue-900 text-center">
             <Info className="inline h-4 w-4 mr-1" />
-            <strong>Unedited Proofs only.</strong> Colors and lighting will be corrected in the final version. Please focus on angles and composition.
+            <strong>Nur unbearbeitete Proofs.</strong> Farben und Beleuchtung werden in der finalen Version korrigiert. Bitte konzentrieren Sie sich auf Winkel und Komposition.
           </p>
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function ClientGallery() {
                 )}
                 {photo.client_comment && (
                   <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    Has comment
+                    Hat Kommentar
                   </div>
                 )}
                 {photo.staging_requested && (
@@ -294,7 +294,7 @@ export default function ClientGallery() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No photos uploaded yet</p>
+            <p className="text-muted-foreground">Noch keine Fotos hochgeladen</p>
           </div>
         )}
       </main>

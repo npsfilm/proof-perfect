@@ -41,7 +41,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -137,7 +137,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         <div className="w-full lg:w-80 bg-background rounded-lg p-6 space-y-6 overflow-y-auto">
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">
-              Photo {currentIndex + 1} of {photos.length}
+              Foto {currentIndex + 1} von {photos.length}
             </p>
             <p className="text-xs text-muted-foreground">{photo.filename}</p>
           </div>
@@ -152,15 +152,15 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
             <Heart 
               className={`h-5 w-5 mr-2 ${photo.is_selected ? 'fill-current' : ''}`} 
             />
-            {photo.is_selected ? 'Selected' : 'Select Photo'}
+            {photo.is_selected ? 'Ausgewählt' : 'Foto auswählen'}
           </Button>
 
           {/* Comment */}
           <div className="space-y-2">
-            <Label htmlFor="comment">Comment (optional)</Label>
+            <Label htmlFor="comment">Kommentar (optional)</Label>
             <Textarea
               id="comment"
-              placeholder="Add notes or feedback about this photo..."
+              placeholder="Notizen oder Feedback zu diesem Foto hinzufügen..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onBlur={handleCommentBlur}
@@ -172,9 +172,9 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
           <div className="space-y-4 border-t pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="staging" className="text-base">Virtual Staging</Label>
+                <Label htmlFor="staging" className="text-base">Virtuelles Staging</Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Add furniture digitally
+                  Möbel digital hinzufügen
                 </p>
               </div>
               <Switch
@@ -186,17 +186,17 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
 
             {stagingRequested && (
               <div className="space-y-2">
-                <Label htmlFor="staging-style">Style</Label>
+                <Label htmlFor="staging-style">Stil</Label>
                 <Select value={stagingStyle} onValueChange={handleStagingStyleChange}>
                   <SelectTrigger id="staging-style">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Modern">Modern</SelectItem>
-                    <SelectItem value="Scandinavian">Scandinavian</SelectItem>
-                    <SelectItem value="Industrial">Industrial</SelectItem>
-                    <SelectItem value="Minimalist">Minimalist</SelectItem>
-                    <SelectItem value="Traditional">Traditional</SelectItem>
+                    <SelectItem value="Scandinavian">Skandinavisch</SelectItem>
+                    <SelectItem value="Industrial">Industriell</SelectItem>
+                    <SelectItem value="Minimalist">Minimalistisch</SelectItem>
+                    <SelectItem value="Traditional">Traditionell</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

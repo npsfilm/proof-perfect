@@ -80,8 +80,8 @@ export default function GalleryReview() {
   const handleCopyFilenames = () => {
     if (!selectedPhotos || selectedPhotos.length === 0) {
       toast({
-        title: 'No photos selected',
-        description: 'There are no selected photos to copy.',
+        title: 'Keine Fotos ausgewählt',
+        description: 'Es wurden keine ausgewählten Fotos zum Kopieren gefunden.',
         variant: 'destructive',
       });
       return;
@@ -91,16 +91,16 @@ export default function GalleryReview() {
     navigator.clipboard.writeText(filenames);
     
     toast({
-      title: 'Copied!',
-      description: `${selectedPhotos.length} filenames copied to clipboard.`,
+      title: 'Kopiert!',
+      description: `${selectedPhotos.length} Dateinamen in Zwischenablage kopiert.`,
     });
   };
 
   const handleDeliverFinalFiles = async () => {
     if (!deliveryLink.trim()) {
       toast({
-        title: 'Missing link',
-        description: 'Please enter a download link.',
+        title: 'Link fehlt',
+        description: 'Bitte geben Sie einen Download-Link ein.',
         variant: 'destructive',
       });
       return;
@@ -108,8 +108,8 @@ export default function GalleryReview() {
 
     if (!clientEmails || clientEmails.length === 0) {
       toast({
-        title: 'No clients',
-        description: 'No client emails found for this gallery.',
+        title: 'Keine Kunden',
+        description: 'Keine Kunden-E-Mails für diese Galerie gefunden.',
         variant: 'destructive',
       });
       return;
@@ -146,8 +146,8 @@ export default function GalleryReview() {
       queryClient.invalidateQueries({ queryKey: ['gallery', id] });
 
       toast({
-        title: 'Delivery sent!',
-        description: `Final files delivery notification sent to ${clientEmails.length} client(s).`,
+        title: 'Lieferung gesendet!',
+        description: `Benachrichtigung über die Auslieferung der finalen Dateien an ${clientEmails.length} Kunde(n) gesendet.`,
       });
 
       setShowDeliveryDialog(false);
@@ -155,7 +155,7 @@ export default function GalleryReview() {
     } catch (error: any) {
       console.error('Delivery error:', error);
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -175,9 +175,9 @@ export default function GalleryReview() {
   if (!gallery) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Gallery not found</p>
+        <p className="text-muted-foreground">Galerie nicht gefunden</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate('/admin/galleries')}>
-          Back to Galleries
+          Zurück zu Galerien
         </Button>
       </div>
     );
@@ -193,8 +193,8 @@ export default function GalleryReview() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">Review: {gallery.name}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Client selections and feedback</p>
+          <h1 className="text-3xl font-bold text-foreground">Überprüfung: {gallery.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1">Kundenauswahl und Feedback</p>
         </div>
         <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
           {gallery.status}
@@ -204,7 +204,7 @@ export default function GalleryReview() {
       {gallery.status !== 'Reviewed' && gallery.status !== 'Delivered' && (
         <Alert>
           <AlertDescription>
-            This gallery has not been reviewed by the client yet. Selected photos will appear here once the client finalizes their selection.
+            Diese Galerie wurde vom Kunden noch nicht überprüft. Ausgewählte Fotos erscheinen hier, sobald der Kunde seine Auswahl finalisiert hat.
           </AlertDescription>
         </Alert>
       )}
@@ -213,33 +213,33 @@ export default function GalleryReview() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Selected Photos</CardTitle>
+            <CardTitle className="text-sm font-medium">Ausgewählte Fotos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{selectedPhotos?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              out of {gallery.package_target_count} in package
+              von {gallery.package_target_count} im Paket
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Staging Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">Staging-Anfragen</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stagingPhotos.length}</div>
-            <p className="text-xs text-muted-foreground">photos need staging</p>
+            <p className="text-xs text-muted-foreground">Fotos benötigen Staging</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Comments</CardTitle>
+            <CardTitle className="text-sm font-medium">Kommentare</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{photosWithComments.length}</div>
-            <p className="text-xs text-muted-foreground">photos with notes</p>
+            <p className="text-xs text-muted-foreground">Fotos mit Notizen</p>
           </CardContent>
         </Card>
       </div>
@@ -248,15 +248,15 @@ export default function GalleryReview() {
       {feedback && feedback.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Client Feedback</CardTitle>
-            <CardDescription>General comments from the client</CardDescription>
+            <CardTitle>Kunden-Feedback</CardTitle>
+            <CardDescription>Allgemeine Kommentare vom Kunden</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {feedback.map((item: any) => (
               <div key={item.id} className="border-l-4 border-primary pl-4 py-2">
                 <p className="text-sm">{item.message}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {item.profiles.email} • {new Date(item.created_at).toLocaleString()}
+                  {item.profiles.email} • {new Date(item.created_at).toLocaleString('de-DE')}
                 </p>
               </div>
             ))}
@@ -269,20 +269,20 @@ export default function GalleryReview() {
         <div className="flex gap-3">
           <Button onClick={handleCopyFilenames} variant="outline">
             <Copy className="h-4 w-4 mr-2" />
-            Copy Filenames
+            Dateinamen kopieren
           </Button>
           
           {gallery.status !== 'Delivered' && (
             <Button onClick={() => setShowDeliveryDialog(true)}>
               <Send className="h-4 w-4 mr-2" />
-              Deliver Final Files
+              Finale Dateien ausliefern
             </Button>
           )}
 
           {gallery.status === 'Delivered' && gallery.final_delivery_link && (
             <Button variant="outline" onClick={() => window.open(gallery.final_delivery_link!, '_blank')}>
               <Check className="h-4 w-4 mr-2" />
-              View Delivery Link
+              Lieferlink ansehen
             </Button>
           )}
         </div>
@@ -292,8 +292,8 @@ export default function GalleryReview() {
       {selectedPhotos && selectedPhotos.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Selected Photos ({selectedPhotos.length})</CardTitle>
-            <CardDescription>Photos chosen by the client</CardDescription>
+            <CardTitle>Ausgewählte Fotos ({selectedPhotos.length})</CardTitle>
+            <CardDescription>Vom Kunden gewählte Fotos</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -335,15 +335,15 @@ export default function GalleryReview() {
       <Dialog open={showDeliveryDialog} onOpenChange={setShowDeliveryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Deliver Final Files</DialogTitle>
+            <DialogTitle>Finale Dateien ausliefern</DialogTitle>
             <DialogDescription>
-              Enter the download link for the final edited photos (e.g., Google Drive, TransferNow)
+              Geben Sie den Download-Link für die finalen bearbeiteten Fotos ein (z.B. Google Drive, TransferNow)
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="delivery-link">Download Link</Label>
+              <Label htmlFor="delivery-link">Download-Link</Label>
               <Input
                 id="delivery-link"
                 type="url"
@@ -355,25 +355,25 @@ export default function GalleryReview() {
             
             <Alert>
               <AlertDescription>
-                This will send a notification to {clientEmails?.length || 0} client(s) with the download link.
+                Dies sendet eine Benachrichtigung an {clientEmails?.length || 0} Kunde(n) mit dem Download-Link.
               </AlertDescription>
             </Alert>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeliveryDialog(false)}>
-              Cancel
+              Abbrechen
             </Button>
             <Button onClick={handleDeliverFinalFiles} disabled={delivering}>
               {delivering ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sending...
+                  Wird gesendet...
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Send Delivery
+                  Auslieferung senden
                 </>
               )}
             </Button>

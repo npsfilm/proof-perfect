@@ -78,44 +78,44 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
         {step === 'feedback' ? (
           <>
             <DialogHeader>
-              <DialogTitle>Share Your Feedback</DialogTitle>
+              <DialogTitle>Teilen Sie Ihr Feedback</DialogTitle>
               <DialogDescription>
-                Let us know your overall thoughts about the photo shoot
+                Lassen Sie uns Ihre allgemeinen Gedanken zum Fotoshooting wissen
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <Textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Your feedback helps us improve future shoots..."
+                placeholder="Ihr Feedback hilft uns, zukünftige Shootings zu verbessern..."
                 rows={6}
                 className="resize-none"
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleFeedbackNext}>Next</Button>
+              <Button variant="outline" onClick={onClose}>Abbrechen</Button>
+              <Button onClick={handleFeedbackNext}>Weiter</Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Virtual Staging</DialogTitle>
+              <DialogTitle>Virtuelles Staging</DialogTitle>
               <DialogDescription>
-                Transform your photos with professional virtual staging
+                Verwandeln Sie Ihre Fotos mit professionellem virtuellem Staging
               </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-6">
               <div className="bg-primary/10 p-4 rounded-lg text-center">
-                <p className="text-lg font-semibold text-primary">Buy 5 Get 1 Free!</p>
+                <p className="text-lg font-semibold text-primary">5 kaufen, 1 gratis!</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Select 6 or more photos for staging to get the best value
+                  Wählen Sie 6 oder mehr Fotos für Staging, um den besten Wert zu erhalten
                 </p>
               </div>
 
               <div className="space-y-3">
                 <Label className="text-base font-semibold">
-                  Select photos for virtual staging ({stagingCount} selected)
+                  Fotos für virtuelles Staging auswählen ({stagingCount} ausgewählt)
                 </Label>
                 <div className="max-h-64 overflow-y-auto space-y-2 border rounded-lg p-3">
                   {selectedPhotos.map((photo) => (
@@ -144,20 +144,20 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
               {hasStagingRequests && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="staging-style">Staging Style</Label>
+                    <Label htmlFor="staging-style">Staging-Stil</Label>
                     <Select value={stagingStyle} onValueChange={setStagingStyle}>
                       <SelectTrigger id="staging-style">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Modern">Modern</SelectItem>
-                        <SelectItem value="Scandi">Scandinavian</SelectItem>
+                        <SelectItem value="Scandi">Skandinavisch</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reference-file">Reference Image (Optional)</Label>
+                    <Label htmlFor="reference-file">Referenzbild (Optional)</Label>
                     <div className="border-2 border-dashed rounded-lg p-4 text-center">
                       <input
                         id="reference-file"
@@ -172,7 +172,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                       >
                         <Upload className="h-8 w-8 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
-                          {referenceFile ? referenceFile.name : 'Upload a reference image for inspiration'}
+                          {referenceFile ? referenceFile.name : 'Referenzbild zur Inspiration hochladen'}
                         </p>
                       </label>
                     </div>
@@ -181,9 +181,9 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep('feedback')}>Back</Button>
+              <Button variant="outline" onClick={() => setStep('feedback')}>Zurück</Button>
               <Button onClick={handleFinalSubmit} disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Finalize Selection'}
+                {isSubmitting ? 'Wird übermittelt...' : 'Auswahl finalisieren'}
               </Button>
             </DialogFooter>
           </>
