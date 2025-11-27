@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Webhook, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function WebhookLogs() {
   const { data: logs, isLoading } = useWebhookLogs();
@@ -71,13 +73,13 @@ export default function WebhookLogs() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Webhook-Logs</h1>
-        <p className="text-muted-foreground">
-          Überwachen Sie alle Webhook-Ereignisse und deren Status
-        </p>
-      </div>
+    <PageContainer size="xl">
+      <div className="space-y-6">
+        <PageHeader
+          title="Webhook-Logs"
+          description="Überwachen Sie alle Webhook-Ereignisse und deren Status"
+          breadcrumbs={[{ label: 'Webhook-Logs' }]}
+        />
 
       <Card>
         <CardHeader>
@@ -216,6 +218,7 @@ export default function WebhookLogs() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

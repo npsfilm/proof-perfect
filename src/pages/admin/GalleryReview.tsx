@@ -10,8 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Copy, Send, Loader2, MessageSquare, Wand2, Check } from 'lucide-react';
+import { Copy, Send, Loader2, MessageSquare, Wand2, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function GalleryReview() {
   const { id } = useParams<{ id: string }>();
@@ -187,19 +189,22 @@ export default function GalleryReview() {
   const photosWithComments = selectedPhotos?.filter(p => p.client_comment) || [];
 
   return (
-    <div className="space-y-6 max-w-6xl">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(`/admin/galleries/${id}`)}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">Überprüfung: {gallery.name}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Kundenauswahl und Feedback</p>
-        </div>
-        <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
-          {gallery.status}
-        </Badge>
-      </div>
+    <PageContainer size="xl">
+      <div className="space-y-6">
+        <PageHeader
+          title={`Überprüfung: ${gallery.name}`}
+          description="Kundenauswahl und Feedback"
+          breadcrumbs={[
+            { label: 'Galerien', href: '/admin/galleries' },
+            { label: gallery.name, href: `/admin/galleries/${id}` },
+            { label: 'Überprüfung' }
+          ]}
+          actions={
+            <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
+              {gallery.status}
+            </Badge>
+          }
+        />
 
       {gallery.status !== 'Reviewed' && gallery.status !== 'Delivered' && (
         <Alert>
@@ -380,6 +385,7 @@ export default function GalleryReview() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

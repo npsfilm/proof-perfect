@@ -14,6 +14,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useCompanyGalleryStats } from '@/hooks/useCompanyStats';
 import { CompanyForm } from '@/components/admin/CompanyForm';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function CompaniesList() {
   const navigate = useNavigate();
@@ -49,17 +51,19 @@ export default function CompaniesList() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Unternehmen</h1>
-          <p className="text-muted-foreground">Kundenunternehmen und ihre Teammitglieder verwalten</p>
-        </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Unternehmen hinzufügen
-        </Button>
-      </div>
+    <PageContainer size="full">
+      <div className="space-y-6">
+        <PageHeader
+          title="Unternehmen"
+          description="Kundenunternehmen und ihre Teammitglieder verwalten"
+          breadcrumbs={[{ label: 'Unternehmen' }]}
+          actions={
+            <Button onClick={() => setIsCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Unternehmen hinzufügen
+            </Button>
+          }
+        />
 
       <Card>
         <div className="overflow-x-auto">
@@ -141,6 +145,7 @@ export default function CompaniesList() {
       </Card>
 
       <CompanyForm open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-    </div>
+      </div>
+    </PageContainer>
   );
 }
