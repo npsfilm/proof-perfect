@@ -3,9 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Gallery, Photo } from '@/types/database';
+import { useCompanies } from '@/hooks/useCompanies';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ClientEmailInput } from '@/components/admin/ClientEmailInput';
 import { PhotoUploader } from '@/components/admin/PhotoUploader';
@@ -16,6 +19,7 @@ export default function GalleryDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: companies } = useCompanies();
   const [clientEmails, setClientEmails] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
 
@@ -63,6 +67,27 @@ export default function GalleryDetail() {
       setClientEmails(emails);
     }
   }, [accessList]);
+
+  const handleCompanyChange = async (companyId: string) => {
+    try {
+      await supabase.rpc('assign_gallery_to_company', {
+        p_gallery_id: id!,
+        p_company_id: companyId || null,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['gallery', id] });
+      toast({
+        title: 'Company updated',
+        description: 'Gallery company assignment updated successfully',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleSendToClient = async () => {
     if (clientEmails.length === 0) {
@@ -220,6 +245,28 @@ export default function GalleryDetail() {
             <div>
               <p className="text-sm text-muted-foreground">Photos Uploaded</p>
               <p className="font-medium">{photos?.length ?? 0} photos</p>
+            </div>
+            <div className="pt-4 border-t">
+              <Label htmlFor="company-select" className="text-sm text-muted-foreground">
+                Company
+              </Label>
+              <Select
+                value={gallery.company_id || ''}
+                onValueChange={handleCompanyChange}
+                disabled={gallery.status !== 'Draft'}
+              >
+                <SelectTrigger id="company-select" className="mt-2">
+                  <SelectValue placeholder="Select a company..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {companies?.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

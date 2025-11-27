@@ -14,8 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      companies: {
+        Row: {
+          created_at: string
+          domain: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       galleries: {
         Row: {
+          company_id: string | null
           created_at: string
           delivered_at: string | null
           final_delivery_link: string | null
@@ -31,6 +109,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           delivered_at?: string | null
           final_delivery_link?: string | null
@@ -46,6 +125,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           delivered_at?: string | null
           final_delivery_link?: string | null
@@ -62,11 +142,32 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "galleries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "galleries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+          {
             foreignKeyName: "galleries_reviewed_by_fkey"
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "galleries_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -98,11 +199,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gallery_access_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+          {
             foreignKeyName: "gallery_access_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -137,11 +252,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gallery_feedback_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "gallery_feedback_gallery_id_fkey"
             columns: ["gallery_id"]
             isOneToOne: false
             referencedRelation: "galleries"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_feedback_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
           },
         ]
       }
@@ -192,6 +321,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "galleries"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
           },
         ]
       }
@@ -256,6 +392,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "staging_references_uploader_user_id_fkey"
+            columns: ["uploader_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       system_settings: {
@@ -309,6 +452,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       webhook_logs: {
@@ -344,17 +494,83 @@ export type Database = {
             referencedRelation: "galleries"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "webhook_logs_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      v_company_gallery_stats: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          delivered_count: number | null
+          domain: string | null
+          galleries_count: number | null
+          photos_count: number | null
+          reviewed_count: number | null
+          selected_count: number | null
+          slug: string | null
+          staging_count: number | null
+        }
+        Relationships: []
+      }
+      v_gallery_selection_stats: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          gallery_id: string | null
+          name: string | null
+          photos_count: number | null
+          selected_count: number | null
+          slug: string | null
+          staging_count: number | null
+          status: Database["public"]["Enums"]["gallery_status_t"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "galleries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "galleries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      v_user_activity: {
+        Row: {
+          email: string | null
+          galleries_assigned: number | null
+          last_sign_in_at: string | null
+          role: Database["public"]["Enums"]["role_t"] | null
+          selections_made: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_clients_to_gallery: {
         Args: { p_emails: string[]; p_gallery_id: string }
         Returns: Json
       }
+      assign_gallery_to_company: {
+        Args: { p_company_id: string; p_gallery_id: string }
+        Returns: undefined
+      }
+      generate_company_slug: { Args: { p_name: string }; Returns: string }
       generate_unique_slug: { Args: { p_name: string }; Returns: string }
       get_my_role: { Args: never; Returns: string }
       has_role: {
