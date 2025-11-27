@@ -29,19 +29,19 @@ export default function AdminLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4">
+          <header className="h-14 border-b border-border bg-background shadow-neu-flat-sm flex items-center justify-between px-4">
             <SidebarTrigger />
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">{user.email}</span>
-              <Button variant="outline" size="sm" onClick={signOut}>
+              <Button variant="soft" size="sm" onClick={signOut}>
                 Sign out
               </Button>
             </div>
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 bg-background">
             <Outlet />
           </main>
         </div>
