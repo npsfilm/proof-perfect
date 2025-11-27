@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -212,7 +212,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['gallery-photos', galleryId] });
+      queryClient.invalidateQueries({ queryKey: ['photos', galleryId] });
     },
     onError: (error: any) => {
       toast({
@@ -461,8 +461,8 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
             className="w-full"
             size="lg"
           >
-            <Heart 
-              className={`h-5 w-5 mr-2 ${photo.is_selected ? 'fill-current' : ''}`} 
+            <Check 
+              className="h-5 w-5 mr-2" 
             />
             {photo.is_selected ? 'Ausgewählt' : 'Foto auswählen'}
           </Button>

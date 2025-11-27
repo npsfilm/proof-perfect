@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -57,8 +57,8 @@ export function PhotoBottomSheet({
             className="w-full"
             size="lg"
           >
-            <Heart 
-              className={`h-5 w-5 mr-2 ${isSelected ? 'fill-current' : ''}`} 
+            <Check 
+              className="h-5 w-5 mr-2" 
             />
             {isSelected ? 'Ausgewählt' : 'Foto auswählen'}
           </Button>
