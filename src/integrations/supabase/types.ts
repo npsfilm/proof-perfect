@@ -686,7 +686,7 @@ export type Database = {
         Row: {
           email: string | null
           galleries_assigned: number | null
-          last_sign_in_at: string | null
+          last_activity: string | null
           role: Database["public"]["Enums"]["role_t"] | null
           selections_made: number | null
           user_id: string | null
