@@ -26,6 +26,7 @@ export default function ClientGallery() {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
+  const [isComparisonMode, setIsComparisonMode] = useState(false);
   const [comparisonPhotos, setComparisonPhotos] = useState<string[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -120,7 +121,7 @@ export default function ClientGallery() {
 
   const handlePhotoClick = (photoId: string) => {
     // If in comparison mode, add to comparison
-    if (comparisonPhotos.length > 0 && comparisonPhotos.length < 2) {
+    if (isComparisonMode && comparisonPhotos.length < 2) {
       if (!comparisonPhotos.includes(photoId)) {
         setComparisonPhotos([...comparisonPhotos, photoId]);
       }
@@ -130,10 +131,13 @@ export default function ClientGallery() {
   };
 
   const handleComparisonToggle = () => {
-    if (comparisonPhotos.length > 0) {
+    if (isComparisonMode) {
+      // Exit comparison mode
+      setIsComparisonMode(false);
       setComparisonPhotos([]);
     } else {
-      // Enter comparison mode - wait for user to select 2 photos
+      // Enter comparison mode
+      setIsComparisonMode(true);
       setComparisonPhotos([]);
     }
   };
@@ -243,9 +247,9 @@ export default function ClientGallery() {
             variant="outline"
             size="sm"
             onClick={handleComparisonToggle}
-            className={comparisonPhotos.length > 0 ? 'border-primary text-primary' : ''}
+            className={isComparisonMode ? 'border-primary text-primary' : ''}
           >
-            {comparisonPhotos.length > 0 
+            {isComparisonMode 
               ? `Vergleichsmodus (${comparisonPhotos.length}/2)` 
               : 'Fotos vergleichen'}
           </Button>
