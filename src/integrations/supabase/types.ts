@@ -501,12 +501,18 @@ export type Database = {
       system_settings: {
         Row: {
           created_at: string
-          email_deliver_body: string | null
-          email_deliver_subject: string | null
-          email_review_body: string | null
-          email_review_subject: string | null
-          email_send_body: string | null
-          email_send_subject: string | null
+          email_deliver_body_du: string | null
+          email_deliver_body_sie: string | null
+          email_deliver_subject_du: string | null
+          email_deliver_subject_sie: string | null
+          email_review_body_du: string | null
+          email_review_body_sie: string | null
+          email_review_subject_du: string | null
+          email_review_subject_sie: string | null
+          email_send_body_du: string | null
+          email_send_body_sie: string | null
+          email_send_subject_du: string | null
+          email_send_subject_sie: string | null
           id: string
           updated_at: string
           zapier_webhook_deliver: string | null
@@ -514,12 +520,18 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email_deliver_body?: string | null
-          email_deliver_subject?: string | null
-          email_review_body?: string | null
-          email_review_subject?: string | null
-          email_send_body?: string | null
-          email_send_subject?: string | null
+          email_deliver_body_du?: string | null
+          email_deliver_body_sie?: string | null
+          email_deliver_subject_du?: string | null
+          email_deliver_subject_sie?: string | null
+          email_review_body_du?: string | null
+          email_review_body_sie?: string | null
+          email_review_subject_du?: string | null
+          email_review_subject_sie?: string | null
+          email_send_body_du?: string | null
+          email_send_body_sie?: string | null
+          email_send_subject_du?: string | null
+          email_send_subject_sie?: string | null
           id?: string
           updated_at?: string
           zapier_webhook_deliver?: string | null
@@ -527,12 +539,18 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email_deliver_body?: string | null
-          email_deliver_subject?: string | null
-          email_review_body?: string | null
-          email_review_subject?: string | null
-          email_send_body?: string | null
-          email_send_subject?: string | null
+          email_deliver_body_du?: string | null
+          email_deliver_body_sie?: string | null
+          email_deliver_subject_du?: string | null
+          email_deliver_subject_sie?: string | null
+          email_review_body_du?: string | null
+          email_review_body_sie?: string | null
+          email_review_subject_du?: string | null
+          email_review_subject_sie?: string | null
+          email_send_body_du?: string | null
+          email_send_body_sie?: string | null
+          email_send_subject_du?: string | null
+          email_send_subject_sie?: string | null
           id?: string
           updated_at?: string
           zapier_webhook_deliver?: string | null

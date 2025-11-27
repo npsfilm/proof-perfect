@@ -86,10 +86,13 @@ serve(async (req) => {
       })
       .filter(Boolean) || [];
 
-    // Get webhook URL from system settings
+    // Get webhook URL and email templates from system settings
+    const subjectField = gallery.salutation_type === 'Du' ? 'email_deliver_subject_du' : 'email_deliver_subject_sie';
+    const bodyField = gallery.salutation_type === 'Du' ? 'email_deliver_body_du' : 'email_deliver_body_sie';
+    
     const { data: settings, error: settingsError } = await supabase
       .from('system_settings')
-      .select('zapier_webhook_deliver')
+      .select(`zapier_webhook_deliver, ${subjectField}, ${bodyField}`)
       .limit(1)
       .maybeSingle();
 
@@ -118,6 +121,8 @@ serve(async (req) => {
       download_link: download_link,
       company_name: companyName,
       salutation: gallery.salutation_type,
+      email_subject: (settings as any)?.[subjectField] || '',
+      email_body: (settings as any)?.[bodyField] || '',
     };
 
     console.log('Sending delivery webhook payload:', payload);
