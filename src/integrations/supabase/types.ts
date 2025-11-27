@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          anrede: string | null
+          ansprache: string
+          company_id: string | null
+          created_at: string
+          email: string
+          id: string
+          nachname: string
+          updated_at: string
+          vorname: string
+        }
+        Insert: {
+          anrede?: string | null
+          ansprache: string
+          company_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          nachname: string
+          updated_at?: string
+          vorname: string
+        }
+        Update: {
+          anrede?: string | null
+          ansprache?: string
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nachname?: string
+          updated_at?: string
+          vorname?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
@@ -93,6 +144,7 @@ export type Database = {
       }
       galleries: {
         Row: {
+          address: string | null
           company_id: string | null
           created_at: string
           delivered_at: string | null
@@ -109,6 +161,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           company_id?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -125,6 +178,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           company_id?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -218,6 +272,49 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_user_activity"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      gallery_clients: {
+        Row: {
+          client_id: string
+          created_at: string
+          gallery_id: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          gallery_id: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          gallery_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_clients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_clients_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_clients_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
           },
         ]
       }
