@@ -14,6 +14,7 @@ import { ComparisonMode } from '@/components/client/ComparisonMode';
 import { WelcomeModal } from '@/components/client/WelcomeModal';
 import { SelectionSummary } from '@/components/client/SelectionSummary';
 import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
+import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -22,7 +23,7 @@ import { Loader2, Info } from 'lucide-react';
 export default function ClientGallery() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, role, signOut, loading: authLoading } = useAuth();
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
@@ -275,6 +276,15 @@ export default function ClientGallery() {
         targetCount={gallery.package_target_count}
         onComplete={handleWelcomeComplete}
       />
+
+      {/* Admin Preview Overlay - Only visible to admins */}
+      {role === 'admin' && (
+        <AdminPreviewOverlay 
+          gallery={gallery}
+          selectedCount={selectedPhotos.length}
+          totalCount={photos?.length || 0}
+        />
+      )}
     </div>
   );
 }
