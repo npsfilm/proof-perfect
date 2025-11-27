@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { BatchActionsBar } from '@/components/admin/BatchActionsBar';
 import { GalleryFilters } from '@/components/admin/GalleryFilters';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Trash2 } from 'lucide-react';
+import { Plus, Eye, Trash2, ExternalLink } from 'lucide-react';
 import { GalleryStatus } from '@/types/database';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
@@ -215,6 +215,17 @@ export default function GalleriesList() {
                     >
                       <Eye className="h-4 w-4 mr-1" />
                       Ansehen
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/gallery/${gallery.slug}`, '_blank');
+                      }}
+                      title="Kunden-Ansicht öffnen"
+                    >
+                      <ExternalLink className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
