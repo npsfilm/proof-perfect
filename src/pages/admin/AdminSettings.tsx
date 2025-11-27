@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { EmailTemplateEditor } from '@/components/admin/EmailTemplateEditor';
+import { EmailTemplates } from '@/types/email-templates';
 import { Save } from 'lucide-react';
 
 export default function AdminSettings() {
@@ -15,21 +16,18 @@ export default function AdminSettings() {
   const [webhookSend, setWebhookSend] = useState('');
   const [webhookDeliver, setWebhookDeliver] = useState('');
   
-  // Du templates
-  const [sendSubjectDu, setSendSubjectDu] = useState('');
-  const [sendBodyDu, setSendBodyDu] = useState('');
-  const [reviewSubjectDu, setReviewSubjectDu] = useState('');
-  const [reviewBodyDu, setReviewBodyDu] = useState('');
-  const [deliverSubjectDu, setDeliverSubjectDu] = useState('');
-  const [deliverBodyDu, setDeliverBodyDu] = useState('');
-  
-  // Sie templates
-  const [sendSubjectSie, setSendSubjectSie] = useState('');
-  const [sendBodySie, setSendBodySie] = useState('');
-  const [reviewSubjectSie, setReviewSubjectSie] = useState('');
-  const [reviewBodySie, setReviewBodySie] = useState('');
-  const [deliverSubjectSie, setDeliverSubjectSie] = useState('');
-  const [deliverBodySie, setDeliverBodySie] = useState('');
+  const [templates, setTemplates] = useState<EmailTemplates>({
+    du: {
+      send: { subject: '', body: '' },
+      review: { subject: '', body: '' },
+      deliver: { subject: '', body: '' },
+    },
+    sie: {
+      send: { subject: '', body: '' },
+      review: { subject: '', body: '' },
+      deliver: { subject: '', body: '' },
+    },
+  });
 
   const { data: settings } = useQuery({
     queryKey: ['system-settings'],
@@ -48,21 +46,36 @@ export default function AdminSettings() {
       setWebhookSend(settings.zapier_webhook_send || '');
       setWebhookDeliver(settings.zapier_webhook_deliver || '');
       
-      // Du templates
-      setSendSubjectDu(settings.email_send_subject_du || '');
-      setSendBodyDu(settings.email_send_body_du || '');
-      setReviewSubjectDu(settings.email_review_subject_du || '');
-      setReviewBodyDu(settings.email_review_body_du || '');
-      setDeliverSubjectDu(settings.email_deliver_subject_du || '');
-      setDeliverBodyDu(settings.email_deliver_body_du || '');
-      
-      // Sie templates
-      setSendSubjectSie(settings.email_send_subject_sie || '');
-      setSendBodySie(settings.email_send_body_sie || '');
-      setReviewSubjectSie(settings.email_review_subject_sie || '');
-      setReviewBodySie(settings.email_review_body_sie || '');
-      setDeliverSubjectSie(settings.email_deliver_subject_sie || '');
-      setDeliverBodySie(settings.email_deliver_body_sie || '');
+      setTemplates({
+        du: {
+          send: {
+            subject: settings.email_send_subject_du || '',
+            body: settings.email_send_body_du || '',
+          },
+          review: {
+            subject: settings.email_review_subject_du || '',
+            body: settings.email_review_body_du || '',
+          },
+          deliver: {
+            subject: settings.email_deliver_subject_du || '',
+            body: settings.email_deliver_body_du || '',
+          },
+        },
+        sie: {
+          send: {
+            subject: settings.email_send_subject_sie || '',
+            body: settings.email_send_body_sie || '',
+          },
+          review: {
+            subject: settings.email_review_subject_sie || '',
+            body: settings.email_review_body_sie || '',
+          },
+          deliver: {
+            subject: settings.email_deliver_subject_sie || '',
+            body: settings.email_deliver_body_sie || '',
+          },
+        },
+      });
     }
   }, [settings]);
 
@@ -73,18 +86,18 @@ export default function AdminSettings() {
         .update({
           zapier_webhook_send: webhookSend || null,
           zapier_webhook_deliver: webhookDeliver || null,
-          email_send_subject_du: sendSubjectDu || null,
-          email_send_body_du: sendBodyDu || null,
-          email_review_subject_du: reviewSubjectDu || null,
-          email_review_body_du: reviewBodyDu || null,
-          email_deliver_subject_du: deliverSubjectDu || null,
-          email_deliver_body_du: deliverBodyDu || null,
-          email_send_subject_sie: sendSubjectSie || null,
-          email_send_body_sie: sendBodySie || null,
-          email_review_subject_sie: reviewSubjectSie || null,
-          email_review_body_sie: reviewBodySie || null,
-          email_deliver_subject_sie: deliverSubjectSie || null,
-          email_deliver_body_sie: deliverBodySie || null,
+          email_send_subject_du: templates.du.send.subject || null,
+          email_send_body_du: templates.du.send.body || null,
+          email_review_subject_du: templates.du.review.subject || null,
+          email_review_body_du: templates.du.review.body || null,
+          email_deliver_subject_du: templates.du.deliver.subject || null,
+          email_deliver_body_du: templates.du.deliver.body || null,
+          email_send_subject_sie: templates.sie.send.subject || null,
+          email_send_body_sie: templates.sie.send.body || null,
+          email_review_subject_sie: templates.sie.review.subject || null,
+          email_review_body_sie: templates.sie.review.body || null,
+          email_deliver_subject_sie: templates.sie.deliver.subject || null,
+          email_deliver_body_sie: templates.sie.deliver.body || null,
         })
         .eq('id', settings!.id);
 
@@ -154,30 +167,8 @@ export default function AdminSettings() {
       </Card>
 
       <EmailTemplateEditor
-        sendSubjectDu={sendSubjectDu}
-        sendBodyDu={sendBodyDu}
-        reviewSubjectDu={reviewSubjectDu}
-        reviewBodyDu={reviewBodyDu}
-        deliverSubjectDu={deliverSubjectDu}
-        deliverBodyDu={deliverBodyDu}
-        sendSubjectSie={sendSubjectSie}
-        sendBodySie={sendBodySie}
-        reviewSubjectSie={reviewSubjectSie}
-        reviewBodySie={reviewBodySie}
-        deliverSubjectSie={deliverSubjectSie}
-        deliverBodySie={deliverBodySie}
-        onSendSubjectDuChange={setSendSubjectDu}
-        onSendBodyDuChange={setSendBodyDu}
-        onReviewSubjectDuChange={setReviewSubjectDu}
-        onReviewBodyDuChange={setReviewBodyDu}
-        onDeliverSubjectDuChange={setDeliverSubjectDu}
-        onDeliverBodyDuChange={setDeliverBodyDu}
-        onSendSubjectSieChange={setSendSubjectSie}
-        onSendBodySieChange={setSendBodySie}
-        onReviewSubjectSieChange={setReviewSubjectSie}
-        onReviewBodySieChange={setReviewBodySie}
-        onDeliverSubjectSieChange={setDeliverSubjectSie}
-        onDeliverBodySieChange={setDeliverBodySie}
+        templates={templates}
+        onTemplatesChange={setTemplates}
       />
     </div>
   );
