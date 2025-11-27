@@ -13,6 +13,7 @@ import GalleryReview from "./pages/admin/GalleryReview";
 import CompaniesList from "./pages/admin/CompaniesList";
 import CompanyDetail from "./pages/admin/CompanyDetail";
 import UsersList from "./pages/admin/UsersList";
+import WebhookLogs from "./pages/admin/WebhookLogs";
 import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ClientGallery from "./pages/client/ClientGallery";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="companies" element={<CompaniesList />} />
               <Route path="companies/:id" element={<CompanyDetail />} />
               <Route path="users" element={<UsersList />} />
+              <Route path="webhook-logs" element={<WebhookLogs />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>

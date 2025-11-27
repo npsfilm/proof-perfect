@@ -1,4 +1,4 @@
-import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -19,6 +19,7 @@ const items = [
   { title: 'Unternehmen', url: '/admin/companies', icon: Building2 },
   { title: 'Benutzer', url: '/admin/users', icon: Users },
   { title: 'Analytik', url: '/admin/analytics', icon: BarChart3 },
+  { title: 'Webhook-Logs', url: '/admin/webhook-logs', icon: Activity },
   { title: 'Einstellungen', url: '/admin/settings', icon: Settings },
 ];
 
