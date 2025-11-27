@@ -31,14 +31,19 @@ export function AdminSidebar() {
   const currentPath = location.pathname;
 
   return (
-    <Sidebar className={open ? 'w-60 shadow-neu-float rounded-[2rem]' : 'w-14 shadow-neu-float rounded-[2rem]'} collapsible="icon">
+    <Sidebar 
+      className={`shadow-neu-float rounded-[2rem] transition-all duration-300 ease-in-out ${
+        open ? 'w-60' : 'w-14'
+      }`} 
+      collapsible="icon"
+    >
       <SidebarHeader className="border-b border-border/50 px-3 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm">
-            <Camera className="h-5 w-5" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm transition-transform duration-200 hover:scale-110 active:scale-95">
+            <Camera className={`h-5 w-5 transition-transform duration-300 ${open ? 'rotate-0' : 'rotate-12'}`} />
           </div>
           {open && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 animate-fade-in">
               <p className="font-semibold text-sm text-foreground truncate">ProofHub</p>
               <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
@@ -48,20 +53,26 @@ export function AdminSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className={open ? 'animate-fade-in' : ''}>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {items.map((item, index) => (
+                <SidebarMenuItem 
+                  key={item.title}
+                  style={{ animationDelay: `${index * 30}ms` }}
+                  className={open ? 'animate-fade-in' : ''}
+                >
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       end
-                      className="hover:bg-muted/50 rounded-2xl transition-all"
+                      className="group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                       activeClassName="bg-muted text-primary font-medium shadow-neu-pressed"
                     >
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
+                      <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                      {open && (
+                        <span className="transition-opacity duration-200">{item.title}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -73,9 +84,9 @@ export function AdminSidebar() {
       
       <SidebarFooter className="border-t border-border/50 px-3 py-3">
         {open && (
-          <div className="text-xs text-muted-foreground">
-            <p>© 2025 ProofHub</p>
-            <p className="mt-1">Version 1.0.0</p>
+          <div className="text-xs text-muted-foreground animate-fade-in space-y-1">
+            <p className="transition-colors duration-200 hover:text-foreground">© 2025 ProofHub</p>
+            <p className="transition-colors duration-200 hover:text-foreground">Version 1.0.0</p>
           </div>
         )}
       </SidebarFooter>
