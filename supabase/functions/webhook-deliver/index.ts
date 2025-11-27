@@ -19,6 +19,47 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Validate Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('[webhook-deliver] Missing Authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing Authorization header' }), 
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    // 2. Validate user session
+    const supabase = createSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      console.error('[webhook-deliver] Invalid user session:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid session' }), 
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    // 3. Verify admin role
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (roleError || roleData?.role !== 'admin') {
+      console.error('[webhook-deliver] User is not admin:', user.id);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }), 
+        { status: 403, headers: corsHeaders }
+      );
+    }
+
+    console.log('[webhook-deliver] Authenticated admin user:', user.id);
+
     const { gallery_id, client_emails, download_link } = await req.json();
 
     console.log('Processing delivery webhook for gallery:', gallery_id);

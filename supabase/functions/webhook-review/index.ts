@@ -20,7 +20,32 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Validate Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('[webhook-review] Missing Authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing Authorization header' }), 
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    // 2. Validate user session (clients can finalize their own galleries)
     const supabase = createSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      console.error('[webhook-review] Invalid user session:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid session' }), 
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    console.log('[webhook-review] Authenticated user:', user.id);
+
     const { gallery_id } = await req.json();
 
     console.log('Processing review webhook for gallery:', gallery_id);
