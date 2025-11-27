@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useGalleries, useDeleteGallery } from '@/hooks/useGalleries';
 import { useBatchGalleryOperations } from '@/hooks/useBatchGalleryOperations';
+import { useGalleryFilters } from '@/hooks/useGalleryFilters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BatchActionsBar } from '@/components/admin/BatchActionsBar';
+import { GalleryFilters } from '@/components/admin/GalleryFilters';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Trash2 } from 'lucide-react';
 import { GalleryStatus } from '@/types/database';
@@ -28,6 +30,23 @@ export default function GalleriesList() {
   const navigate = useNavigate();
   const [selectedGalleries, setSelectedGalleries] = useState<Set<string>>(new Set());
 
+  // Use the filtering hook
+  const {
+    searchQuery,
+    selectedStatuses,
+    selectedCompanyId,
+    dateFrom,
+    dateTo,
+    activeFilterCount,
+    onSearchChange,
+    onStatusToggle,
+    onCompanyChange,
+    onDateFromChange,
+    onDateToChange,
+    onClearAll,
+    filteredGalleries,
+  } = useGalleryFilters(galleries);
+
   const statusColors = {
     Draft: 'bg-muted text-muted-foreground',
     Sent: 'bg-blue-100 text-blue-800',
@@ -46,11 +65,11 @@ export default function GalleriesList() {
   };
 
   const toggleSelectAll = () => {
-    if (!galleries) return;
-    if (selectedGalleries.size === galleries.length) {
+    if (filteredGalleries.length === 0) return;
+    if (selectedGalleries.size === filteredGalleries.length) {
       setSelectedGalleries(new Set());
     } else {
-      setSelectedGalleries(new Set(galleries.map(g => g.id)));
+      setSelectedGalleries(new Set(filteredGalleries.map(g => g.id)));
     }
   };
 
@@ -72,14 +91,14 @@ export default function GalleriesList() {
     setSelectedGalleries(new Set());
   };
 
-  const isAllSelected = galleries && galleries.length > 0 && selectedGalleries.size === galleries.length;
+  const isAllSelected = filteredGalleries.length > 0 && selectedGalleries.size === filteredGalleries.length;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-foreground">Galerien</h1>
-          {galleries && galleries.length > 0 && (
+          {filteredGalleries.length > 0 && (
             <div className="flex items-center gap-2">
               <Checkbox
                 id="select-all"
@@ -101,15 +120,39 @@ export default function GalleriesList() {
         </Button>
       </div>
 
+      <GalleryFilters
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        selectedStatuses={selectedStatuses}
+        onStatusToggle={onStatusToggle}
+        selectedCompanyId={selectedCompanyId}
+        onCompanyChange={onCompanyChange}
+        dateFrom={dateFrom}
+        onDateFromChange={onDateFromChange}
+        dateTo={dateTo}
+        onDateToChange={onDateToChange}
+        onClearAll={onClearAll}
+        activeFilterCount={activeFilterCount}
+      />
+
       {isLoading ? (
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">Lade Galerien...</p>
           </CardContent>
         </Card>
-      ) : galleries && galleries.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {galleries.map((gallery) => (
+      ) : filteredGalleries.length > 0 ? (
+        <>
+          {activeFilterCount > 0 && (
+            <div className="text-sm text-muted-foreground">
+              {filteredGalleries.length} {filteredGalleries.length === 1 ? 'Galerie' : 'Galerien'} gefunden
+              {galleries && galleries.length > filteredGalleries.length && (
+                <span> von {galleries.length} gesamt</span>
+              )}
+            </div>
+          )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredGalleries.map((gallery) => (
             <Card
               key={gallery.id}
               className={`hover:shadow-md transition-shadow ${
@@ -189,8 +232,22 @@ export default function GalleriesList() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
+      ) : galleries && galleries.length > 0 ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-4">
+                Keine Galerien entsprechen den Filterkriterien
+              </p>
+              <Button onClick={onClearAll} variant="outline">
+                Filter zurücksetzen
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardContent className="py-12">
