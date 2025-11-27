@@ -1,9 +1,10 @@
 import { Photo } from '@/types/database';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, RectangleVertical, RectangleHorizontal, Square } from 'lucide-react';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Orientation } from '@/hooks/usePhotoOrientations';
 
 interface ClientPhotoGridProps {
   photos?: Photo[];
@@ -11,9 +12,23 @@ interface ClientPhotoGridProps {
   onPhotoClick: (photoId: string) => void;
   galleryId?: string;
   comparisonPhotos?: string[];
+  isComparisonMode?: boolean;
+  photoOrientations?: Record<string, Orientation>;
+  allowedOrientation?: Orientation | null;
+  onOrientationDetected?: (photoId: string, width: number, height: number) => void;
 }
 
-export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId, comparisonPhotos = [] }: ClientPhotoGridProps) {
+export function ClientPhotoGrid({ 
+  photos, 
+  isLoading, 
+  onPhotoClick, 
+  galleryId, 
+  comparisonPhotos = [],
+  isComparisonMode = false,
+  photoOrientations = {},
+  allowedOrientation = null,
+  onOrientationDetected
+}: ClientPhotoGridProps) {
   const { toggleSelection } = usePhotoSelection(galleryId);
   const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
 
@@ -43,6 +58,13 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId, co
       {photos.map((photo, index) => {
         const comparisonIndex = comparisonPhotos.indexOf(photo.id);
         const isInComparison = comparisonIndex !== -1;
+        const orientation = photoOrientations[photo.id];
+        const isDisabled = isComparisonMode && allowedOrientation && orientation && orientation !== allowedOrientation;
+        
+        const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+          const img = e.currentTarget;
+          onOrientationDetected?.(photo.id, img.naturalWidth, img.naturalHeight);
+        };
         
         return (
           <div
@@ -53,17 +75,18 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId, co
                 : isInComparison
                 ? 'ring-2 ring-blue-500 shadow-lg'
                 : 'hover:shadow-neu-float'
-            }`}
+            } ${isDisabled ? 'opacity-40 pointer-events-none' : ''}`}
           >
             {/* Image Container */}
             <div 
               className="relative bg-muted/30 cursor-pointer overflow-hidden h-64"
-              onClick={() => onPhotoClick(photo.id)}
+              onClick={() => !isDisabled && onPhotoClick(photo.id)}
             >
               <img
                 src={signedUrls[photo.id] || photo.storage_url}
                 alt={photo.filename}
                 className="w-full h-full object-contain hover:scale-105 transition-transform"
+                onLoad={handleImageLoad}
               />
               
               {/* Comparison Badge */}
@@ -73,8 +96,21 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId, co
                 </div>
               )}
               
-              {/* Badges */}
-              {photo.client_comment && (
+              {/* Orientation Badge - Only show in comparison mode */}
+              {isComparisonMode && orientation && (
+                <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                  {orientation === 'portrait' ? (
+                    <><RectangleVertical className="h-3 w-3" /> Hochformat</>
+                  ) : orientation === 'landscape' ? (
+                    <><RectangleHorizontal className="h-3 w-3" /> Querformat</>
+                  ) : (
+                    <><Square className="h-3 w-3" /> Quadratisch</>
+                  )}
+                </div>
+              )}
+              
+              {/* Other Badges */}
+              {!isComparisonMode && photo.client_comment && (
                 <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                   Kommentar
                 </div>

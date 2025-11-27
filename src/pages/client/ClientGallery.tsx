@@ -15,6 +15,7 @@ import { SelectionSummary } from '@/components/client/SelectionSummary';
 import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
 import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
+import { usePhotoOrientations, Orientation } from '@/hooks/usePhotoOrientations';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -29,11 +30,14 @@ export default function ClientGallery() {
   const [isComparisonMode, setIsComparisonMode] = useState(false);
   const [comparisonPhotos, setComparisonPhotos] = useState<string[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [firstComparisonOrientation, setFirstComparisonOrientation] = useState<Orientation | null>(null);
+  const [showComparisonOverlay, setShowComparisonOverlay] = useState(false);
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
+  const { orientations, detectOrientation } = usePhotoOrientations(photos);
 
   // Filter photos based on active filter - MUST be before early returns
   const filteredPhotos = useMemo(() => {
@@ -123,7 +127,18 @@ export default function ClientGallery() {
     // If in comparison mode, add to comparison
     if (isComparisonMode && comparisonPhotos.length < 2) {
       if (!comparisonPhotos.includes(photoId)) {
-        setComparisonPhotos([...comparisonPhotos, photoId]);
+        const orientation = orientations[photoId];
+        
+        // First photo selection - set the orientation filter
+        if (comparisonPhotos.length === 0) {
+          setFirstComparisonOrientation(orientation);
+          setComparisonPhotos([photoId]);
+        } 
+        // Second photo - only allow if same orientation
+        else if (orientation === firstComparisonOrientation) {
+          setComparisonPhotos([...comparisonPhotos, photoId]);
+          // DON'T auto-open comparison - wait for button click
+        }
       }
     } else {
       setSelectedPhotoId(photoId);
@@ -135,10 +150,20 @@ export default function ClientGallery() {
       // Exit comparison mode
       setIsComparisonMode(false);
       setComparisonPhotos([]);
+      setFirstComparisonOrientation(null);
+      setShowComparisonOverlay(false);
     } else {
       // Enter comparison mode
       setIsComparisonMode(true);
       setComparisonPhotos([]);
+      setFirstComparisonOrientation(null);
+      setShowComparisonOverlay(false);
+    }
+  };
+
+  const handleStartComparison = () => {
+    if (comparisonPhotos.length === 2) {
+      setShowComparisonOverlay(true);
     }
   };
 
@@ -273,7 +298,7 @@ export default function ClientGallery() {
         </div>
 
         {/* Comparison Mode Instructions */}
-        {isComparisonMode && comparisonPhotos.length < 2 && (
+        {isComparisonMode && (
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-6 shadow-neu-flat-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -284,14 +309,34 @@ export default function ClientGallery() {
                   <p className="font-semibold text-primary">Vergleichsmodus aktiv</p>
                   <p className="text-sm text-muted-foreground">
                     {comparisonPhotos.length === 0 
-                      ? 'Klicken Sie auf 2 Fotos, um sie zu vergleichen' 
-                      : 'Klicken Sie auf ein weiteres Foto zum Vergleichen'}
+                      ? 'Wählen Sie das erste Foto zum Vergleichen' 
+                      : comparisonPhotos.length === 1
+                      ? `Wählen Sie ein weiteres ${
+                          firstComparisonOrientation === 'portrait' 
+                            ? 'Hochformat' 
+                            : firstComparisonOrientation === 'landscape' 
+                            ? 'Querformat' 
+                            : 'quadratisches'
+                        }-Foto`
+                      : 'Bereit zum Vergleichen!'}
                   </p>
+                  {firstComparisonOrientation && comparisonPhotos.length === 1 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Nur Fotos mit gleichem Format können verglichen werden
+                    </p>
+                  )}
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleComparisonToggle}>
-                Abbrechen
-              </Button>
+              <div className="flex items-center gap-2">
+                {comparisonPhotos.length === 2 && (
+                  <Button onClick={handleStartComparison}>
+                    Bilder vergleichen
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={handleComparisonToggle}>
+                  Abbrechen
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -301,6 +346,10 @@ export default function ClientGallery() {
         onPhotoClick={handlePhotoClick}
         galleryId={gallery.id}
         comparisonPhotos={comparisonPhotos}
+        isComparisonMode={isComparisonMode}
+        photoOrientations={orientations}
+        allowedOrientation={firstComparisonOrientation}
+        onOrientationDetected={detectOrientation}
       />
       </main>
 
@@ -316,13 +365,15 @@ export default function ClientGallery() {
       )}
 
       {/* Comparison Mode */}
-      {comparisonPhoto1 && comparisonPhoto2 && filteredPhotos && (
+      {showComparisonOverlay && comparisonPhoto1 && comparisonPhoto2 && filteredPhotos && (
         <ComparisonMode
           photo1={comparisonPhoto1}
           photo2={comparisonPhoto2}
           photos={filteredPhotos}
           onClose={() => {
+            setShowComparisonOverlay(false);
             setComparisonPhotos([]);
+            setFirstComparisonOrientation(null);
             setIsComparisonMode(false);
           }}
           onSwap={handleComparisonSwap}
