@@ -10,12 +10,18 @@ interface SelectionSummaryProps {
   selectedPhotos: Photo[];
   onPhotoClick: (photoId: string) => void;
   onRemoveSelection: (photoId: string) => void;
+  onFinalize: () => void;
+  disabled?: boolean;
+  targetCount: number;
 }
 
 export function SelectionSummary({ 
   selectedPhotos, 
   onPhotoClick,
-  onRemoveSelection 
+  onRemoveSelection,
+  onFinalize,
+  disabled,
+  targetCount
 }: SelectionSummaryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { signedUrls } = useSignedPhotoUrls(selectedPhotos);
@@ -23,23 +29,28 @@ export function SelectionSummary({
   if (selectedPhotos.length === 0) return null;
 
   return (
-    <div className="fixed bottom-24 left-0 right-0 bg-card border-t border-border shadow-lg z-30 transition-all duration-300">
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-40 transition-all duration-300">
       {/* Header Bar */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent transition-colors"
-      >
-        <div className="flex items-center gap-3">
+      <div className="px-4 py-4 flex items-center justify-between gap-4">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
           <span className="font-medium">Ausgewählte Fotos</span>
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary">
             {selectedPhotos.length}
           </Badge>
-        </div>
-        <span className="text-sm text-muted-foreground">
-          {isExpanded ? 'Schließen' : 'Vorschau anzeigen'}
-        </span>
-      </button>
+        </button>
+        <Button 
+          onClick={onFinalize}
+          size="lg"
+          disabled={selectedPhotos.length === 0 || disabled}
+          className="whitespace-nowrap"
+        >
+          Auswahl abschließen
+        </Button>
+      </div>
 
       {/* Expandable Content */}
       {isExpanded && (

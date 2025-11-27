@@ -5,7 +5,6 @@ import { useGalleryBySlug } from '@/hooks/useGallery';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { useGalleryFinalization } from '@/hooks/useGalleryFinalization';
 import { PhotoLightbox } from '@/components/client/PhotoLightbox';
-import { SelectionFooter } from '@/components/client/SelectionFooter';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
 import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
@@ -177,7 +176,7 @@ export default function ClientGallery() {
   const comparisonPhoto2 = comparisonPhotos[1] ? photos?.find(p => p.id === comparisonPhotos[1]) : null;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <ClientGalleryHeader 
         galleryName={gallery.name} 
         onSignOut={signOut}
@@ -245,19 +244,14 @@ export default function ClientGallery() {
       )}
 
       {/* Selection Summary */}
-      <SelectionSummary
-        selectedPhotos={selectedPhotos}
-        onPhotoClick={handlePhotoClick}
-        onRemoveSelection={handleRemoveSelection}
-      />
-
-      {/* Footer */}
       {photos && photos.length > 0 && (
-        <SelectionFooter
-          selectedCount={selectedPhotos.length}
-          targetCount={gallery.package_target_count}
+        <SelectionSummary
+          selectedPhotos={selectedPhotos}
+          onPhotoClick={handlePhotoClick}
+          onRemoveSelection={handleRemoveSelection}
           onFinalize={handleFinalize}
           disabled={gallery.is_locked || isSubmitting}
+          targetCount={gallery.package_target_count}
         />
       )}
 
