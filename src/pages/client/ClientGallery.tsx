@@ -10,6 +10,7 @@ import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
 import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
+import { ComparisonMode } from '@/components/client/ComparisonMode';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -21,6 +22,7 @@ export default function ClientGallery() {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
+  const [comparisonPhotos, setComparisonPhotos] = useState<string[]>([]);
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
@@ -33,7 +35,27 @@ export default function ClientGallery() {
   }, [user, authLoading, navigate]);
 
   const handlePhotoClick = (photoId: string) => {
-    setSelectedPhotoId(photoId);
+    // If in comparison mode, add to comparison
+    if (comparisonPhotos.length > 0 && comparisonPhotos.length < 2) {
+      if (!comparisonPhotos.includes(photoId)) {
+        setComparisonPhotos([...comparisonPhotos, photoId]);
+      }
+    } else {
+      setSelectedPhotoId(photoId);
+    }
+  };
+
+  const handleComparisonToggle = () => {
+    if (comparisonPhotos.length > 0) {
+      setComparisonPhotos([]);
+    } else {
+      // Enter comparison mode - wait for user to select 2 photos
+      setComparisonPhotos([]);
+    }
+  };
+
+  const handleComparisonSwap = () => {
+    setComparisonPhotos([comparisonPhotos[1], comparisonPhotos[0]]);
   };
 
   const handleNavigate = (direction: 'prev' | 'next') => {
@@ -99,6 +121,8 @@ export default function ClientGallery() {
 
   const selectedPhotos = photos?.filter(p => p.is_selected) || [];
   const selectedPhoto = selectedPhotoId ? photos?.find(p => p.id === selectedPhotoId) : null;
+  const comparisonPhoto1 = comparisonPhotos[0] ? photos?.find(p => p.id === comparisonPhotos[0]) : null;
+  const comparisonPhoto2 = comparisonPhotos[1] ? photos?.find(p => p.id === comparisonPhotos[1]) : null;
 
   // Filter photos based on active filter
   const filteredPhotos = useMemo(() => {
@@ -135,11 +159,23 @@ export default function ClientGallery() {
 
       {/* Photo Grid */}
       <main className="container mx-auto px-4 py-6">
-        <GalleryFilterBar
-          activeFilter={photoFilter}
-          onFilterChange={setPhotoFilter}
-          counts={filterCounts}
-        />
+        <div className="flex items-center justify-between mb-4">
+          <GalleryFilterBar
+            activeFilter={photoFilter}
+            onFilterChange={setPhotoFilter}
+            counts={filterCounts}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleComparisonToggle}
+            className={comparisonPhotos.length > 0 ? 'border-primary text-primary' : ''}
+          >
+            {comparisonPhotos.length > 0 
+              ? `Vergleichsmodus (${comparisonPhotos.length}/2)` 
+              : 'Fotos vergleichen'}
+          </Button>
+        </div>
         <ClientPhotoGrid
           photos={filteredPhotos}
           isLoading={photosLoading}
@@ -156,6 +192,16 @@ export default function ClientGallery() {
           onClose={() => setSelectedPhotoId(null)}
           onNavigate={handleNavigate}
           galleryId={gallery.id}
+        />
+      )}
+
+      {/* Comparison Mode */}
+      {comparisonPhoto1 && comparisonPhoto2 && (
+        <ComparisonMode
+          photo1={comparisonPhoto1}
+          photo2={comparisonPhoto2}
+          onClose={() => setComparisonPhotos([])}
+          onSwap={handleComparisonSwap}
         />
       )}
 
