@@ -10,9 +10,10 @@ interface ClientPhotoGridProps {
   isLoading: boolean;
   onPhotoClick: (photoId: string) => void;
   galleryId?: string;
+  comparisonPhotos?: string[];
 }
 
-export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: ClientPhotoGridProps) {
+export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId, comparisonPhotos = [] }: ClientPhotoGridProps) {
   const { toggleSelection } = usePhotoSelection(galleryId);
   const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
 
@@ -40,12 +41,17 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {photos.map((photo, index) => {
+        const comparisonIndex = comparisonPhotos.indexOf(photo.id);
+        const isInComparison = comparisonIndex !== -1;
+        
         return (
           <div
             key={photo.id}
             className={`bg-card rounded-lg overflow-hidden shadow-neu-flat transition-all ${
               photo.is_selected 
                 ? 'ring-2 ring-primary shadow-lg' 
+                : isInComparison
+                ? 'ring-2 ring-blue-500 shadow-lg'
                 : 'hover:shadow-neu-float'
             }`}
           >
@@ -60,14 +66,21 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
                 className="w-full h-full object-contain hover:scale-105 transition-transform"
               />
               
+              {/* Comparison Badge */}
+              {isInComparison && (
+                <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {comparisonIndex + 1}
+                </div>
+              )}
+              
               {/* Badges */}
               {photo.client_comment && (
-                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                   Kommentar
                 </div>
               )}
               {photo.staging_requested && (
-                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
                   Staging
                 </div>
               )}

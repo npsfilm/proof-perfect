@@ -142,6 +142,23 @@ export default function ClientGallery() {
     }
   };
 
+  const handleComparisonNavigate = (slot: 1 | 2, direction: 'prev' | 'next') => {
+    const currentPhotoId = comparisonPhotos[slot - 1];
+    const currentIndex = filteredPhotos.findIndex(p => p.id === currentPhotoId);
+    
+    let newIndex;
+    if (direction === 'prev') {
+      newIndex = Math.max(0, currentIndex - 1);
+    } else {
+      newIndex = Math.min(filteredPhotos.length - 1, currentIndex + 1);
+    }
+    
+    const newPhotoId = filteredPhotos[newIndex].id;
+    setComparisonPhotos(prev => 
+      slot === 1 ? [newPhotoId, prev[1]] : [prev[0], newPhotoId]
+    );
+  };
+
   const handleComparisonSwap = () => {
     setComparisonPhotos([comparisonPhotos[1], comparisonPhotos[0]]);
   };
@@ -254,12 +271,13 @@ export default function ClientGallery() {
               : 'Fotos vergleichen'}
           </Button>
         </div>
-        <ClientPhotoGrid
-          photos={filteredPhotos}
-          isLoading={photosLoading}
-          onPhotoClick={handlePhotoClick}
-          galleryId={gallery.id}
-        />
+      <ClientPhotoGrid
+        photos={filteredPhotos}
+        isLoading={photosLoading}
+        onPhotoClick={handlePhotoClick}
+        galleryId={gallery.id}
+        comparisonPhotos={comparisonPhotos}
+      />
       </main>
 
       {/* Lightbox */}
@@ -274,12 +292,23 @@ export default function ClientGallery() {
       )}
 
       {/* Comparison Mode */}
-      {comparisonPhoto1 && comparisonPhoto2 && (
+      {comparisonPhoto1 && comparisonPhoto2 && filteredPhotos && (
         <ComparisonMode
           photo1={comparisonPhoto1}
           photo2={comparisonPhoto2}
-          onClose={() => setComparisonPhotos([])}
+          photos={filteredPhotos}
+          onClose={() => {
+            setComparisonPhotos([]);
+            setIsComparisonMode(false);
+          }}
           onSwap={handleComparisonSwap}
+          onNavigate={handleComparisonNavigate}
+          onToggleSelection={(photoId) => {
+            const photo = photos?.find(p => p.id === photoId);
+            if (photo) {
+              toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
+            }
+          }}
         />
       )}
 
