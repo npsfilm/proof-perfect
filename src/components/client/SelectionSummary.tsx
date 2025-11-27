@@ -54,38 +54,40 @@ export function SelectionSummary({
 
       {/* Expandable Content */}
       {isExpanded && (
-        <ScrollArea className="h-72 px-4 pb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {selectedPhotos.map((photo) => {
-              return (
-                <div
-                  key={photo.id}
-                  className="relative group cursor-pointer aspect-[3/2] rounded-md overflow-hidden border-2 border-primary"
-                  onClick={() => onPhotoClick(photo.id)}
-                >
-                  <img
-                    src={signedUrls[photo.id] || photo.storage_url}
-                    alt={photo.filename}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemoveSelection(photo.id);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+        <div className="animate-accordion-down overflow-hidden">
+          <ScrollArea className="h-72 px-4 pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {selectedPhotos.map((photo) => {
+                return (
+                  <div
+                    key={photo.id}
+                    className="relative group cursor-pointer aspect-[3/2] rounded-md overflow-hidden border-2 border-primary"
+                    onClick={() => onPhotoClick(photo.id)}
+                  >
+                    <img
+                      src={signedUrls[photo.id] || photo.storage_url}
+                      alt={photo.filename}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveSelection(photo.id);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </div>
       )}
     </div>
   );
