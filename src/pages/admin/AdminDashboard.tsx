@@ -2,7 +2,7 @@ import { useGalleries } from '@/hooks/useGalleries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderOpen, Clock } from 'lucide-react';
+import { Plus, FolderOpen, Clock, ExternalLink } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { StatCardSkeletonGrid } from '@/components/admin/skeletons/StatCardSkeleton';
@@ -106,9 +106,22 @@ export default function AdminDashboard() {
                       {gallery.slug} • {gallery.status}
                     </p>
                   </div>
-                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    Ansehen
-                  </Button>
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/gallery/${gallery.slug}`, '_blank');
+                      }}
+                      title="Kunden-Ansicht öffnen"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      Ansehen
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
