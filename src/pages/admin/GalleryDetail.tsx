@@ -171,6 +171,49 @@ export default function GalleryDetail() {
     }
   };
 
+  const handleResendToClient = async () => {
+    if (clientEmails.length === 0) {
+      toast({
+        title: 'Keine Kunden',
+        description: 'Bitte fügen Sie mindestens eine Kunden-E-Mail hinzu.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSending(true);
+    try {
+      // Send webhook notification without changing status
+      const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
+
+      const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
+        body: {
+          gallery_id: id!,
+          client_emails: clientEmails,
+          new_passwords: [], // No new passwords on resend
+          gallery_url: galleryUrl,
+        },
+      });
+
+      if (webhookError) {
+        throw new Error(webhookError.message || 'Webhook-Fehler');
+      }
+
+      toast({
+        title: 'Galerie erneut gesendet!',
+        description: `Benachrichtigung an ${clientEmails.length} Kunde(n) gesendet.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Fehler',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   if (galleryLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -321,8 +364,8 @@ export default function GalleryDetail() {
         </Card>
       )}
 
-      {gallery.status === 'Draft' && (
-        <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        {gallery.status === 'Draft' && (
           <Button onClick={handleSendToClient} disabled={sending} size="lg">
             {sending ? (
               <>
@@ -336,8 +379,24 @@ export default function GalleryDetail() {
               </>
             )}
           </Button>
-        </div>
-      )}
+        )}
+        
+        {gallery.status !== 'Draft' && (
+          <Button onClick={handleResendToClient} disabled={sending} size="lg" variant="outline">
+            {sending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Wird gesendet...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Erneut senden
+              </>
+            )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
