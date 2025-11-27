@@ -131,30 +131,24 @@ export function ComparisonMode({
             onMouseDown={startDragging}
             onTouchStart={startDragging}
           >
-            {/* Bottom layer - Photo 2 (full width) */}
+            {/* Bottom layer - Photo 2 (always full visible) */}
             <img
               src={signedUrl2 || photo2.storage_url}
               alt={photo2.filename}
-              className="w-full h-auto max-h-[70vh] object-contain"
+              className="w-full h-auto max-h-[70vh] object-contain select-none"
               draggable={false}
             />
             
-            {/* Top layer - Photo 1 (clipped by slider position) */}
-            <div 
-              className="absolute inset-0 overflow-hidden pointer-events-none"
-              style={{ width: `${sliderPosition}%` }}
-            >
-              <img
-                src={signedUrl1 || photo1.storage_url}
-                alt={photo1.filename}
-                className="w-full h-full object-contain"
-                style={{ 
-                  width: `${100 / (sliderPosition / 100)}%`,
-                  maxHeight: '70vh'
-                }}
-                draggable={false}
-              />
-            </div>
+            {/* Top layer - Photo 1 (clipped using clip-path - NO RESIZING) */}
+            <img
+              src={signedUrl1 || photo1.storage_url}
+              alt={photo1.filename}
+              className="absolute inset-0 w-full h-full object-contain select-none"
+              style={{ 
+                clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`
+              }}
+              draggable={false}
+            />
             
             {/* Draggable Divider */}
             <div 
