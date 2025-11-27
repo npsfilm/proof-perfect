@@ -48,6 +48,14 @@ export default function ClientGallery() {
     }
   }, [photos, photoFilter]);
 
+  // Calculate filter counts - MUST be before early returns
+  const selectedPhotos = photos?.filter(p => p.is_selected) || [];
+  const filterCounts = useMemo(() => ({
+    all: photos?.length || 0,
+    selected: selectedPhotos.length,
+    unselected: (photos?.length || 0) - selectedPhotos.length,
+  }), [photos, selectedPhotos]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -164,16 +172,9 @@ export default function ClientGallery() {
     );
   }
 
-  const selectedPhotos = photos?.filter(p => p.is_selected) || [];
   const selectedPhoto = selectedPhotoId ? photos?.find(p => p.id === selectedPhotoId) : null;
   const comparisonPhoto1 = comparisonPhotos[0] ? photos?.find(p => p.id === comparisonPhotos[0]) : null;
   const comparisonPhoto2 = comparisonPhotos[1] ? photos?.find(p => p.id === comparisonPhotos[1]) : null;
-
-  const filterCounts = useMemo(() => ({
-    all: photos?.length || 0,
-    selected: selectedPhotos.length,
-    unselected: (photos?.length || 0) - selectedPhotos.length,
-  }), [photos, selectedPhotos]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
