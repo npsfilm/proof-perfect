@@ -35,6 +35,19 @@ export default function ClientGallery() {
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
 
+  // Filter photos based on active filter - MUST be before early returns
+  const filteredPhotos = useMemo(() => {
+    if (!photos) return undefined;
+    switch (photoFilter) {
+      case 'selected':
+        return photos.filter(p => p.is_selected);
+      case 'unselected':
+        return photos.filter(p => !p.is_selected);
+      default:
+        return photos;
+    }
+  }, [photos, photoFilter]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -155,19 +168,6 @@ export default function ClientGallery() {
   const selectedPhoto = selectedPhotoId ? photos?.find(p => p.id === selectedPhotoId) : null;
   const comparisonPhoto1 = comparisonPhotos[0] ? photos?.find(p => p.id === comparisonPhotos[0]) : null;
   const comparisonPhoto2 = comparisonPhotos[1] ? photos?.find(p => p.id === comparisonPhotos[1]) : null;
-
-  // Filter photos based on active filter
-  const filteredPhotos = useMemo(() => {
-    if (!photos) return undefined;
-    switch (photoFilter) {
-      case 'selected':
-        return photos.filter(p => p.is_selected);
-      case 'unselected':
-        return photos.filter(p => !p.is_selected);
-      default:
-        return photos;
-    }
-  }, [photos, photoFilter]);
 
   const filterCounts = useMemo(() => ({
     all: photos?.length || 0,
