@@ -49,13 +49,13 @@ export default function AdminSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-settings'] });
       toast({
-        title: 'Settings saved',
-        description: 'Webhook URLs have been updated successfully.',
+        title: 'Einstellungen gespeichert',
+        description: 'Webhook-URLs wurden erfolgreich aktualisiert.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -64,18 +64,18 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+      <h1 className="text-3xl font-bold text-foreground">Einstellungen</h1>
 
       <Card>
         <CardHeader>
           <CardTitle>Zapier Webhooks</CardTitle>
           <CardDescription>
-            Configure Zapier webhook URLs for sending notifications
+            Zapier-Webhook-URLs für Benachrichtigungen konfigurieren
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="webhook-send">Send to Client Webhook</Label>
+            <Label htmlFor="webhook-send">An Kunde senden Webhook</Label>
             <Input
               id="webhook-send"
               type="url"
@@ -84,12 +84,12 @@ export default function AdminSettings() {
               onChange={(e) => setWebhookSend(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Triggered when gallery is sent to clients with credentials
+              Wird ausgelöst, wenn Galerie mit Zugangsdaten an Kunden gesendet wird
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="webhook-deliver">Delivery Webhook</Label>
+            <Label htmlFor="webhook-deliver">Lieferungs-Webhook</Label>
             <Input
               id="webhook-deliver"
               type="url"
@@ -98,13 +98,13 @@ export default function AdminSettings() {
               onChange={(e) => setWebhookDeliver(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Triggered when final files are delivered to clients
+              Wird ausgelöst, wenn finale Dateien an Kunden geliefert werden
             </p>
           </div>
 
           <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
             <Save className="h-4 w-4 mr-2" />
-            {updateSettings.isPending ? 'Saving...' : 'Save Settings'}
+            {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
           </Button>
         </CardContent>
       </Card>

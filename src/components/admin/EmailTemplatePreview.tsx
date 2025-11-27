@@ -10,16 +10,16 @@ export function EmailTemplatePreview() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
-          Email Template Previews
+          E-Mail-Template-Vorschauen
         </CardTitle>
         <CardDescription>
-          Data sent to Zapier webhooks for email composition
+          Daten, die an Zapier-Webhooks für E-Mail-Erstellung gesendet werden
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Alert className="mb-4">
           <AlertDescription>
-            These templates show the data structure sent to your Zapier webhooks. Design your Zap email templates using these fields.
+            Diese Templates zeigen die Datenstruktur, die an Ihre Zapier-Webhooks gesendet wird. Gestalten Sie Ihre Zap-E-Mail-Templates mit diesen Feldern.
           </AlertDescription>
         </Alert>
 
@@ -27,15 +27,15 @@ export function EmailTemplatePreview() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="send">
               <Send className="h-4 w-4 mr-2" />
-              Send to Client
+              An Kunde senden
             </TabsTrigger>
             <TabsTrigger value="review">
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Review Notification
+              Überprüfungsbenachrichtigung
             </TabsTrigger>
             <TabsTrigger value="delivery">
               <Package className="h-4 w-4 mr-2" />
-              Final Delivery
+              Finale Lieferung
             </TabsTrigger>
           </TabsList>
 
@@ -43,7 +43,7 @@ export function EmailTemplatePreview() {
           <TabsContent value="send" className="space-y-4">
             <div className="border rounded-lg p-4 bg-muted/50">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold">Gallery Sent to Client</h4>
+                <h4 className="font-semibold">Galerie an Kunde gesendet</h4>
                 <Badge>webhook_send</Badge>
               </div>
               <div className="space-y-2 text-sm font-mono">
@@ -83,13 +83,13 @@ export function EmailTemplatePreview() {
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h5 className="font-semibold text-blue-900 mb-2">Email Content Suggestions:</h5>
+              <h5 className="font-semibold text-blue-900 mb-2">E-Mail-Inhaltsvorschläge:</h5>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Welcome message with gallery name</li>
-                <li>• Direct link to gallery (gallery_url)</li>
-                <li>• Login credentials for new users (temp_password)</li>
-                <li>• Instructions to select favorite photos</li>
-                <li>• Use appropriate salutation (Du/Sie)</li>
+                <li>• Willkommensnachricht mit Galerienamen</li>
+                <li>• Direkter Link zur Galerie (gallery_url)</li>
+                <li>• Login-Zugangsdaten für neue Benutzer (temp_password)</li>
+                <li>• Anweisungen zur Auswahl der Lieblingsfotos</li>
+                <li>• Passende Anrede verwenden (Du/Sie)</li>
               </ul>
             </div>
           </TabsContent>
@@ -98,8 +98,8 @@ export function EmailTemplatePreview() {
           <TabsContent value="review" className="space-y-4">
             <div className="border rounded-lg p-4 bg-muted/50">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold">Client Reviewed Gallery</h4>
-                <Badge variant="secondary">webhook_send (review event)</Badge>
+                <h4 className="font-semibold">Kunde hat Galerie überprüft</h4>
+                <Badge variant="secondary">webhook_send (Überprüfungsereignis)</Badge>
               </div>
               <div className="space-y-2 text-sm font-mono">
                 <div className="grid grid-cols-[140px,1fr] gap-2">
@@ -138,13 +138,13 @@ export function EmailTemplatePreview() {
             </div>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h5 className="font-semibold text-yellow-900 mb-2">Email Content Suggestions:</h5>
+              <h5 className="font-semibold text-yellow-900 mb-2">E-Mail-Inhaltsvorschläge:</h5>
               <ul className="text-sm text-yellow-800 space-y-1">
-                <li>• Notification to admin about completed review</li>
-                <li>• Summary of selections (selected_count)</li>
-                <li>• Number of staging requests (staging_count)</li>
-                <li>• Link to admin review interface</li>
-                <li>• Next steps for processing</li>
+                <li>• Benachrichtigung an Admin über abgeschlossene Überprüfung</li>
+                <li>• Zusammenfassung der Auswahl (selected_count)</li>
+                <li>• Anzahl der Staging-Anfragen (staging_count)</li>
+                <li>• Link zur Admin-Überprüfungsoberfläche</li>
+                <li>• Nächste Schritte für die Bearbeitung</li>
               </ul>
             </div>
           </TabsContent>
@@ -153,7 +153,7 @@ export function EmailTemplatePreview() {
           <TabsContent value="delivery" className="space-y-4">
             <div className="border rounded-lg p-4 bg-muted/50">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold">Final Files Delivered</h4>
+                <h4 className="font-semibold">Finale Dateien geliefert</h4>
                 <Badge variant="default">webhook_deliver</Badge>
               </div>
               <div className="space-y-2 text-sm font-mono">
@@ -189,25 +189,25 @@ export function EmailTemplatePreview() {
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h5 className="font-semibold text-green-900 mb-2">Email Content Suggestions:</h5>
+              <h5 className="font-semibold text-green-900 mb-2">E-Mail-Inhaltsvorschläge:</h5>
               <ul className="text-sm text-green-800 space-y-1">
-                <li>• Congratulations message for completed project</li>
-                <li>• Prominent download link for final edited photos</li>
-                <li>• Instructions for accessing files</li>
-                <li>• File expiration notice (if applicable)</li>
-                <li>• Thank you message and feedback request</li>
+                <li>• Glückwunschnachricht zum abgeschlossenen Projekt</li>
+                <li>• Prominenter Download-Link für finale bearbeitete Fotos</li>
+                <li>• Anweisungen zum Zugriff auf Dateien</li>
+                <li>• Hinweis auf Dateiverfallsdatum (falls zutreffend)</li>
+                <li>• Dankesnachricht und Feedback-Anfrage</li>
               </ul>
             </div>
           </TabsContent>
         </Tabs>
 
         <div className="mt-6 border-t pt-4">
-          <h4 className="font-semibold mb-2">Common Fields in All Templates:</h4>
+          <h4 className="font-semibold mb-2">Gemeinsame Felder in allen Templates:</h4>
           <div className="text-sm space-y-1 text-muted-foreground">
-            <p>• <strong>event_id</strong>: Unique identifier for webhook deduplication</p>
-            <p>• <strong>timestamp</strong>: ISO 8601 timestamp of when event occurred</p>
-            <p>• <strong>salutation</strong>: Use "Du" for informal, "Sie" for formal German</p>
-            <p>• <strong>event_type</strong>: Identifier for routing in Zapier workflows</p>
+            <p>• <strong>event_id</strong>: Eindeutige Kennung zur Webhook-Deduplizierung</p>
+            <p>• <strong>timestamp</strong>: ISO 8601 Zeitstempel des Ereigniszeitpunkts</p>
+            <p>• <strong>salutation</strong>: "Du" für informell, "Sie" für formelles Deutsch</p>
+            <p>• <strong>event_type</strong>: Kennung für Routing in Zapier-Workflows</p>
           </div>
         </div>
       </CardContent>
