@@ -21,14 +21,14 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
         <Button onClick={() => navigate('/admin/galleries/new')}>
           <Plus className="h-4 w-4 mr-2" />
-          New Gallery
+          Neue Galerie
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Galleries</CardTitle>
+            <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft</CardTitle>
+            <CardTitle className="text-sm font-medium">Entwurf</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.draft}</div>
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sent</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesendet</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.sent}</div>
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reviewed</CardTitle>
+            <CardTitle className="text-sm font-medium">Überprüft</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.reviewed}</div>
@@ -66,12 +66,12 @@ export default function AdminDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Galleries</CardTitle>
-          <CardDescription>Your most recently created galleries</CardDescription>
+          <CardTitle>Neueste Galerien</CardTitle>
+          <CardDescription>Ihre zuletzt erstellten Galerien</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">Lädt...</p>
           ) : galleries && galleries.length > 0 ? (
             <div className="space-y-2">
               {galleries.slice(0, 5).map((gallery) => (
@@ -87,14 +87,14 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                   <Button variant="ghost" size="sm">
-                    View
+                    Ansehen
                   </Button>
                 </div>
               ))}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No galleries yet. Create your first gallery to get started.
+              Noch keine Galerien. Erstellen Sie Ihre erste Galerie, um loszulegen.
             </p>
           )}
         </CardContent>

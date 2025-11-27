@@ -23,7 +23,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">Lädt...</p>
       </div>
     );
   }
@@ -37,12 +37,12 @@ export default function Dashboard() {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary">
-            {role === 'admin' ? 'Admin Dashboard' : 'My Galleries'}
+            {role === 'admin' ? 'Admin Dashboard' : 'Meine Galerien'}
           </h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{user.email}</span>
             <Button variant="outline" size="sm" onClick={signOut}>
-              Sign out
+              Abmelden
             </Button>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function Dashboard() {
         ) : (
           <div className="text-center">
             <p className="text-lg text-muted-foreground">
-              Welcome! You are logged in as <strong className="text-foreground">{role}</strong>.
+              Willkommen! Sie sind angemeldet als <strong className="text-foreground">{role}</strong>.
             </p>
           </div>
         )}
@@ -90,21 +90,21 @@ function ClientDashboard() {
   });
 
   if (isLoading) {
-    return <p className="text-center text-muted-foreground">Loading your galleries...</p>;
+    return <p className="text-center text-muted-foreground">Ihre Galerien werden geladen...</p>;
   }
 
   if (!galleries || galleries.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground mb-2">You don't have access to any galleries yet.</p>
-        <p className="text-sm text-muted-foreground">Your photographer will send you a link when photos are ready.</p>
+        <p className="text-muted-foreground mb-2">Sie haben noch keinen Zugriff auf Galerien.</p>
+        <p className="text-sm text-muted-foreground">Ihr Fotograf sendet Ihnen einen Link, sobald die Fotos bereit sind.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Your Galleries</h2>
+      <h2 className="text-2xl font-bold">Ihre Galerien</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {galleries.map((gallery) => (
           <Card key={gallery.id} className="hover:shadow-md transition-shadow">
@@ -114,14 +114,14 @@ function ClientDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Select up to {gallery.package_target_count} photos
+                Wählen Sie bis zu {gallery.package_target_count} Fotos aus
               </p>
               <Button 
                 className="w-full" 
                 onClick={() => window.location.href = `/gallery/${gallery.slug}`}
                 disabled={gallery.is_locked}
               >
-                {gallery.is_locked ? 'Finalized' : 'View Gallery'}
+                {gallery.is_locked ? 'Abgeschlossen' : 'Galerie ansehen'}
               </Button>
             </CardContent>
           </Card>
