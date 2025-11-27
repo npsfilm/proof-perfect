@@ -58,10 +58,20 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      boxShadow: {
+        "neu-flat": "9px 9px 16px rgb(163 177 198 / 0.5), -9px -9px 16px rgb(255 255 255 / 0.6)",
+        "neu-flat-sm": "5px 5px 10px rgb(163 177 198 / 0.5), -5px -5px 10px rgb(255 255 255 / 0.6)",
+        "neu-pressed": "inset 6px 6px 10px rgb(163 177 198 / 0.4), inset -6px -6px 10px rgb(255 255 255 / 0.8)",
+        "neu-float": "14px 14px 24px rgb(163 177 198 / 0.4), -14px -14px 24px rgb(255 255 255 / 0.9)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "1rem",
+        "2xl": "1.5rem",
+        "3xl": "2rem",
+        pill: "9999px",
       },
       keyframes: {
         "accordion-down": {

@@ -29,7 +29,7 @@ export function AdminSidebar() {
   const currentPath = location.pathname;
 
   return (
-    <Sidebar className={open ? 'w-60' : 'w-14'} collapsible="icon">
+    <Sidebar className={open ? 'w-60 shadow-neu-float rounded-[2rem]' : 'w-14 shadow-neu-float rounded-[2rem]'} collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
@@ -41,8 +41,8 @@ export function AdminSidebar() {
                     <NavLink
                       to={item.url}
                       end
-                      className="hover:bg-muted/50"
-                      activeClassName="bg-muted text-primary font-medium"
+                      className="hover:bg-muted/50 rounded-2xl"
+                      activeClassName="bg-muted text-primary font-medium shadow-neu-pressed"
                     >
                       <item.icon className="h-4 w-4" />
                       {open && <span>{item.title}</span>}
