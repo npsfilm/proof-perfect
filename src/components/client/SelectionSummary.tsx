@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Photo } from '@/types/database';
-import { supabase } from '@/integrations/supabase/client';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 
 interface SelectionSummaryProps {
   selectedPhotos: Photo[];
@@ -18,6 +18,7 @@ export function SelectionSummary({
   onRemoveSelection 
 }: SelectionSummaryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { signedUrls } = useSignedPhotoUrls(selectedPhotos);
 
   if (selectedPhotos.length === 0) return null;
 
@@ -45,16 +46,6 @@ export function SelectionSummary({
         <ScrollArea className="h-48 px-4 pb-4">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
             {selectedPhotos.map((photo) => {
-              const imageUrl = supabase.storage
-                .from('proofs')
-                .getPublicUrl(photo.storage_url, {
-                  transform: {
-                    width: 150,
-                    height: 150,
-                    resize: 'cover',
-                  },
-                }).data.publicUrl;
-
               return (
                 <div
                   key={photo.id}
@@ -62,7 +53,7 @@ export function SelectionSummary({
                   onClick={() => onPhotoClick(photo.id)}
                 >
                   <img
-                    src={imageUrl}
+                    src={signedUrls[photo.id] || photo.storage_url}
                     alt={photo.filename}
                     className="w-full h-full object-cover"
                   />

@@ -1,6 +1,7 @@
 import { Photo } from '@/types/database';
 import { Loader2, Heart } from 'lucide-react';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 
 interface ClientPhotoGridProps {
   photos?: Photo[];
@@ -11,13 +12,14 @@ interface ClientPhotoGridProps {
 
 export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: ClientPhotoGridProps) {
   const { toggleSelection } = usePhotoSelection(galleryId);
+  const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
 
   const handleHeartClick = (e: React.MouseEvent, photo: Photo) => {
     e.stopPropagation();
     toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
   };
 
-  if (isLoading) {
+  if (isLoading || urlsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -45,7 +47,7 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
           }`}
         >
           <img
-            src={photo.storage_url}
+            src={signedUrls[photo.id] || photo.storage_url}
             alt={photo.filename}
             className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform"
             onClick={() => onPhotoClick(photo.id)}
