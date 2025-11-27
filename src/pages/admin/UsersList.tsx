@@ -19,6 +19,7 @@ import { ManageUserAccessDialog } from '@/components/admin/ManageUserAccessDialo
 import { UserActivity } from '@/types/database';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { TableSkeleton } from '@/components/admin/skeletons/TableSkeleton';
 
 export default function UsersList() {
   const { data: users, isLoading } = useUserActivity();
@@ -56,10 +57,6 @@ export default function UsersList() {
         return sortDirection === 'asc' ? aDate - bDate : bDate - aDate;
       }
     });
-
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
 
   return (
     <PageContainer size="full">
@@ -102,9 +99,12 @@ export default function UsersList() {
         </div>
       </div>
 
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
+      {isLoading ? (
+        <TableSkeleton columns={6} rows={10} />
+      ) : (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>
@@ -188,6 +188,7 @@ export default function UsersList() {
           </Table>
         </div>
       </Card>
+      )}
 
       {editRoleUser && (
         <EditUserRoleDialog

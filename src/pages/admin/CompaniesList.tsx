@@ -16,6 +16,7 @@ import { useCompanyGalleryStats } from '@/hooks/useCompanyStats';
 import { CompanyForm } from '@/components/admin/CompanyForm';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { TableSkeleton } from '@/components/admin/skeletons/TableSkeleton';
 
 export default function CompaniesList() {
   const navigate = useNavigate();
@@ -46,10 +47,6 @@ export default function CompaniesList() {
     return sortDirection === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
   });
 
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
-
   return (
     <PageContainer size="full">
       <div className="space-y-6">
@@ -65,9 +62,12 @@ export default function CompaniesList() {
           }
         />
 
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
+      {isLoading ? (
+        <TableSkeleton columns={6} rows={8} />
+      ) : (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>
@@ -143,6 +143,7 @@ export default function CompaniesList() {
           </Table>
         </div>
       </Card>
+      )}
 
       <CompanyForm open={isCreateOpen} onOpenChange={setIsCreateOpen} />
       </div>

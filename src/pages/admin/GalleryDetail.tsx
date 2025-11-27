@@ -17,6 +17,7 @@ import { GallerySendActions } from '@/components/admin/gallery/GallerySendAction
 import { Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { GalleryDetailSkeleton } from '@/components/admin/skeletons/GalleryDetailSkeleton';
 
 export default function GalleryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -59,11 +60,7 @@ export default function GalleryDetail() {
   };
 
   if (galleryLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <GalleryDetailSkeleton />;
   }
 
   if (!gallery) {
