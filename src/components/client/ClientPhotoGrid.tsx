@@ -40,7 +40,7 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
       {photos.map((photo) => (
         <div
           key={photo.id}
-          className={`relative aspect-square rounded-lg overflow-hidden group border-2 transition-all ${
+          className={`relative aspect-[3/2] rounded-lg overflow-hidden group border-2 transition-all ${
             photo.is_selected 
               ? 'border-primary shadow-md' 
               : 'border-transparent hover:border-muted'
