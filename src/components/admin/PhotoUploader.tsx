@@ -74,14 +74,14 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
 
         if (successfulUploads.length > 0) {
           toast({
-            title: 'Upload complete',
-            description: `Successfully uploaded ${successfulUploads.length} photo(s).`,
+            title: 'Upload abgeschlossen',
+            description: `Erfolgreich ${successfulUploads.length} Foto(s) hochgeladen.`,
           });
           onUploadComplete();
         }
       } catch (error: any) {
         toast({
-          title: 'Upload error',
+          title: 'Upload-Fehler',
           description: error.message,
           variant: 'destructive',
         });
@@ -129,10 +129,10 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
         <label htmlFor="photo-upload" className="cursor-pointer">
           <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-sm font-medium mb-1">
-            {uploading ? 'Uploading...' : 'Drop photos here or click to browse'}
+            {uploading ? 'Wird hochgeladen...' : 'Fotos hier ablegen oder klicken zum Durchsuchen'}
           </p>
           <p className="text-xs text-muted-foreground">
-            Support for JPG, PNG, WEBP files
+            Unterstützt JPG, PNG, WEBP Dateien
           </p>
         </label>
       </div>
@@ -141,7 +141,7 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Uploading {uploadProgress.length} file(s)...</span>
+            <span>Lade {uploadProgress.length} Datei(en) hoch...</span>
           </div>
         </div>
       )}

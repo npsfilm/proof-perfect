@@ -39,32 +39,32 @@ export default function GalleryCreate() {
         <Button variant="ghost" size="sm" onClick={() => navigate('/admin/galleries')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-3xl font-bold text-foreground">Create Gallery</h1>
+        <h1 className="text-3xl font-bold text-foreground">Galerie erstellen</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Gallery Details</CardTitle>
+          <CardTitle>Galerie-Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Gallery Name</Label>
+              <Label htmlFor="name">Galerie-Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Sunset Villa Shoot"
+                placeholder="z.B. Sonnenuntergang Villa Shooting"
                 required
                 disabled={createGallery.isPending}
               />
               <p className="text-xs text-muted-foreground">
-                A URL-friendly slug will be automatically generated
+                Ein URL-freundlicher Slug wird automatisch generiert
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="target">Target Package Count</Label>
+              <Label htmlFor="target">Ziel-Paketanzahl</Label>
               <Input
                 id="target"
                 type="number"
@@ -77,12 +77,12 @@ export default function GalleryCreate() {
                 disabled={createGallery.isPending}
               />
               <p className="text-xs text-muted-foreground">
-                Number of photos included in the client's package
+                Anzahl der Fotos im Kundenpaket
               </p>
             </div>
 
             <div className="space-y-3">
-              <Label>Salutation Type</Label>
+              <Label>Anredeform</Label>
               <RadioGroup
                 value={formData.salutation_type}
                 onValueChange={(value) =>
@@ -93,30 +93,30 @@ export default function GalleryCreate() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Du" id="du" />
                   <Label htmlFor="du" className="font-normal cursor-pointer">
-                    Du (informal)
+                    Du (informell)
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Sie" id="sie" />
                   <Label htmlFor="sie" className="font-normal cursor-pointer">
-                    Sie (formal)
+                    Sie (formell)
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company">Company (Optional)</Label>
+              <Label htmlFor="company">Unternehmen (Optional)</Label>
               <Select
                 value={formData.company_id}
                 onValueChange={(value) => setFormData({ ...formData, company_id: value })}
                 disabled={createGallery.isPending}
               >
                 <SelectTrigger id="company">
-                  <SelectValue placeholder="Select a company..." />
+                  <SelectValue placeholder="Unternehmen auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">Keines</SelectItem>
                   {companies?.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
@@ -125,7 +125,7 @@ export default function GalleryCreate() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Assign this gallery to a company for organization
+                Diese Galerie einem Unternehmen zur Organisation zuweisen
               </p>
             </div>
 
@@ -136,10 +136,10 @@ export default function GalleryCreate() {
                 onClick={() => navigate('/admin/galleries')}
                 disabled={createGallery.isPending}
               >
-                Cancel
+                Abbrechen
               </Button>
               <Button type="submit" disabled={createGallery.isPending}>
-                {createGallery.isPending ? 'Creating...' : 'Create Gallery'}
+                {createGallery.isPending ? 'Wird erstellt...' : 'Galerie erstellen'}
               </Button>
             </div>
           </form>
