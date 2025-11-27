@@ -1,0 +1,146 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Building2, ArrowUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useCompanyGalleryStats } from '@/hooks/useCompanyStats';
+import { CompanyForm } from '@/components/admin/CompanyForm';
+
+export default function CompaniesList() {
+  const navigate = useNavigate();
+  const { data: companies, isLoading } = useCompanyGalleryStats();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [sortField, setSortField] = useState<'name' | 'galleries_count'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const handleSort = (field: 'name' | 'galleries_count') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedCompanies = companies?.slice().sort((a, b) => {
+    const aVal = sortField === 'name' ? a.company_name : a.galleries_count;
+    const bVal = sortField === 'name' ? b.company_name : b.galleries_count;
+    
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return sortDirection === 'asc' 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    return sortDirection === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+  });
+
+  if (isLoading) {
+    return <div className="p-8">Loading...</div>;
+  }
+
+  return (
+    <div className="flex-1 space-y-4 p-4 md:p-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
+          <p className="text-muted-foreground">Manage client companies and their team members</p>
+        </div>
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Company
+        </Button>
+      </div>
+
+      <Card>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('name')}
+                    className="flex items-center gap-2 hover:text-foreground"
+                  >
+                    Company
+                    <ArrowUpDown className="h-4 w-4" />
+                  </button>
+                </TableHead>
+                <TableHead className="hidden md:table-cell">Domain</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('galleries_count')}
+                    className="flex items-center gap-2 hover:text-foreground"
+                  >
+                    Galleries
+                    <ArrowUpDown className="h-4 w-4" />
+                  </button>
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">Photos</TableHead>
+                <TableHead className="hidden lg:table-cell">Selected</TableHead>
+                <TableHead className="hidden xl:table-cell">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedCompanies?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <Building2 className="mx-auto h-12 w-12 mb-2 opacity-50" />
+                    <p>No companies yet. Create one to get started.</p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                sortedCompanies?.map((company) => (
+                  <TableRow
+                    key={company.company_id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/admin/companies/${company.company_id}`)}
+                  >
+                    <TableCell className="font-medium">{company.company_name}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {company.domain ? (
+                        <Badge variant="outline">{company.domain}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{company.galleries_count}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">{company.photos_count}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{company.selected_count}</TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      <div className="flex gap-2">
+                        {company.reviewed_count > 0 && (
+                          <Badge variant="outline" className="text-xs">
+                            {company.reviewed_count} Reviewed
+                          </Badge>
+                        )}
+                        {company.delivered_count > 0 && (
+                          <Badge variant="outline" className="text-xs">
+                            {company.delivered_count} Delivered
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      <CompanyForm open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+    </div>
+  );
+}

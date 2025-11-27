@@ -1,25 +1,33 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGalleries } from '@/hooks/useGalleries';
+import { useCompanies } from '@/hooks/useCompanies';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
   const { createGallery } = useGalleries();
+  const { data: companies } = useCompanies();
   const [formData, setFormData] = useState({
     name: '',
     package_target_count: 20,
     salutation_type: 'Du' as 'Du' | 'Sie',
+    company_id: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await createGallery.mutateAsync(formData);
+    const submitData = {
+      ...formData,
+      company_id: formData.company_id || null,
+    };
+    const result = await createGallery.mutateAsync(submitData);
     if (result) {
       navigate(`/admin/galleries/${result.id}`);
     }
@@ -95,6 +103,30 @@ export default function GalleryCreate() {
                   </Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company">Company (Optional)</Label>
+              <Select
+                value={formData.company_id}
+                onValueChange={(value) => setFormData({ ...formData, company_id: value })}
+                disabled={createGallery.isPending}
+              >
+                <SelectTrigger id="company">
+                  <SelectValue placeholder="Select a company..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {companies?.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Assign this gallery to a company for organization
+              </p>
             </div>
 
             <div className="flex gap-3">

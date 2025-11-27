@@ -23,6 +23,7 @@ export interface Gallery {
   status: GalleryStatus;
   package_target_count: number;
   salutation_type: SalutationType;
+  company_id?: string;
   final_delivery_link?: string;
   is_locked: boolean;
   reviewed_at?: string;
@@ -85,4 +86,54 @@ export interface SystemSettings {
   zapier_webhook_deliver?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  domain?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompanyMember {
+  id: string;
+  company_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface CompanyGalleryStats {
+  company_id: string;
+  company_name: string;
+  slug: string;
+  domain?: string;
+  galleries_count: number;
+  photos_count: number;
+  selected_count: number;
+  staging_count: number;
+  reviewed_count: number;
+  delivered_count: number;
+}
+
+export interface UserActivity {
+  user_id: string;
+  email: string;
+  role?: RoleType;
+  last_sign_in_at?: string;
+  galleries_assigned: number;
+  selections_made: number;
+}
+
+export interface GallerySelectionStats {
+  gallery_id: string;
+  company_id?: string;
+  name: string;
+  slug: string;
+  status: GalleryStatus;
+  created_at: string;
+  photos_count: number;
+  selected_count: number;
+  staging_count: number;
 }
