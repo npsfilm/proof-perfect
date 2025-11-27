@@ -34,30 +34,45 @@ export function ComparisonMode({
   const photo2Index = photos.findIndex(p => p.id === photo2.id);
 
   useEffect(() => {
-    if (isDragging) {
-      const stopDragging = () => setIsDragging(false);
-      window.addEventListener('mouseup', stopDragging);
-      window.addEventListener('touchend', stopDragging);
-      return () => {
-        window.removeEventListener('mouseup', stopDragging);
-        window.removeEventListener('touchend', stopDragging);
-      };
-    }
-  }, [isDragging]);
+    if (!isDragging) return;
 
-  const handleSliderDrag = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || !containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const position = ((clientX - rect.left) / rect.width) * 100;
-    
-    setSliderPosition(Math.max(5, Math.min(95, position)));
-  };
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!containerRef.current) return;
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
+      const position = ((clientX - rect.left) / rect.width) * 100;
+      
+      setSliderPosition(Math.max(5, Math.min(95, position)));
+    };
+
+    const handleEnd = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchend', handleEnd);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchend', handleEnd);
+    };
+  }, [isDragging]);
 
   const startDragging = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setIsDragging(true);
+    
+    // Immediately update position on click/touch
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const position = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPosition(Math.max(5, Math.min(95, position)));
   };
   return (
     <div 
@@ -113,8 +128,8 @@ export function ComparisonMode({
           <div 
             ref={containerRef}
             className="relative max-w-5xl w-full max-h-[70vh] overflow-hidden rounded-lg cursor-ew-resize"
-            onMouseMove={handleSliderDrag}
-            onTouchMove={handleSliderDrag}
+            onMouseDown={startDragging}
+            onTouchStart={startDragging}
           >
             {/* Bottom layer - Photo 2 (full width) */}
             <img
@@ -143,10 +158,8 @@ export function ComparisonMode({
             
             {/* Draggable Divider */}
             <div 
-              className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize z-10"
+              className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize z-10 pointer-events-none"
               style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
-              onMouseDown={startDragging}
-              onTouchStart={startDragging}
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center pointer-events-none">
                 <ArrowLeftRight className="h-5 w-5 text-gray-600" />
