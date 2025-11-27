@@ -5,9 +5,10 @@ interface SelectionFooterProps {
   selectedCount: number;
   targetCount: number;
   onFinalize: () => void;
+  disabled?: boolean;
 }
 
-export function SelectionFooter({ selectedCount, targetCount, onFinalize }: SelectionFooterProps) {
+export function SelectionFooter({ selectedCount, targetCount, onFinalize, disabled }: SelectionFooterProps) {
   const remaining = targetCount - selectedCount;
   const isOver = selectedCount > targetCount;
 
@@ -39,7 +40,7 @@ export function SelectionFooter({ selectedCount, targetCount, onFinalize }: Sele
           <Button 
             onClick={onFinalize}
             size="lg"
-            disabled={selectedCount === 0}
+            disabled={selectedCount === 0 || disabled}
           >
             Finalize Selection
           </Button>
