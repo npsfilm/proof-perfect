@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -6,6 +7,7 @@ import { Photo } from '@/types/database';
 export function usePhotoSelection(galleryId: string | undefined) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [lastSaved, setLastSaved] = useState<Date>();
 
   const toggleSelection = useMutation({
     mutationFn: async ({ photoId, currentState }: { photoId: string; currentState: boolean }) => {
@@ -44,15 +46,16 @@ export function usePhotoSelection(galleryId: string | undefined) {
       });
     },
     onSuccess: () => {
-      toast({
-        description: 'Änderungen gespeichert',
-        duration: 2000,
-      });
+      setLastSaved(new Date());
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['photos', galleryId] });
     },
   });
 
-  return { toggleSelection };
+  return { 
+    toggleSelection,
+    isSaving: toggleSelection.isPending,
+    lastSaved,
+  };
 }

@@ -12,6 +12,9 @@ import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
 import { ComparisonMode } from '@/components/client/ComparisonMode';
 import { WelcomeModal } from '@/components/client/WelcomeModal';
+import { SelectionSummary } from '@/components/client/SelectionSummary';
+import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
+import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -29,6 +32,7 @@ export default function ClientGallery() {
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
+  const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -79,6 +83,10 @@ export default function ClientGallery() {
 
   const handleComparisonSwap = () => {
     setComparisonPhotos([comparisonPhotos[1], comparisonPhotos[0]]);
+  };
+
+  const handleRemoveSelection = (photoId: string) => {
+    toggleSelection.mutate({ photoId, currentState: true });
   };
 
   const handleNavigate = (direction: 'prev' | 'next') => {
@@ -172,7 +180,9 @@ export default function ClientGallery() {
         galleryName={gallery.name} 
         onSignOut={signOut}
         onShowHelp={handleShowHelp}
-      />
+      >
+        <SaveStatusIndicator isSaving={isSaving} lastSaved={lastSaved} />
+      </ClientGalleryHeader>
 
       {/* Banner */}
       <div className="bg-blue-50 border-b border-blue-200 py-3">
@@ -231,6 +241,13 @@ export default function ClientGallery() {
           onSwap={handleComparisonSwap}
         />
       )}
+
+      {/* Selection Summary */}
+      <SelectionSummary
+        selectedPhotos={selectedPhotos}
+        onPhotoClick={handlePhotoClick}
+        onRemoveSelection={handleRemoveSelection}
+      />
 
       {/* Footer */}
       {photos && photos.length > 0 && (
