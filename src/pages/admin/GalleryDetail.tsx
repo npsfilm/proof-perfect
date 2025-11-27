@@ -106,8 +106,27 @@ export default function GalleryDetail() {
 
       if (updateError) throw updateError;
 
-      // TODO: Send webhook notification
-      // For now, just show success
+      // Send webhook notification
+      const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
+      const newPasswords = result.created?.map((c: any) => ({
+        email: c.email,
+        temp_password: c.temp_password,
+      })) || [];
+
+      const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
+        body: {
+          gallery_id: id!,
+          client_emails: clientEmails,
+          new_passwords: newPasswords,
+          gallery_url: galleryUrl,
+        },
+      });
+
+      if (webhookError) {
+        console.error('Webhook error:', webhookError);
+        // Don't fail the whole process if webhook fails
+      }
+
       toast({
         title: 'Gallery sent!',
         description: `Sent to ${clientEmails.length} client(s). ${
