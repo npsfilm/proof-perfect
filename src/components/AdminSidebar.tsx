@@ -1,8 +1,6 @@
-import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity, Camera, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity, Camera, Eye } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
-import { useGalleries } from '@/hooks/useGalleries';
-import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -31,10 +29,6 @@ export function AdminSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { data: galleries } = useGalleries();
-
-  // Get recent galleries (max 5)
-  const recentGalleries = galleries?.slice(0, 5) || [];
 
   return (
     <Sidebar 
@@ -87,42 +81,30 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Client View Quick Access */}
-        {recentGalleries.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className={open ? 'animate-fade-in' : ''}>
-              Kunden-Ansicht
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {recentGalleries.map((gallery, index) => (
-                  <SidebarMenuItem
-                    key={gallery.id}
-                    style={{ animationDelay: `${index * 30}ms` }}
-                    className={open ? 'animate-fade-in' : ''}
+        {/* Client View Switcher */}
+        <SidebarGroup>
+          <SidebarGroupLabel className={open ? 'animate-fade-in' : ''}>
+            Kunden-Ansicht
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem className={open ? 'animate-fade-in' : ''}>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/"
+                    className="group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    activeClassName="bg-muted text-primary font-medium shadow-neu-pressed"
                   >
-                    <SidebarMenuButton asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => window.open(`/gallery/${gallery.slug}`, '_blank')}
-                        className="w-full justify-start hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] px-2 py-1.5 h-auto"
-                        title={`${gallery.name} - Kunden-Ansicht öffnen`}
-                      >
-                        <ExternalLink className="h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                        {open && (
-                          <span className="ml-2 text-sm truncate transition-opacity duration-200">
-                            {gallery.name}
-                          </span>
-                        )}
-                      </Button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+                    <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                    {open && (
+                      <span className="transition-opacity duration-200">Kunden-Dashboard</span>
+                    )}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       
       <SidebarFooter className="border-t border-border/50 px-3 py-3">
