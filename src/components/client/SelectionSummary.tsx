@@ -54,8 +54,8 @@ export function SelectionSummary({
 
       {/* Expandable Content */}
       {isExpanded && (
-        <ScrollArea className="h-48 px-4 pb-4">
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+        <ScrollArea className="h-72 px-4 pb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {selectedPhotos.map((photo) => {
               return (
                 <div
