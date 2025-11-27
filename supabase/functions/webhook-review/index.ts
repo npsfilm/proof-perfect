@@ -13,6 +13,12 @@ import {
   getCompanyName 
 } from "../_shared/gallery-helpers.ts";
 import { logWebhookAttempt } from "../_shared/webhook-logger.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+// Input validation schema
+const reviewWebhookSchema = z.object({
+  gallery_id: z.string().uuid({ message: "Invalid gallery_id format" })
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -46,7 +52,22 @@ serve(async (req) => {
 
     console.log('[webhook-review] Authenticated user:', user.id);
 
-    const { gallery_id } = await req.json();
+    // 3. Parse and validate input
+    const body = await req.json();
+    const validationResult = reviewWebhookSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      console.error('[webhook-review] Input validation failed:', validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validationResult.error.flatten().fieldErrors 
+        }), 
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const { gallery_id } = validationResult.data;
 
     console.log('Processing review webhook for gallery:', gallery_id);
 
