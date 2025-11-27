@@ -5,32 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Send, CheckCircle2, Package, Info } from 'lucide-react';
+import { EmailTemplates, SalutationType, EmailType } from '@/types/email-templates';
 
 interface EmailTemplateEditorProps {
-  sendSubjectDu: string;
-  sendBodyDu: string;
-  reviewSubjectDu: string;
-  reviewBodyDu: string;
-  deliverSubjectDu: string;
-  deliverBodyDu: string;
-  sendSubjectSie: string;
-  sendBodySie: string;
-  reviewSubjectSie: string;
-  reviewBodySie: string;
-  deliverSubjectSie: string;
-  deliverBodySie: string;
-  onSendSubjectDuChange: (value: string) => void;
-  onSendBodyDuChange: (value: string) => void;
-  onReviewSubjectDuChange: (value: string) => void;
-  onReviewBodyDuChange: (value: string) => void;
-  onDeliverSubjectDuChange: (value: string) => void;
-  onDeliverBodyDuChange: (value: string) => void;
-  onSendSubjectSieChange: (value: string) => void;
-  onSendBodySieChange: (value: string) => void;
-  onReviewSubjectSieChange: (value: string) => void;
-  onReviewBodySieChange: (value: string) => void;
-  onDeliverSubjectSieChange: (value: string) => void;
-  onDeliverBodySieChange: (value: string) => void;
+  templates: EmailTemplates;
+  onTemplatesChange: (templates: EmailTemplates) => void;
 }
 
 const PlaceholderInfo = ({ type }: { type: 'send' | 'review' | 'deliver' }) => {
@@ -87,7 +66,25 @@ const PlaceholderInfo = ({ type }: { type: 'send' | 'review' | 'deliver' }) => {
   );
 };
 
-export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
+export function EmailTemplateEditor({ templates, onTemplatesChange }: EmailTemplateEditorProps) {
+  const updateTemplate = (
+    salutation: SalutationType,
+    type: EmailType,
+    field: 'subject' | 'body',
+    value: string
+  ) => {
+    onTemplatesChange({
+      ...templates,
+      [salutation]: {
+        ...templates[salutation],
+        [type]: {
+          ...templates[salutation][type],
+          [field]: value,
+        },
+      },
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -137,8 +134,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="send-subject-du"
                     placeholder="Deine Galerie ist bereit: {gallery_name}"
-                    value={props.sendSubjectDu}
-                    onChange={(e) => props.onSendSubjectDuChange(e.target.value)}
+                    value={templates.du.send.subject}
+                    onChange={(e) => updateTemplate('du', 'send', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -146,8 +143,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="send-body-du"
                     placeholder="Hallo,&#10;&#10;Deine Galerie '{gallery_name}' ist jetzt bereit zur Ansicht..."
-                    value={props.sendBodyDu}
-                    onChange={(e) => props.onSendBodyDuChange(e.target.value)}
+                    value={templates.du.send.body}
+                    onChange={(e) => updateTemplate('du', 'send', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -161,8 +158,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="review-subject-du"
                     placeholder="Kunde hat Galerie überprüft: {gallery_name}"
-                    value={props.reviewSubjectDu}
-                    onChange={(e) => props.onReviewSubjectDuChange(e.target.value)}
+                    value={templates.du.review.subject}
+                    onChange={(e) => updateTemplate('du', 'review', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -170,8 +167,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="review-body-du"
                     placeholder="Hallo,&#10;&#10;Der Kunde hat die Galerie '{gallery_name}' überprüft..."
-                    value={props.reviewBodyDu}
-                    onChange={(e) => props.onReviewBodyDuChange(e.target.value)}
+                    value={templates.du.review.body}
+                    onChange={(e) => updateTemplate('du', 'review', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -185,8 +182,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="deliver-subject-du"
                     placeholder="Deine finalen Fotos sind bereit: {gallery_name}"
-                    value={props.deliverSubjectDu}
-                    onChange={(e) => props.onDeliverSubjectDuChange(e.target.value)}
+                    value={templates.du.deliver.subject}
+                    onChange={(e) => updateTemplate('du', 'deliver', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -194,8 +191,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="deliver-body-du"
                     placeholder="Hallo,&#10;&#10;Deine finalen bearbeiteten Fotos für '{gallery_name}' sind jetzt bereit..."
-                    value={props.deliverBodyDu}
-                    onChange={(e) => props.onDeliverBodyDuChange(e.target.value)}
+                    value={templates.du.deliver.body}
+                    onChange={(e) => updateTemplate('du', 'deliver', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -229,8 +226,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="send-subject-sie"
                     placeholder="Ihre Galerie ist bereit: {gallery_name}"
-                    value={props.sendSubjectSie}
-                    onChange={(e) => props.onSendSubjectSieChange(e.target.value)}
+                    value={templates.sie.send.subject}
+                    onChange={(e) => updateTemplate('sie', 'send', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -238,8 +235,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="send-body-sie"
                     placeholder="Sehr geehrte Damen und Herren,&#10;&#10;Ihre Galerie '{gallery_name}' ist jetzt bereit zur Ansicht..."
-                    value={props.sendBodySie}
-                    onChange={(e) => props.onSendBodySieChange(e.target.value)}
+                    value={templates.sie.send.body}
+                    onChange={(e) => updateTemplate('sie', 'send', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -253,8 +250,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="review-subject-sie"
                     placeholder="Kunde hat Galerie überprüft: {gallery_name}"
-                    value={props.reviewSubjectSie}
-                    onChange={(e) => props.onReviewSubjectSieChange(e.target.value)}
+                    value={templates.sie.review.subject}
+                    onChange={(e) => updateTemplate('sie', 'review', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -262,8 +259,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="review-body-sie"
                     placeholder="Sehr geehrte Damen und Herren,&#10;&#10;Der Kunde hat die Galerie '{gallery_name}' überprüft..."
-                    value={props.reviewBodySie}
-                    onChange={(e) => props.onReviewBodySieChange(e.target.value)}
+                    value={templates.sie.review.body}
+                    onChange={(e) => updateTemplate('sie', 'review', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -277,8 +274,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Input
                     id="deliver-subject-sie"
                     placeholder="Ihre finalen Fotos sind bereit: {gallery_name}"
-                    value={props.deliverSubjectSie}
-                    onChange={(e) => props.onDeliverSubjectSieChange(e.target.value)}
+                    value={templates.sie.deliver.subject}
+                    onChange={(e) => updateTemplate('sie', 'deliver', 'subject', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -286,8 +283,8 @@ export function EmailTemplateEditor(props: EmailTemplateEditorProps) {
                   <Textarea
                     id="deliver-body-sie"
                     placeholder="Sehr geehrte Damen und Herren,&#10;&#10;Ihre finalen bearbeiteten Fotos für '{gallery_name}' sind jetzt bereit..."
-                    value={props.deliverBodySie}
-                    onChange={(e) => props.onDeliverBodySieChange(e.target.value)}
+                    value={templates.sie.deliver.body}
+                    onChange={(e) => updateTemplate('sie', 'deliver', 'body', e.target.value)}
                     rows={10}
                     className="font-mono text-sm"
                   />
