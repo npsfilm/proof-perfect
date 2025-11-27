@@ -52,12 +52,12 @@ export default function CompaniesList() {
     <div className="flex-1 space-y-4 p-4 md:p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
-          <p className="text-muted-foreground">Manage client companies and their team members</p>
+          <h1 className="text-3xl font-bold tracking-tight">Unternehmen</h1>
+          <p className="text-muted-foreground">Kundenunternehmen und ihre Teammitglieder verwalten</p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Company
+          Unternehmen hinzufügen
         </Button>
       </div>
 
@@ -71,7 +71,7 @@ export default function CompaniesList() {
                     onClick={() => handleSort('name')}
                     className="flex items-center gap-2 hover:text-foreground"
                   >
-                    Company
+                    Unternehmen
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </TableHead>
@@ -81,12 +81,12 @@ export default function CompaniesList() {
                     onClick={() => handleSort('galleries_count')}
                     className="flex items-center gap-2 hover:text-foreground"
                   >
-                    Galleries
+                    Galerien
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </TableHead>
-                <TableHead className="hidden lg:table-cell">Photos</TableHead>
-                <TableHead className="hidden lg:table-cell">Selected</TableHead>
+                <TableHead className="hidden lg:table-cell">Fotos</TableHead>
+                <TableHead className="hidden lg:table-cell">Ausgewählt</TableHead>
                 <TableHead className="hidden xl:table-cell">Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -95,7 +95,7 @@ export default function CompaniesList() {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     <Building2 className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                    <p>No companies yet. Create one to get started.</p>
+                    <p>Noch keine Unternehmen. Erstellen Sie eines, um loszulegen.</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -122,12 +122,12 @@ export default function CompaniesList() {
                       <div className="flex gap-2">
                         {company.reviewed_count > 0 && (
                           <Badge variant="outline" className="text-xs">
-                            {company.reviewed_count} Reviewed
+                            {company.reviewed_count} Überprüft
                           </Badge>
                         )}
                         {company.delivered_count > 0 && (
                           <Badge variant="outline" className="text-xs">
-                            {company.delivered_count} Delivered
+                            {company.delivered_count} Geliefert
                           </Badge>
                         )}
                       </div>

@@ -77,22 +77,22 @@ export function ManageUserAccessDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Manage Gallery Access</DialogTitle>
+          <DialogTitle>Galeriezugriff verwalten</DialogTitle>
           <DialogDescription>
-            Control which galleries {user.email} can access
+            Steuern Sie, auf welche Galerien {user.email} zugreifen kann
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Add Gallery Access</Label>
+            <Label>Galeriezugriff hinzufügen</Label>
             <div className="flex gap-2">
               <Select
                 value={selectedGalleryId}
                 onValueChange={setSelectedGalleryId}
               >
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a gallery..." />
+                  <SelectValue placeholder="Galerie auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
                   {availableGalleries?.map((gallery) => (
@@ -107,22 +107,22 @@ export function ManageUserAccessDialog({
                 disabled={!selectedGalleryId || addAccess.isPending}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Hinzufügen
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Current Access ({userAccess?.length || 0})</Label>
+            <Label>Aktueller Zugriff ({userAccess?.length || 0})</Label>
             <ScrollArea className="h-[300px] border rounded-md">
               {isLoading ? (
                 <div className="p-4 text-center text-muted-foreground">
-                  Loading...
+                  Lädt...
                 </div>
               ) : userAccess?.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <FolderOpen className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                  <p>No gallery access yet</p>
+                  <p>Noch kein Galeriezugriff</p>
                 </div>
               ) : (
                 <div className="p-2 space-y-2">

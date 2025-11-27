@@ -59,19 +59,19 @@ export function CompanyMembersTable({ companyId }: CompanyMembersTableProps) {
     <>
       <Card>
         <div className="p-4 border-b flex items-center justify-between">
-          <h3 className="font-semibold">Team Members</h3>
+          <h3 className="font-semibold">Teammitglieder</h3>
           <Button size="sm" onClick={() => setIsAddOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Member
+            Mitglied hinzufügen
           </Button>
         </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead className="hidden md:table-cell">Role</TableHead>
-                <TableHead className="hidden md:table-cell">Added</TableHead>
+                <TableHead>E-Mail</TableHead>
+                <TableHead className="hidden md:table-cell">Rolle</TableHead>
+                <TableHead className="hidden md:table-cell">Hinzugefügt</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -79,7 +79,7 @@ export function CompanyMembersTable({ companyId }: CompanyMembersTableProps) {
               {members?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    No members yet. Add one to get started.
+                    Noch keine Mitglieder. Fügen Sie eines hinzu, um loszulegen.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -87,7 +87,7 @@ export function CompanyMembersTable({ companyId }: CompanyMembersTableProps) {
                   <TableRow key={member.id}>
                     <TableCell className="font-medium">{member.profiles?.email}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary">Client</Badge>
+                      <Badge variant="secondary">Kunde</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {format(new Date(member.created_at), 'MMM d, yyyy')}
@@ -125,15 +125,15 @@ export function CompanyMembersTable({ companyId }: CompanyMembersTableProps) {
       <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+            <AlertDialogTitle>Teammitglied entfernen?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove {selectedMember?.email} from this company. They will lose access to all company galleries.
+              Dies entfernt {selectedMember?.email} von diesem Unternehmen. Sie verlieren den Zugriff auf alle Unternehmensgalerien.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
             <AlertDialogAction onClick={handleRemove} disabled={removeMember.isPending}>
-              Remove
+              Entfernen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

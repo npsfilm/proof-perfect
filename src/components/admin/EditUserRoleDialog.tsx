@@ -46,15 +46,15 @@ export function EditUserRoleDialog({ user, open, onOpenChange }: EditUserRoleDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit User Role</DialogTitle>
+          <DialogTitle>Benutzerrolle bearbeiten</DialogTitle>
           <DialogDescription>
-            Change the role for {user.email}
+            Rolle ändern für {user.email}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-3">
-              <Label>Role</Label>
+              <Label>Rolle</Label>
               <RadioGroup
                 value={selectedRole}
                 onValueChange={(value) => setSelectedRole(value as RoleType)}
@@ -62,13 +62,13 @@ export function EditUserRoleDialog({ user, open, onOpenChange }: EditUserRoleDia
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="client" id="client" />
                   <Label htmlFor="client" className="font-normal cursor-pointer">
-                    Client - Limited access to assigned galleries
+                    Kunde - Eingeschränkter Zugriff auf zugewiesene Galerien
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="admin" id="admin" />
                   <Label htmlFor="admin" className="font-normal cursor-pointer">
-                    Admin - Full access to all galleries and settings
+                    Admin - Vollzugriff auf alle Galerien und Einstellungen
                   </Label>
                 </div>
               </RadioGroup>
@@ -80,10 +80,10 @@ export function EditUserRoleDialog({ user, open, onOpenChange }: EditUserRoleDia
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Abbrechen
             </Button>
             <Button type="submit" disabled={updateRole.isPending}>
-              Update Role
+              Rolle aktualisieren
             </Button>
           </DialogFooter>
         </form>
