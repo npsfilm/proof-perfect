@@ -1,102 +1,48 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, handleCorsPreflightRequest } from "../_shared/cors.ts";
+import { createSupabaseClient } from "../_shared/supabase-client.ts";
+import { 
+  fetchGalleryDetails, 
+  fetchGalleryClients, 
+  fetchPhotosCount,
+  fetchEmailSettings,
+  getEmailTemplateFields,
+  extractClientInfo,
+  getCompanyName 
+} from "../_shared/gallery-helpers.ts";
+import { logWebhookAttempt } from "../_shared/webhook-logger.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsPreflightRequest();
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
     const { gallery_id, client_emails, new_passwords, gallery_url } = await req.json();
 
     console.log('Processing send webhook for gallery:', gallery_id);
 
-    // Get gallery details with company
-    const { data: gallery, error: galleryError } = await supabase
-      .from('galleries')
-      .select(`
-        name, 
-        slug, 
-        salutation_type, 
-        address,
-        package_target_count,
-        company_id,
-        companies (name)
-      `)
-      .eq('id', gallery_id)
-      .single();
+    // Fetch all required data
+    const gallery = await fetchGalleryDetails(gallery_id);
+    const galleryClients = await fetchGalleryClients(gallery_id);
+    const photosCount = await fetchPhotosCount(gallery_id);
 
-    if (galleryError) throw galleryError;
+    // Extract client information
+    const { clientNames, clientAnrede } = extractClientInfo(galleryClients);
 
-    // Get client details
-    const { data: galleryClients, error: clientsError } = await supabase
-      .from('gallery_clients')
-      .select(`
-        clients (
-          vorname,
-          nachname,
-          anrede,
-          email
-        )
-      `)
-      .eq('gallery_id', gallery_id);
-
-    if (clientsError) throw clientsError;
-
-    // Get total photo count
-    const { count: photosCount, error: photosError } = await supabase
-      .from('photos')
-      .select('*', { count: 'exact', head: true })
-      .eq('gallery_id', gallery_id);
-
-    if (photosError) throw photosError;
-
-    // Build client names array
-    const clientNames = galleryClients
-      ?.map(gc => {
-        const client = gc.clients as any;
-        return `${client.vorname} ${client.nachname}`;
-      })
-      .filter(Boolean) || [];
-
-    // Build client anrede array
-    const clientAnrede = galleryClients
-      ?.map(gc => {
-        const client = gc.clients as any;
-        return client.anrede;
-      })
-      .filter(Boolean) || [];
-
-    // Get webhook URL and email templates from system settings
-    const subjectField = gallery.salutation_type === 'Du' ? 'email_send_subject_du' : 'email_send_subject_sie';
-    const bodyField = gallery.salutation_type === 'Du' ? 'email_send_body_du' : 'email_send_body_sie';
-    
-    const { data: settings, error: settingsError } = await supabase
-      .from('system_settings')
-      .select(`zapier_webhook_send, ${subjectField}, ${bodyField}`)
-      .limit(1)
-      .maybeSingle();
-
-    if (settingsError) throw settingsError;
+    // Get email templates
+    const templateFields = getEmailTemplateFields(gallery.salutation_type, 'send');
+    const settings = await fetchEmailSettings(['zapier_webhook_send', ...templateFields]);
 
     if (!settings?.zapier_webhook_send) {
       throw new Error('Zapier send webhook URL not configured');
     }
 
     const eventId = crypto.randomUUID();
-    const companyName = gallery.companies && !Array.isArray(gallery.companies) 
-      ? (gallery.companies as any).name 
-      : '';
+    const companyName = getCompanyName(gallery);
+    
+    const subjectField = templateFields[0];
+    const bodyField = templateFields[1];
     
     const payload = {
       event_id: eventId,
@@ -106,7 +52,7 @@ serve(async (req) => {
       gallery_address: gallery.address || '',
       gallery_url: gallery_url,
       package_target_count: gallery.package_target_count,
-      photos_count: photosCount || 0,
+      photos_count: photosCount,
       client_emails: client_emails,
       client_names: clientNames,
       client_anrede: clientAnrede,
@@ -127,12 +73,12 @@ serve(async (req) => {
     });
 
     // Log webhook attempt
-    await supabase.from('webhook_logs').insert({
+    await logWebhookAttempt(
       gallery_id,
-      type: 'send',
-      status: webhookResponse.ok ? 'success' : 'failed',
-      response_body: { status: webhookResponse.status, event_id: eventId },
-    });
+      'send',
+      webhookResponse.ok ? 'success' : 'failed',
+      { status: webhookResponse.status, event_id: eventId }
+    );
 
     console.log('Send webhook response status:', webhookResponse.status);
 
