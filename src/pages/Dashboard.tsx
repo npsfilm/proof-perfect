@@ -10,8 +10,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+    } else if (!loading && user && role === 'admin') {
+      navigate('/admin');
     }
-  }, [user, loading, navigate]);
+  }, [user, role, loading, navigate]);
 
   if (loading) {
     return (
