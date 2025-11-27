@@ -11,6 +11,7 @@ import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
 import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
 import { ComparisonMode } from '@/components/client/ComparisonMode';
+import { WelcomeModal } from '@/components/client/WelcomeModal';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -23,6 +24,7 @@ export default function ClientGallery() {
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
   const [comparisonPhotos, setComparisonPhotos] = useState<string[]>([]);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
@@ -33,6 +35,27 @@ export default function ClientGallery() {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  // Check if welcome modal should be shown
+  useEffect(() => {
+    if (gallery && slug) {
+      const storageKey = `proofing_welcome_shown_${slug}`;
+      const hasSeenWelcome = localStorage.getItem(storageKey);
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+      }
+    }
+  }, [gallery, slug]);
+
+  const handleWelcomeComplete = () => {
+    if (slug) {
+      localStorage.setItem(`proofing_welcome_shown_${slug}`, 'true');
+    }
+  };
+
+  const handleShowHelp = () => {
+    setShowWelcome(true);
+  };
 
   const handlePhotoClick = (photoId: string) => {
     // If in comparison mode, add to comparison
@@ -145,7 +168,11 @@ export default function ClientGallery() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <ClientGalleryHeader galleryName={gallery.name} onSignOut={signOut} />
+      <ClientGalleryHeader 
+        galleryName={gallery.name} 
+        onSignOut={signOut}
+        onShowHelp={handleShowHelp}
+      />
 
       {/* Banner */}
       <div className="bg-blue-50 border-b border-blue-200 py-3">
@@ -221,6 +248,15 @@ export default function ClientGallery() {
         onClose={() => setShowFinalizeModals(false)}
         selectedPhotos={selectedPhotos}
         onFinalize={handleFinalizeSubmit}
+      />
+
+      {/* Welcome Modal */}
+      <WelcomeModal
+        open={showWelcome}
+        onOpenChange={setShowWelcome}
+        galleryName={gallery.name}
+        targetCount={gallery.package_target_count}
+        onComplete={handleWelcomeComplete}
       />
     </div>
   );
