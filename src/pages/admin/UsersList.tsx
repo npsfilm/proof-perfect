@@ -17,6 +17,8 @@ import { useUserActivity } from '@/hooks/useCompanyStats';
 import { EditUserRoleDialog } from '@/components/admin/EditUserRoleDialog';
 import { ManageUserAccessDialog } from '@/components/admin/ManageUserAccessDialog';
 import { UserActivity } from '@/types/database';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function UsersList() {
   const { data: users, isLoading } = useUserActivity();
@@ -60,13 +62,13 @@ export default function UsersList() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Benutzer</h1>
-          <p className="text-muted-foreground">Benutzerrollen und Galeriezugriff verwalten</p>
-        </div>
-      </div>
+    <PageContainer size="full">
+      <div className="space-y-6">
+        <PageHeader
+          title="Benutzer"
+          description="Benutzerrollen und Galeriezugriff verwalten"
+          breadcrumbs={[{ label: 'Benutzer' }]}
+        />
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
@@ -202,6 +204,7 @@ export default function UsersList() {
           onOpenChange={(open) => !open && setManageAccessUser(null)}
         />
       )}
-    </div>
+      </div>
+    </PageContainer>
   );
 }

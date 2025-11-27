@@ -2,6 +2,8 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, TrendingUp, Clock, Wand2, Users } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 const COLORS = ['#233C63', '#4A90E2', '#7CB342', '#FFA726', '#EF5350'];
 
@@ -25,11 +27,13 @@ export default function Analytics() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Analytik-Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Leistungskennzahlen und Einblicke</p>
-      </div>
+    <PageContainer size="full">
+      <div className="space-y-6">
+        <PageHeader
+          title="Analytik-Dashboard"
+          description="Leistungskennzahlen und Einblicke"
+          breadcrumbs={[{ label: 'Analytik' }]}
+        />
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -232,6 +236,7 @@ export default function Analytics() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

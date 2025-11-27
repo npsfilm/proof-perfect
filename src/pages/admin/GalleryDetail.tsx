@@ -14,7 +14,9 @@ import { GalleryInfoCard } from '@/components/admin/gallery/GalleryInfoCard';
 import { GalleryClientsCard } from '@/components/admin/gallery/GalleryClientsCard';
 import { GalleryPhotosSection } from '@/components/admin/gallery/GalleryPhotosSection';
 import { GallerySendActions } from '@/components/admin/gallery/GallerySendActions';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function GalleryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -76,24 +78,26 @@ export default function GalleryDetail() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin/galleries')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">{gallery.name}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{gallery.slug}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
-            <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
-              Überprüfung ansehen
-            </Button>
-          )}
-          <Badge>{gallery.status}</Badge>
-        </div>
-      </div>
+    <PageContainer size="lg">
+      <div className="space-y-6">
+        <PageHeader
+          title={gallery.name}
+          description={gallery.slug}
+          breadcrumbs={[
+            { label: 'Galerien', href: '/admin/galleries' },
+            { label: gallery.name }
+          ]}
+          actions={
+            <div className="flex items-center gap-3">
+              {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
+                <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
+                  Überprüfung ansehen
+                </Button>
+              )}
+              <Badge>{gallery.status}</Badge>
+            </div>
+          }
+        />
 
       <div className="grid gap-6 md:grid-cols-2">
         <GalleryInfoCard
@@ -123,6 +127,7 @@ export default function GalleryDetail() {
         photos={photos}
         galleryClients={galleryClients}
       />
-    </div>
+      </div>
+    </PageContainer>
   );
 }

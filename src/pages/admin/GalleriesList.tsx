@@ -11,6 +11,8 @@ import { GalleryFilters } from '@/components/admin/GalleryFilters';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Trash2 } from 'lucide-react';
 import { GalleryStatus } from '@/types/database';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,31 +96,36 @@ export default function GalleriesList() {
   const isAllSelected = filteredGalleries.length > 0 && selectedGalleries.size === filteredGalleries.length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-foreground">Galerien</h1>
-          {filteredGalleries.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="select-all"
-                checked={isAllSelected}
-                onCheckedChange={toggleSelectAll}
-              />
-              <label
-                htmlFor="select-all"
-                className="text-sm font-medium cursor-pointer"
-              >
-                Alle auswählen
-              </label>
-            </div>
-          )}
-        </div>
-        <Button onClick={() => navigate('/admin/galleries/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Neue Galerie
-        </Button>
-      </div>
+    <PageContainer size="full">
+      <div className="space-y-6">
+        <PageHeader
+          title="Galerien"
+          description="Alle Galerien verwalten und organisieren"
+          breadcrumbs={[{ label: 'Galerien' }]}
+          actions={
+            <>
+              {filteredGalleries.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="select-all"
+                    checked={isAllSelected}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                  <label
+                    htmlFor="select-all"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Alle auswählen
+                  </label>
+                </div>
+              )}
+              <Button onClick={() => navigate('/admin/galleries/new')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Neue Galerie
+              </Button>
+            </>
+          }
+        />
 
       <GalleryFilters
         searchQuery={searchQuery}
@@ -269,6 +276,7 @@ export default function GalleriesList() {
         onBulkDelete={handleBulkDelete}
         onClearSelection={() => setSelectedGalleries(new Set())}
       />
-    </div>
+      </div>
+    </PageContainer>
   );
 }

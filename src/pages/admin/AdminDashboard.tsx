@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Plus, FolderOpen } from 'lucide-react';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function AdminDashboard() {
   const { data: galleries, isLoading } = useGalleries();
@@ -16,14 +18,18 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <Button onClick={() => navigate('/admin/galleries/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Neue Galerie
-        </Button>
-      </div>
+    <PageContainer size="full">
+      <div className="space-y-6">
+        <PageHeader
+          title="Dashboard"
+          description="Übersicht über Ihre Galerien und Aktivitäten"
+          actions={
+            <Button onClick={() => navigate('/admin/galleries/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Neue Galerie
+            </Button>
+          }
+        />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -99,6 +105,7 @@ export default function AdminDashboard() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

@@ -1,12 +1,14 @@
-import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity, Camera } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -30,9 +32,23 @@ export function AdminSidebar() {
 
   return (
     <Sidebar className={open ? 'w-60 shadow-neu-float rounded-[2rem]' : 'w-14 shadow-neu-float rounded-[2rem]'} collapsible="icon">
+      <SidebarHeader className="border-b border-border/50 px-3 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm">
+            <Camera className="h-5 w-5" />
+          </div>
+          {open && (
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-foreground truncate">ProofHub</p>
+              <p className="text-xs text-muted-foreground">Admin Panel</p>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+      
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -41,7 +57,7 @@ export function AdminSidebar() {
                     <NavLink
                       to={item.url}
                       end
-                      className="hover:bg-muted/50 rounded-2xl"
+                      className="hover:bg-muted/50 rounded-2xl transition-all"
                       activeClassName="bg-muted text-primary font-medium shadow-neu-pressed"
                     >
                       <item.icon className="h-4 w-4" />
@@ -54,6 +70,15 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <SidebarFooter className="border-t border-border/50 px-3 py-3">
+        {open && (
+          <div className="text-xs text-muted-foreground">
+            <p>© 2025 ProofHub</p>
+            <p className="mt-1">Version 1.0.0</p>
+          </div>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { EmailTemplateEditor } from '@/components/admin/EmailTemplateEditor';
 import { EmailTemplates } from '@/types/email-templates';
 import { Save } from 'lucide-react';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { PageContainer } from '@/components/admin/PageContainer';
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -120,8 +122,13 @@ export default function AdminSettings() {
   });
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <h1 className="text-3xl font-bold text-foreground">Einstellungen</h1>
+    <PageContainer size="md">
+      <div className="space-y-6">
+        <PageHeader
+          title="Einstellungen"
+          description="System-Konfiguration und E-Mail-Templates"
+          breadcrumbs={[{ label: 'Einstellungen' }]}
+        />
 
       <Card>
         <CardHeader>
@@ -170,6 +177,7 @@ export default function AdminSettings() {
         templates={templates}
         onTemplatesChange={setTemplates}
       />
-    </div>
+      </div>
+    </PageContainer>
   );
 }
