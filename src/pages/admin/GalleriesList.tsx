@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { useGalleries } from '@/hooks/useGalleries';
+import { useBatchGalleryOperations } from '@/hooks/useBatchGalleryOperations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { BatchActionsBar } from '@/components/admin/BatchActionsBar';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Trash2 } from 'lucide-react';
+import { GalleryStatus } from '@/types/database';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +23,9 @@ import {
 
 export default function GalleriesList() {
   const { galleries, isLoading, deleteGallery } = useGalleries();
+  const { duplicateGalleries, bulkStatusUpdate, bulkDelete } = useBatchGalleryOperations();
   const navigate = useNavigate();
+  const [selectedGalleries, setSelectedGalleries] = useState<Set<string>>(new Set());
 
   const statusColors = {
     Draft: 'bg-muted text-muted-foreground',
@@ -27,10 +34,66 @@ export default function GalleriesList() {
     Delivered: 'bg-green-100 text-green-800',
   };
 
+  const toggleGallerySelection = (galleryId: string) => {
+    const newSelection = new Set(selectedGalleries);
+    if (newSelection.has(galleryId)) {
+      newSelection.delete(galleryId);
+    } else {
+      newSelection.add(galleryId);
+    }
+    setSelectedGalleries(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (!galleries) return;
+    if (selectedGalleries.size === galleries.length) {
+      setSelectedGalleries(new Set());
+    } else {
+      setSelectedGalleries(new Set(galleries.map(g => g.id)));
+    }
+  };
+
+  const handleDuplicate = async () => {
+    await duplicateGalleries.mutateAsync(Array.from(selectedGalleries));
+    setSelectedGalleries(new Set());
+  };
+
+  const handleBulkStatusUpdate = async (status: GalleryStatus) => {
+    await bulkStatusUpdate.mutateAsync({
+      galleryIds: Array.from(selectedGalleries),
+      status,
+    });
+    setSelectedGalleries(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    await bulkDelete.mutateAsync(Array.from(selectedGalleries));
+    setSelectedGalleries(new Set());
+  };
+
+  const isAllSelected = galleries && galleries.length > 0 && selectedGalleries.size === galleries.length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Galleries</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold text-foreground">Galleries</h1>
+          {galleries && galleries.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="select-all"
+                checked={isAllSelected}
+                onCheckedChange={toggleSelectAll}
+              />
+              <label
+                htmlFor="select-all"
+                className="text-sm font-medium cursor-pointer"
+              >
+                Select all
+              </label>
+            </div>
+          )}
+        </div>
         <Button onClick={() => navigate('/admin/galleries/new')}>
           <Plus className="h-4 w-4 mr-2" />
           New Gallery
@@ -46,12 +109,30 @@ export default function GalleriesList() {
       ) : galleries && galleries.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {galleries.map((gallery) => (
-            <Card key={gallery.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={gallery.id}
+              className={`hover:shadow-md transition-shadow ${
+                selectedGalleries.has(gallery.id) ? 'ring-2 ring-primary' : ''
+              }`}
+            >
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{gallery.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">{gallery.slug}</p>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id={`gallery-${gallery.id}`}
+                    checked={selectedGalleries.has(gallery.id)}
+                    onCheckedChange={() => toggleGallerySelection(gallery.id)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <label
+                      htmlFor={`gallery-${gallery.id}`}
+                      className="cursor-pointer"
+                    >
+                      <CardTitle className="text-lg">{gallery.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1 truncate">
+                        {gallery.slug}
+                      </p>
+                    </label>
                   </div>
                   <Badge className={statusColors[gallery.status]}>
                     {gallery.status}
@@ -122,6 +203,14 @@ export default function GalleriesList() {
           </CardContent>
         </Card>
       )}
+
+      <BatchActionsBar
+        selectedCount={selectedGalleries.size}
+        onDuplicate={handleDuplicate}
+        onBulkStatusUpdate={handleBulkStatusUpdate}
+        onBulkDelete={handleBulkDelete}
+        onClearSelection={() => setSelectedGalleries(new Set())}
+      />
     </div>
   );
 }
