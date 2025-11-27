@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, HelpCircle } from 'lucide-react';
 
 interface ClientGalleryHeaderProps {
   galleryName: string;
   onSignOut: () => void;
+  onShowHelp?: () => void;
 }
 
-export function ClientGalleryHeader({ galleryName, onSignOut }: ClientGalleryHeaderProps) {
+export function ClientGalleryHeader({ galleryName, onSignOut, onShowHelp }: ClientGalleryHeaderProps) {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-30">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -14,10 +15,18 @@ export function ClientGalleryHeader({ galleryName, onSignOut }: ClientGalleryHea
           <h1 className="text-xl md:text-2xl font-bold text-foreground">{galleryName}</h1>
           <p className="text-sm text-muted-foreground">Wählen Sie Ihre Lieblingsfotos</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onSignOut}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Abmelden
-        </Button>
+        <div className="flex items-center gap-2">
+          {onShowHelp && (
+            <Button variant="ghost" size="sm" onClick={onShowHelp}>
+              <HelpCircle className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Hilfe</span>
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onSignOut}>
+            <LogOut className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Abmelden</span>
+          </Button>
+        </div>
       </div>
     </header>
   );
