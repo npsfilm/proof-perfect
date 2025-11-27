@@ -12,6 +12,7 @@ import GalleryDetail from "./pages/admin/GalleryDetail";
 import GalleryReview from "./pages/admin/GalleryReview";
 import CompaniesList from "./pages/admin/CompaniesList";
 import CompanyDetail from "./pages/admin/CompanyDetail";
+import UsersList from "./pages/admin/UsersList";
 import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ClientGallery from "./pages/client/ClientGallery";
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="galleries/:id/review" element={<GalleryReview />} />
               <Route path="companies" element={<CompaniesList />} />
               <Route path="companies/:id" element={<CompanyDetail />} />
+              <Route path="users" element={<UsersList />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
