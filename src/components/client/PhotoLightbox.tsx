@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight, Keyboard } from 'lucide-react';
+import { X, Heart, ChevronLeft, ChevronRight, Keyboard, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PhotoBottomSheet } from './PhotoBottomSheet';
 import { Photo } from '@/types/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -23,33 +25,45 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const [stagingRequested, setStagingRequested] = useState(photo.staging_requested);
   const [stagingStyle, setStagingStyle] = useState(photo.staging_style || 'Modern');
   const [showKeyboardHints, setShowKeyboardHints] = useState(false);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchEndY = useRef<number | null>(null);
 
   const currentIndex = photos.findIndex(p => p.id === photo.id);
 
   // Swipe gesture handling
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
+    if (!touchStartX.current || !touchEndX.current || !touchStartY.current || !touchEndY.current) return;
     
-    const diff = touchStartX.current - touchEndX.current;
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = touchStartY.current - touchEndY.current;
     const minSwipeDistance = 50;
 
-    if (Math.abs(diff) > minSwipeDistance) {
-      if (diff > 0 && currentIndex < photos.length - 1) {
+    // Vertical swipe down to close (only if in fullscreen mode on mobile)
+    if (Math.abs(diffY) > Math.abs(diffX) && diffY < -minSwipeDistance && isFullscreen) {
+      onClose();
+    }
+    // Horizontal swipe for navigation
+    else if (Math.abs(diffX) > minSwipeDistance) {
+      if (diffX > 0 && currentIndex < photos.length - 1) {
         // Swiped left - go to next
         onNavigate('next');
-      } else if (diff < 0 && currentIndex > 0) {
+      } else if (diffX < 0 && currentIndex > 0) {
         // Swiped right - go to previous
         onNavigate('prev');
       }
@@ -57,6 +71,8 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
 
     touchStartX.current = null;
     touchEndX.current = null;
+    touchStartY.current = null;
+    touchEndY.current = null;
   };
 
   // Toggle keyboard hints with '?' key
@@ -128,7 +144,10 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
 
   return (
     <div 
-      className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+      className={cn(
+        "fixed inset-0 bg-black z-50 flex items-center justify-center",
+        isFullscreen ? "bg-black" : "bg-black/90"
+      )}
       onClick={onClose}
       onKeyDown={handleKeyDown as any}
       onTouchStart={handleTouchStart}
@@ -136,18 +155,34 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       onTouchEnd={handleTouchEnd}
       tabIndex={0}
     >
-      {/* Close button */}
+      {/* Mobile Top Bar */}
+      <div className="lg:hidden absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent z-10 p-4 flex items-center justify-between">
+        <button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="text-white/80 hover:text-white text-sm"
+        >
+          {isFullscreen ? 'Normal' : 'Vollbild'}
+        </button>
+        <button
+          onClick={onClose}
+          className="text-white hover:text-white/80"
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Desktop Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+        className="hidden lg:block absolute top-4 right-4 text-white hover:text-gray-300 z-10"
       >
         <X className="h-8 w-8" />
       </button>
 
-      {/* Keyboard Hints Toggle */}
+      {/* Keyboard Hints Toggle (Desktop only) */}
       <button
         onClick={() => setShowKeyboardHints(!showKeyboardHints)}
-        className="absolute top-4 left-4 text-white/60 hover:text-white z-10"
+        className="hidden lg:block absolute top-4 left-4 text-white/60 hover:text-white z-10"
         title="Tastaturkürzel anzeigen"
       >
         <Keyboard className="h-6 w-6" />
@@ -182,34 +217,49 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         </div>
       )}
 
-      {/* Navigation */}
-      {currentIndex > 0 && (
+      {/* Navigation (Desktop only, mobile uses swipe) */}
+      {!isFullscreen && currentIndex > 0 && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             onNavigate('prev');
           }}
-          className="absolute left-4 text-white hover:text-gray-300 z-10"
+          className="hidden lg:block absolute left-4 text-white hover:text-gray-300 z-10"
         >
           <ChevronLeft className="h-12 w-12" />
         </button>
       )}
       
-      {currentIndex < photos.length - 1 && (
+      {!isFullscreen && currentIndex < photos.length - 1 && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             onNavigate('next');
           }}
-          className="absolute right-4 text-white hover:text-gray-300 z-10"
+          className="hidden lg:block absolute right-4 text-white hover:text-gray-300 z-10"
         >
           <ChevronRight className="h-12 w-12" />
         </button>
       )}
 
+      {/* Mobile Bottom Action Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowBottomSheet(true);
+        }}
+        className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-20 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+      >
+        <Menu className="h-5 w-5" />
+        <span>Aktionen</span>
+      </button>
+
       {/* Content */}
       <div 
-        className="w-full h-full flex flex-col lg:flex-row gap-4 p-4 lg:p-8"
+        className={cn(
+          "w-full h-full flex flex-col lg:flex-row gap-4 lg:p-8",
+          isFullscreen ? "p-0" : "p-4 pt-16 pb-24 lg:pt-8 lg:pb-8"
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Image */}
@@ -217,12 +267,15 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
           <img
             src={photo.storage_url}
             alt={photo.filename}
-            className="max-w-full max-h-full object-contain"
+            className={cn(
+              "object-contain",
+              isFullscreen ? "w-full h-full" : "max-w-full max-h-full"
+            )}
           />
         </div>
 
-        {/* Controls */}
-        <div className="w-full lg:w-80 bg-background rounded-lg p-6 space-y-6 overflow-y-auto">
+        {/* Controls (Desktop only) */}
+        <div className="hidden lg:block w-80 bg-background rounded-lg p-6 space-y-6 overflow-y-auto">
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">
               Foto {currentIndex + 1} von {photos.length}
@@ -292,6 +345,24 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
           </div>
         </div>
       </div>
+
+      {/* Mobile Bottom Sheet */}
+      <PhotoBottomSheet
+        isOpen={showBottomSheet}
+        onOpenChange={setShowBottomSheet}
+        isSelected={photo.is_selected}
+        comment={comment}
+        stagingRequested={stagingRequested}
+        stagingStyle={stagingStyle}
+        currentIndex={currentIndex}
+        totalPhotos={photos.length}
+        filename={photo.filename}
+        onToggleSelection={toggleSelection}
+        onCommentChange={setComment}
+        onCommentBlur={handleCommentBlur}
+        onStagingToggle={handleStagingToggle}
+        onStagingStyleChange={handleStagingStyleChange}
+      />
     </div>
   );
 }
