@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGalleryBySlug } from '@/hooks/useGallery';
@@ -9,6 +9,7 @@ import { SelectionFooter } from '@/components/client/SelectionFooter';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
 import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
+import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -19,6 +20,7 @@ export default function ClientGallery() {
   const { user, signOut, loading: authLoading } = useAuth();
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
+  const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
@@ -98,6 +100,25 @@ export default function ClientGallery() {
   const selectedPhotos = photos?.filter(p => p.is_selected) || [];
   const selectedPhoto = selectedPhotoId ? photos?.find(p => p.id === selectedPhotoId) : null;
 
+  // Filter photos based on active filter
+  const filteredPhotos = useMemo(() => {
+    if (!photos) return undefined;
+    switch (photoFilter) {
+      case 'selected':
+        return photos.filter(p => p.is_selected);
+      case 'unselected':
+        return photos.filter(p => !p.is_selected);
+      default:
+        return photos;
+    }
+  }, [photos, photoFilter]);
+
+  const filterCounts = useMemo(() => ({
+    all: photos?.length || 0,
+    selected: selectedPhotos.length,
+    unselected: (photos?.length || 0) - selectedPhotos.length,
+  }), [photos, selectedPhotos]);
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <ClientGalleryHeader galleryName={gallery.name} onSignOut={signOut} />
@@ -114,10 +135,16 @@ export default function ClientGallery() {
 
       {/* Photo Grid */}
       <main className="container mx-auto px-4 py-6">
+        <GalleryFilterBar
+          activeFilter={photoFilter}
+          onFilterChange={setPhotoFilter}
+          counts={filterCounts}
+        />
         <ClientPhotoGrid
-          photos={photos}
+          photos={filteredPhotos}
           isLoading={photosLoading}
           onPhotoClick={handlePhotoClick}
+          galleryId={gallery.id}
         />
       </main>
 
