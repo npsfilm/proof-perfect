@@ -156,7 +156,14 @@ export default function GalleryDetail() {
           <h1 className="text-3xl font-bold text-foreground">{gallery.name}</h1>
           <p className="text-sm text-muted-foreground mt-1">{gallery.slug}</p>
         </div>
-        <Badge>{gallery.status}</Badge>
+        <div className="flex items-center gap-3">
+          {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
+            <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
+              View Review
+            </Button>
+          )}
+          <Badge>{gallery.status}</Badge>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
