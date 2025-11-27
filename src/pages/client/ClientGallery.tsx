@@ -271,6 +271,30 @@ export default function ClientGallery() {
               : 'Fotos vergleichen'}
           </Button>
         </div>
+
+        {/* Comparison Mode Instructions */}
+        {isComparisonMode && comparisonPhotos.length < 2 && (
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-6 shadow-neu-flat-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-neu-flat-sm">
+                  {comparisonPhotos.length}/2
+                </div>
+                <div>
+                  <p className="font-semibold text-primary">Vergleichsmodus aktiv</p>
+                  <p className="text-sm text-muted-foreground">
+                    {comparisonPhotos.length === 0 
+                      ? 'Klicken Sie auf 2 Fotos, um sie zu vergleichen' 
+                      : 'Klicken Sie auf ein weiteres Foto zum Vergleichen'}
+                  </p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleComparisonToggle}>
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        )}
       <ClientPhotoGrid
         photos={filteredPhotos}
         isLoading={photosLoading}

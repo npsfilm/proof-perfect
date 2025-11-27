@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { X, ArrowLeftRight, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/database';
@@ -24,9 +25,40 @@ export function ComparisonMode({
 }: ComparisonModeProps) {
   const { signedUrl: signedUrl1 } = useSignedPhotoUrl(photo1);
   const { signedUrl: signedUrl2 } = useSignedPhotoUrl(photo2);
+  const [viewMode, setViewMode] = useState<'split' | 'slider'>('split');
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const photo1Index = photos.findIndex(p => p.id === photo1.id);
   const photo2Index = photos.findIndex(p => p.id === photo2.id);
+
+  useEffect(() => {
+    if (isDragging) {
+      const stopDragging = () => setIsDragging(false);
+      window.addEventListener('mouseup', stopDragging);
+      window.addEventListener('touchend', stopDragging);
+      return () => {
+        window.removeEventListener('mouseup', stopDragging);
+        window.removeEventListener('touchend', stopDragging);
+      };
+    }
+  }, [isDragging]);
+
+  const handleSliderDrag = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const position = ((clientX - rect.left) / rect.width) * 100;
+    
+    setSliderPosition(Math.max(5, Math.min(95, position)));
+  };
+
+  const startDragging = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
   return (
     <div 
       className="fixed inset-0 bg-black/95 z-50 flex flex-col"
@@ -37,6 +69,25 @@ export function ComparisonMode({
       <div className="flex items-center justify-between p-4 bg-black/50">
         <h2 className="text-white text-lg font-medium">Fotovergleich</h2>
         <div className="flex items-center gap-2">
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1 bg-white/10 rounded-full p-1">
+            <button 
+              onClick={() => setViewMode('split')}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                viewMode === 'split' ? 'bg-white text-black' : 'text-white hover:bg-white/20'
+              }`}
+            >
+              Nebeneinander
+            </button>
+            <button 
+              onClick={() => setViewMode('slider')}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                viewMode === 'slider' ? 'bg-white text-black' : 'text-white hover:bg-white/20'
+              }`}
+            >
+              Überblendung
+            </button>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -55,8 +106,109 @@ export function ComparisonMode({
         </div>
       </div>
 
-      {/* Split View */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-1 overflow-hidden">
+      {/* Content Area */}
+      {viewMode === 'slider' ? (
+        // Slider Overlay Mode
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <div 
+            ref={containerRef}
+            className="relative max-w-5xl w-full max-h-[70vh] overflow-hidden rounded-lg cursor-ew-resize"
+            onMouseMove={handleSliderDrag}
+            onTouchMove={handleSliderDrag}
+          >
+            {/* Bottom layer - Photo 2 (full width) */}
+            <img
+              src={signedUrl2 || photo2.storage_url}
+              alt={photo2.filename}
+              className="w-full h-auto max-h-[70vh] object-contain"
+              draggable={false}
+            />
+            
+            {/* Top layer - Photo 1 (clipped by slider position) */}
+            <div 
+              className="absolute inset-0 overflow-hidden pointer-events-none"
+              style={{ width: `${sliderPosition}%` }}
+            >
+              <img
+                src={signedUrl1 || photo1.storage_url}
+                alt={photo1.filename}
+                className="w-full h-full object-contain"
+                style={{ 
+                  width: `${100 / (sliderPosition / 100)}%`,
+                  maxHeight: '70vh'
+                }}
+                draggable={false}
+              />
+            </div>
+            
+            {/* Draggable Divider */}
+            <div 
+              className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize z-10"
+              style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+              onMouseDown={startDragging}
+              onTouchStart={startDragging}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center pointer-events-none">
+                <ArrowLeftRight className="h-5 w-5 text-gray-600" />
+              </div>
+            </div>
+            
+            {/* Photo Labels */}
+            <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1.5 rounded-lg text-sm font-medium">
+              {photo1.filename}
+            </div>
+            <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-lg text-sm font-medium">
+              {photo2.filename}
+            </div>
+          </div>
+
+          {/* Selection controls for slider mode */}
+          <div className="flex justify-center gap-8 mt-6">
+            <div className="text-center">
+              <div className="text-white/70 text-sm mb-2">
+                Foto {photo1Index + 1} von {photos.length}
+              </div>
+              <Button
+                variant={photo1.is_selected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onToggleSelection(photo1.id)}
+                className="bg-white/10 hover:bg-white/20"
+              >
+                {photo1.is_selected ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Ausgewählt
+                  </>
+                ) : (
+                  'Auswählen'
+                )}
+              </Button>
+            </div>
+            <div className="text-center">
+              <div className="text-white/70 text-sm mb-2">
+                Foto {photo2Index + 1} von {photos.length}
+              </div>
+              <Button
+                variant={photo2.is_selected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onToggleSelection(photo2.id)}
+                className="bg-white/10 hover:bg-white/20"
+              >
+                {photo2.is_selected ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Ausgewählt
+                  </>
+                ) : (
+                  'Auswählen'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Split View Mode
+        <div className="flex-1 flex flex-col lg:flex-row gap-1 overflow-hidden">
         {/* Photo 1 */}
         <div className="flex-1 flex flex-col items-center justify-center bg-black p-6 relative">
           {/* Navigation */}
@@ -161,11 +313,14 @@ export function ComparisonMode({
             </Button>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Instructions */}
       <div className="p-3 bg-black/50 text-center text-white/50 text-xs">
-        ESC zum Schließen • ← → zum Navigieren • Leertaste zum Auswählen
+        {viewMode === 'slider' 
+          ? 'Ziehen Sie den Schieberegler, um die Fotos zu vergleichen • ESC zum Schließen'
+          : 'ESC zum Schließen • ← → zum Navigieren'}
       </div>
     </div>
   );
