@@ -2,10 +2,11 @@ import { useGalleries } from '@/hooks/useGalleries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderOpen } from 'lucide-react';
+import { Plus, FolderOpen, Clock } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { StatCardSkeletonGrid } from '@/components/admin/skeletons/StatCardSkeleton';
+import { TimeElapsed } from '@/components/admin/TimeElapsed';
 
 export default function AdminDashboard() {
   const { data: galleries, isLoading } = useGalleries();
@@ -88,16 +89,24 @@ export default function AdminDashboard() {
               {galleries.slice(0, 5).map((gallery) => (
                 <div
                   key={gallery.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  className="flex items-center justify-between p-3 border rounded-2xl hover:bg-muted/50 cursor-pointer transition-all duration-200 hover:shadow-neu-flat-sm group"
                   onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
                 >
-                  <div>
-                    <p className="font-medium">{gallery.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium truncate">{gallery.name}</p>
+                      {gallery.status === 'Reviewed' && gallery.reviewed_at && (
+                        <TimeElapsed 
+                          startTime={gallery.reviewed_at}
+                          variant="secondary"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {gallery.slug} • {gallery.status}
                     </p>
                   </div>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
                     Ansehen
                   </Button>
                 </div>

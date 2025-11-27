@@ -14,6 +14,7 @@ import { GalleryStatus } from '@/types/database';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryCardSkeletonGrid } from '@/components/admin/skeletons/GalleryCardSkeleton';
+import { TimeElapsed } from '@/components/admin/TimeElapsed';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -176,7 +177,15 @@ export default function GalleriesList() {
                       htmlFor={`gallery-${gallery.id}`}
                       className="cursor-pointer"
                     >
-                      <CardTitle className="text-lg">{gallery.name}</CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CardTitle className="text-lg">{gallery.name}</CardTitle>
+                        {gallery.status === 'Reviewed' && gallery.reviewed_at && (
+                          <TimeElapsed 
+                            startTime={gallery.reviewed_at}
+                            variant="secondary"
+                          />
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1 truncate">
                         {gallery.slug}
                       </p>
