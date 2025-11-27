@@ -14,12 +14,22 @@ export default function AdminSettings() {
   const queryClient = useQueryClient();
   const [webhookSend, setWebhookSend] = useState('');
   const [webhookDeliver, setWebhookDeliver] = useState('');
-  const [sendSubject, setSendSubject] = useState('');
-  const [sendBody, setSendBody] = useState('');
-  const [reviewSubject, setReviewSubject] = useState('');
-  const [reviewBody, setReviewBody] = useState('');
-  const [deliverSubject, setDeliverSubject] = useState('');
-  const [deliverBody, setDeliverBody] = useState('');
+  
+  // Du templates
+  const [sendSubjectDu, setSendSubjectDu] = useState('');
+  const [sendBodyDu, setSendBodyDu] = useState('');
+  const [reviewSubjectDu, setReviewSubjectDu] = useState('');
+  const [reviewBodyDu, setReviewBodyDu] = useState('');
+  const [deliverSubjectDu, setDeliverSubjectDu] = useState('');
+  const [deliverBodyDu, setDeliverBodyDu] = useState('');
+  
+  // Sie templates
+  const [sendSubjectSie, setSendSubjectSie] = useState('');
+  const [sendBodySie, setSendBodySie] = useState('');
+  const [reviewSubjectSie, setReviewSubjectSie] = useState('');
+  const [reviewBodySie, setReviewBodySie] = useState('');
+  const [deliverSubjectSie, setDeliverSubjectSie] = useState('');
+  const [deliverBodySie, setDeliverBodySie] = useState('');
 
   const { data: settings } = useQuery({
     queryKey: ['system-settings'],
@@ -37,12 +47,22 @@ export default function AdminSettings() {
     if (settings) {
       setWebhookSend(settings.zapier_webhook_send || '');
       setWebhookDeliver(settings.zapier_webhook_deliver || '');
-      setSendSubject(settings.email_send_subject || '');
-      setSendBody(settings.email_send_body || '');
-      setReviewSubject(settings.email_review_subject || '');
-      setReviewBody(settings.email_review_body || '');
-      setDeliverSubject(settings.email_deliver_subject || '');
-      setDeliverBody(settings.email_deliver_body || '');
+      
+      // Du templates
+      setSendSubjectDu(settings.email_send_subject_du || '');
+      setSendBodyDu(settings.email_send_body_du || '');
+      setReviewSubjectDu(settings.email_review_subject_du || '');
+      setReviewBodyDu(settings.email_review_body_du || '');
+      setDeliverSubjectDu(settings.email_deliver_subject_du || '');
+      setDeliverBodyDu(settings.email_deliver_body_du || '');
+      
+      // Sie templates
+      setSendSubjectSie(settings.email_send_subject_sie || '');
+      setSendBodySie(settings.email_send_body_sie || '');
+      setReviewSubjectSie(settings.email_review_subject_sie || '');
+      setReviewBodySie(settings.email_review_body_sie || '');
+      setDeliverSubjectSie(settings.email_deliver_subject_sie || '');
+      setDeliverBodySie(settings.email_deliver_body_sie || '');
     }
   }, [settings]);
 
@@ -53,12 +73,18 @@ export default function AdminSettings() {
         .update({
           zapier_webhook_send: webhookSend || null,
           zapier_webhook_deliver: webhookDeliver || null,
-          email_send_subject: sendSubject || null,
-          email_send_body: sendBody || null,
-          email_review_subject: reviewSubject || null,
-          email_review_body: reviewBody || null,
-          email_deliver_subject: deliverSubject || null,
-          email_deliver_body: deliverBody || null,
+          email_send_subject_du: sendSubjectDu || null,
+          email_send_body_du: sendBodyDu || null,
+          email_review_subject_du: reviewSubjectDu || null,
+          email_review_body_du: reviewBodyDu || null,
+          email_deliver_subject_du: deliverSubjectDu || null,
+          email_deliver_body_du: deliverBodyDu || null,
+          email_send_subject_sie: sendSubjectSie || null,
+          email_send_body_sie: sendBodySie || null,
+          email_review_subject_sie: reviewSubjectSie || null,
+          email_review_body_sie: reviewBodySie || null,
+          email_deliver_subject_sie: deliverSubjectSie || null,
+          email_deliver_body_sie: deliverBodySie || null,
         })
         .eq('id', settings!.id);
 
@@ -68,7 +94,7 @@ export default function AdminSettings() {
       queryClient.invalidateQueries({ queryKey: ['system-settings'] });
       toast({
         title: 'Einstellungen gespeichert',
-        description: 'Webhook-URLs wurden erfolgreich aktualisiert.',
+        description: 'Webhook-URLs und E-Mail-Templates wurden erfolgreich aktualisiert.',
       });
     },
     onError: (error: any) => {
@@ -128,18 +154,30 @@ export default function AdminSettings() {
       </Card>
 
       <EmailTemplateEditor
-        sendSubject={sendSubject}
-        sendBody={sendBody}
-        reviewSubject={reviewSubject}
-        reviewBody={reviewBody}
-        deliverSubject={deliverSubject}
-        deliverBody={deliverBody}
-        onSendSubjectChange={setSendSubject}
-        onSendBodyChange={setSendBody}
-        onReviewSubjectChange={setReviewSubject}
-        onReviewBodyChange={setReviewBody}
-        onDeliverSubjectChange={setDeliverSubject}
-        onDeliverBodyChange={setDeliverBody}
+        sendSubjectDu={sendSubjectDu}
+        sendBodyDu={sendBodyDu}
+        reviewSubjectDu={reviewSubjectDu}
+        reviewBodyDu={reviewBodyDu}
+        deliverSubjectDu={deliverSubjectDu}
+        deliverBodyDu={deliverBodyDu}
+        sendSubjectSie={sendSubjectSie}
+        sendBodySie={sendBodySie}
+        reviewSubjectSie={reviewSubjectSie}
+        reviewBodySie={reviewBodySie}
+        deliverSubjectSie={deliverSubjectSie}
+        deliverBodySie={deliverBodySie}
+        onSendSubjectDuChange={setSendSubjectDu}
+        onSendBodyDuChange={setSendBodyDu}
+        onReviewSubjectDuChange={setReviewSubjectDu}
+        onReviewBodyDuChange={setReviewBodyDu}
+        onDeliverSubjectDuChange={setDeliverSubjectDu}
+        onDeliverBodyDuChange={setDeliverBodyDu}
+        onSendSubjectSieChange={setSendSubjectSie}
+        onSendBodySieChange={setSendBodySie}
+        onReviewSubjectSieChange={setReviewSubjectSie}
+        onReviewBodySieChange={setReviewBodySie}
+        onDeliverSubjectSieChange={setDeliverSubjectSie}
+        onDeliverBodySieChange={setDeliverBodySie}
       />
     </div>
   );
