@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Gallery, Photo, Client } from '@/types/database';
+import { Client } from '@/types/database';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useGalleryClients } from '@/hooks/useClients';
+import { useGallery } from '@/hooks/useGallery';
+import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -22,32 +24,8 @@ export default function GalleryDetail() {
   const { data: companies } = useCompanies();
   const [selectedClients, setSelectedClients] = useState<Client[]>([]);
 
-  const { data: gallery, isLoading: galleryLoading } = useQuery({
-    queryKey: ['gallery', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('galleries')
-        .select('*')
-        .eq('id', id!)
-        .single();
-      if (error) throw error;
-      return data as Gallery;
-    },
-  });
-
-  const { data: photos, refetch: refetchPhotos } = useQuery({
-    queryKey: ['photos', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('gallery_id', id!)
-        .order('upload_order', { ascending: true });
-      if (error) throw error;
-      return data as Photo[];
-    },
-  });
-
+  const { data: gallery, isLoading: galleryLoading } = useGallery(id);
+  const { data: photos, refetch: refetchPhotos } = useGalleryPhotos(id);
   const { data: galleryClients } = useGalleryClients(id);
 
   useEffect(() => {

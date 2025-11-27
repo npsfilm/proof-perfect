@@ -4,10 +4,7 @@ import { Gallery } from '@/types/database';
 import { useToast } from '@/hooks/use-toast';
 
 export function useGalleries() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: galleries, isLoading } = useQuery({
+  return useQuery({
     queryKey: ['galleries'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -19,14 +16,18 @@ export function useGalleries() {
       return data as Gallery[];
     },
   });
+}
 
-  const createGallery = useMutation({
+export function useCreateGallery() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: async (gallery: {
       name: string;
       package_target_count: number;
       salutation_type: 'Du' | 'Sie';
     }) => {
-      // Generate unique slug
       const { data: slugData, error: slugError } = await supabase.rpc(
         'generate_unique_slug',
         { p_name: gallery.name }
@@ -52,20 +53,25 @@ export function useGalleries() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Gallery created',
-        description: 'Your gallery has been created successfully.',
+        title: 'Galerie erstellt',
+        description: 'Die Galerie wurde erfolgreich erstellt.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
+}
 
-  const updateGallery = useMutation({
+export function useUpdateGallery() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Gallery> & { id: string }) => {
       const { data, error } = await supabase
         .from('galleries')
@@ -80,20 +86,25 @@ export function useGalleries() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Gallery updated',
-        description: 'Your gallery has been updated successfully.',
+        title: 'Galerie aktualisiert',
+        description: 'Die Galerie wurde erfolgreich aktualisiert.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
+}
 
-  const deleteGallery = useMutation({
+export function useDeleteGallery() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('galleries').delete().eq('id', id);
       if (error) throw error;
@@ -101,24 +112,16 @@ export function useGalleries() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Gallery deleted',
-        description: 'The gallery has been deleted successfully.',
+        title: 'Galerie gelöscht',
+        description: 'Die Galerie wurde erfolgreich gelöscht.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
-
-  return {
-    galleries,
-    isLoading,
-    createGallery,
-    updateGallery,
-    deleteGallery,
-  };
 }
