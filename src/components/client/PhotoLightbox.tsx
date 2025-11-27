@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Heart, ChevronLeft, ChevronRight, Keyboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -22,10 +22,53 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const [comment, setComment] = useState(photo.client_comment || '');
   const [stagingRequested, setStagingRequested] = useState(photo.staging_requested);
   const [stagingStyle, setStagingStyle] = useState(photo.staging_style || 'Modern');
+  const [showKeyboardHints, setShowKeyboardHints] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const currentIndex = photos.findIndex(p => p.id === photo.id);
+
+  // Swipe gesture handling
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const diff = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (Math.abs(diff) > minSwipeDistance) {
+      if (diff > 0 && currentIndex < photos.length - 1) {
+        // Swiped left - go to next
+        onNavigate('next');
+      } else if (diff < 0 && currentIndex > 0) {
+        // Swiped right - go to previous
+        onNavigate('prev');
+      }
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  // Toggle keyboard hints with '?' key
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === '?') {
+        setShowKeyboardHints(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const updatePhoto = useMutation({
     mutationFn: async (updates: Partial<Photo>) => {
@@ -77,6 +120,10 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     if (e.key === 'Escape') onClose();
     if (e.key === 'ArrowLeft' && currentIndex > 0) onNavigate('prev');
     if (e.key === 'ArrowRight' && currentIndex < photos.length - 1) onNavigate('next');
+    if (e.key === ' ') {
+      e.preventDefault();
+      toggleSelection();
+    }
   };
 
   return (
@@ -84,6 +131,9 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
       onClick={onClose}
       onKeyDown={handleKeyDown as any}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       tabIndex={0}
     >
       {/* Close button */}
@@ -93,6 +143,44 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       >
         <X className="h-8 w-8" />
       </button>
+
+      {/* Keyboard Hints Toggle */}
+      <button
+        onClick={() => setShowKeyboardHints(!showKeyboardHints)}
+        className="absolute top-4 left-4 text-white/60 hover:text-white z-10"
+        title="Tastaturkürzel anzeigen"
+      >
+        <Keyboard className="h-6 w-6" />
+      </button>
+
+      {/* Keyboard Shortcuts Overlay */}
+      {showKeyboardHints && (
+        <div className="absolute top-16 left-4 bg-black/80 text-white rounded-lg p-4 z-10 backdrop-blur-sm">
+          <h3 className="font-medium mb-3 text-sm">Tastaturkürzel</h3>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">←</kbd>
+              <span>Vorheriges Foto</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">→</kbd>
+              <span>Nächstes Foto</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">Leertaste</kbd>
+              <span>Foto auswählen</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">ESC</kbd>
+              <span>Schließen</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">?</kbd>
+              <span>Diese Hilfe ein/ausblenden</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       {currentIndex > 0 && (
