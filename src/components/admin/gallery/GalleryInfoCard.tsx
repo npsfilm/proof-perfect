@@ -20,11 +20,11 @@ export function GalleryInfoCard({ gallery, photoCount, companies, onCompanyChang
       <CardHeader>
         <CardTitle>Galerie-Info</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div>
-          <p className="text-sm text-muted-foreground">Galerie-URL</p>
-          <div className="flex items-center gap-2 mt-1">
-            <code className="text-xs bg-muted px-2 py-1 rounded flex-1 overflow-x-auto">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Galerie-URL</p>
+          <div className="flex items-center gap-2">
+            <code className="text-sm bg-muted/50 px-3 py-2 rounded-xl flex-1 overflow-x-auto font-mono">
               {window.location.origin}/gallery/{gallery.slug}
             </code>
             <Button
@@ -39,24 +39,31 @@ export function GalleryInfoCard({ gallery, photoCount, companies, onCompanyChang
             </Button>
           </div>
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Paket-Ziel</p>
-          <p className="font-medium">{gallery.package_target_count} Fotos</p>
+
+        <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Paket-Ziel</p>
+            <p className="text-2xl font-bold text-primary">{gallery.package_target_count}</p>
+            <p className="text-xs text-muted-foreground">Fotos</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Hochgeladen</p>
+            <p className="text-2xl font-bold">{photoCount}</p>
+            <p className="text-xs text-muted-foreground">Fotos</p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Anrede</p>
-          <p className="font-medium">{gallery.salutation_type}</p>
+
+        <div className="space-y-1 pt-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Anrede</p>
+          <p className="text-lg font-semibold">{gallery.salutation_type}</p>
         </div>
+
         {gallery.address && (
-          <div>
-            <p className="text-sm text-muted-foreground">Adresse</p>
-            <p className="font-medium whitespace-pre-line">{gallery.address}</p>
+          <div className="space-y-1 pt-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Adresse</p>
+            <p className="font-medium whitespace-pre-line leading-relaxed">{gallery.address}</p>
           </div>
         )}
-        <div>
-          <p className="text-sm text-muted-foreground">Hochgeladene Fotos</p>
-          <p className="font-medium">{photoCount} Fotos</p>
-        </div>
         <div className="pt-4 border-t">
           <Label htmlFor="company-select" className="text-sm text-muted-foreground">
             Unternehmen

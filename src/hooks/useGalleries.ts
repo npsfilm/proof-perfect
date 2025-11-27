@@ -27,6 +27,8 @@ export function useCreateGallery() {
       name: string;
       package_target_count: number;
       salutation_type: 'Du' | 'Sie';
+      address?: string | null;
+      company_id?: string | null;
     }) => {
       const { data: slugData, error: slugError } = await supabase.rpc(
         'generate_unique_slug',
@@ -42,6 +44,8 @@ export function useCreateGallery() {
           slug: slugData,
           package_target_count: gallery.package_target_count,
           salutation_type: gallery.salutation_type,
+          address: gallery.address,
+          company_id: gallery.company_id,
           status: 'Draft',
         })
         .select()

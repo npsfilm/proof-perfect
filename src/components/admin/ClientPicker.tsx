@@ -58,20 +58,18 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
   return (
     <>
       <div className="space-y-3">
-        <Label>Kunden</Label>
-        
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="w-full justify-between"
+              className="w-full justify-between h-auto py-4"
               disabled={disabled}
             >
               <span className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                Kunden suchen oder hinzufügen...
+                <Search className="h-5 w-5" />
+                <span className="text-base">Kunden suchen oder hinzufügen...</span>
               </span>
             </Button>
           </PopoverTrigger>
@@ -155,24 +153,26 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
         </Popover>
 
         {selectedClients.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {selectedClients.map((client) => {
-              const displayName = `${client.anrede ? client.anrede + ' ' : ''}${client.vorname} ${client.nachname}`;
-              
-              return (
-                <Badge key={client.id} variant="secondary" className="gap-2">
-                  {displayName}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveClient(client.id)}
-                    disabled={disabled}
-                    className="ml-1 rounded-full hover:bg-muted"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              );
-            })}
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {selectedClients.map((client) => {
+                const displayName = `${client.anrede ? client.anrede + ' ' : ''}${client.vorname} ${client.nachname}`;
+                
+                return (
+                  <Badge key={client.id} variant="secondary" className="gap-2 py-1.5 px-3">
+                    <span className="font-medium">{displayName}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveClient(client.id)}
+                      disabled={disabled}
+                      className="ml-1 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
