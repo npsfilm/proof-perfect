@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { EmailTemplatePreview } from '@/components/admin/EmailTemplatePreview';
 import { Save } from 'lucide-react';
 
 export default function AdminSettings() {
@@ -62,7 +63,7 @@ export default function AdminSettings() {
   });
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-4xl">
       <h1 className="text-3xl font-bold text-foreground">Settings</h1>
 
       <Card>
@@ -107,6 +108,8 @@ export default function AdminSettings() {
           </Button>
         </CardContent>
       </Card>
+
+      <EmailTemplatePreview />
     </div>
   );
 }
