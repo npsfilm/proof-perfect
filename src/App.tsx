@@ -12,6 +12,7 @@ import GalleriesList from "./pages/admin/GalleriesList";
 import GalleryCreate from "./pages/admin/GalleryCreate";
 import GalleryDetail from "./pages/admin/GalleryDetail";
 import AdminSettings from "./pages/admin/AdminSettings";
+import ClientGallery from "./pages/client/ClientGallery";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/gallery/:slug" element={<ClientGallery />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="galleries" element={<GalleriesList />} />
