@@ -97,10 +97,17 @@ export function EmailTemplateEditor({
                 <p className="font-semibold mb-2">Verfügbare Platzhalter:</p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li>• {'{'}gallery_name{'}'} - Name der Galerie</li>
+                  <li>• {'{'}gallery_address{'}'} - Adresse der Immobilie</li>
                   <li>• {'{'}gallery_url{'}'} - Link zur Galerie</li>
+                  <li>• {'{'}package_target_count{'}'} - Ziel-Anzahl der Fotos im Paket</li>
                   <li>• {'{'}client_emails{'}'} - E-Mail-Adressen der Kunden</li>
+                  <li>• {'{'}client_names{'}'} - Namen der Kunden (Vorname Nachname)</li>
+                  <li>• {'{'}client_anrede{'}'} - Anrede der Kunden (Herr/Frau)</li>
                   <li>• {'{'}new_passwords{'}'} - Temporäre Passwörter (falls neu)</li>
                   <li>• {'{'}salutation{'}'} - Anrede (Du/Sie)</li>
+                  <li>• {'{'}company_name{'}'} - Firmenname (falls zugewiesen)</li>
+                  <li>• {'{'}timestamp{'}'} - Zeitstempel des Ereignisses</li>
+                  <li>• {'{'}event_id{'}'} - Eindeutige Ereignis-ID</li>
                 </ul>
               </div>
             </div>
@@ -133,10 +140,18 @@ export function EmailTemplateEditor({
                 <p className="font-semibold mb-2">Verfügbare Platzhalter:</p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li>• {'{'}gallery_name{'}'} - Name der Galerie</li>
+                  <li>• {'{'}gallery_address{'}'} - Adresse der Immobilie</li>
+                  <li>• {'{'}gallery_url{'}'} - Link zur Galerie (Admin-Ansicht)</li>
+                  <li>• {'{'}package_target_count{'}'} - Ziel-Anzahl der Fotos</li>
                   <li>• {'{'}selected_count{'}'} - Anzahl ausgewählter Fotos</li>
                   <li>• {'{'}staging_count{'}'} - Anzahl Staging-Anfragen</li>
+                  <li>• {'{'}photos_count{'}'} - Gesamtanzahl der Fotos</li>
+                  <li>• {'{'}client_names{'}'} - Namen der Kunden</li>
+                  <li>• {'{'}client_emails{'}'} - E-Mail-Adressen der Kunden</li>
                   <li>• {'{'}admin_email{'}'} - Admin-E-Mail-Adresse</li>
+                  <li>• {'{'}company_name{'}'} - Firmenname</li>
                   <li>• {'{'}salutation{'}'} - Anrede (Du/Sie)</li>
+                  <li>• {'{'}timestamp{'}'} - Zeitstempel des Ereignisses</li>
                 </ul>
               </div>
             </div>
@@ -169,9 +184,16 @@ export function EmailTemplateEditor({
                 <p className="font-semibold mb-2">Verfügbare Platzhalter:</p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li>• {'{'}gallery_name{'}'} - Name der Galerie</li>
+                  <li>• {'{'}gallery_address{'}'} - Adresse der Immobilie</li>
                   <li>• {'{'}download_link{'}'} - Download-Link für finale Dateien</li>
+                  <li>• {'{'}selected_count{'}'} - Anzahl ausgewählter Fotos</li>
+                  <li>• {'{'}staging_count{'}'} - Anzahl Staging-Anfragen</li>
                   <li>• {'{'}client_emails{'}'} - E-Mail-Adressen der Kunden</li>
+                  <li>• {'{'}client_names{'}'} - Namen der Kunden</li>
+                  <li>• {'{'}client_anrede{'}'} - Anrede der Kunden (Herr/Frau)</li>
+                  <li>• {'{'}company_name{'}'} - Firmenname</li>
                   <li>• {'{'}salutation{'}'} - Anrede (Du/Sie)</li>
+                  <li>• {'{'}timestamp{'}'} - Zeitstempel der Lieferung</li>
                 </ul>
               </div>
             </div>

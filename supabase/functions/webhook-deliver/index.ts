@@ -21,14 +21,70 @@ serve(async (req) => {
 
     console.log('Processing delivery webhook for gallery:', gallery_id);
 
-    // Get gallery details
+    // Get gallery details with company
     const { data: gallery, error: galleryError } = await supabase
       .from('galleries')
-      .select('name, salutation_type')
+      .select(`
+        name, 
+        salutation_type,
+        address,
+        package_target_count,
+        company_id,
+        companies (name)
+      `)
       .eq('id', gallery_id)
       .single();
 
     if (galleryError) throw galleryError;
+
+    // Get selected photos count
+    const { count: selectedCount, error: selectedError } = await supabase
+      .from('photos')
+      .select('*', { count: 'exact', head: true })
+      .eq('gallery_id', gallery_id)
+      .eq('is_selected', true);
+
+    if (selectedError) throw selectedError;
+
+    // Get staging count
+    const { count: stagingCount, error: stagingError } = await supabase
+      .from('photos')
+      .select('*', { count: 'exact', head: true })
+      .eq('gallery_id', gallery_id)
+      .eq('staging_requested', true);
+
+    if (stagingError) throw stagingError;
+
+    // Get client details
+    const { data: galleryClients, error: clientsError } = await supabase
+      .from('gallery_clients')
+      .select(`
+        clients (
+          vorname,
+          nachname,
+          anrede,
+          email
+        )
+      `)
+      .eq('gallery_id', gallery_id);
+
+    if (clientsError) throw clientsError;
+
+    // Build client names array
+    const clientNames = galleryClients
+      ?.map(gc => {
+        const client = gc.clients as any;
+        return `${client.vorname} ${client.nachname}`;
+      })
+      .filter(Boolean) || [];
+
+    // Build client anrede array
+    const clientAnrede = galleryClients
+      ?.map(gc => {
+        const client = gc.clients as any;
+        return client.anrede;
+      })
+      .filter(Boolean) || [];
 
     // Get webhook URL from system settings
     const { data: settings, error: settingsError } = await supabase
@@ -44,13 +100,23 @@ serve(async (req) => {
     }
 
     const eventId = crypto.randomUUID();
+    const companyName = gallery.companies && !Array.isArray(gallery.companies) 
+      ? (gallery.companies as any).name 
+      : '';
+    
     const payload = {
       event_id: eventId,
       timestamp: new Date().toISOString(),
       event_type: 'gallery_delivered',
       gallery_name: gallery.name,
+      gallery_address: gallery.address || '',
+      selected_count: selectedCount || 0,
+      staging_count: stagingCount || 0,
       client_emails: client_emails,
+      client_names: clientNames,
+      client_anrede: clientAnrede,
       download_link: download_link,
+      company_name: companyName,
       salutation: gallery.salutation_type,
     };
 

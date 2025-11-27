@@ -21,23 +21,39 @@ serve(async (req) => {
 
     console.log('Processing review webhook for gallery:', gallery_id);
 
-    // Get gallery details
+    // Get gallery details with company
     const { data: gallery, error: galleryError } = await supabase
       .from('galleries')
-      .select('name, salutation_type')
+      .select(`
+        name, 
+        slug,
+        salutation_type,
+        address,
+        package_target_count,
+        company_id,
+        companies (name)
+      `)
       .eq('id', gallery_id)
       .single();
 
     if (galleryError) throw galleryError;
 
+    // Get total photo count
+    const { count: photosCount, error: photosError } = await supabase
+      .from('photos')
+      .select('*', { count: 'exact', head: true })
+      .eq('gallery_id', gallery_id);
+
+    if (photosError) throw photosError;
+
     // Get selected photos count
-    const { count: selectedCount, error: photosError } = await supabase
+    const { count: selectedCount, error: selectedError } = await supabase
       .from('photos')
       .select('*', { count: 'exact', head: true })
       .eq('gallery_id', gallery_id)
       .eq('is_selected', true);
 
-    if (photosError) throw photosError;
+    if (selectedError) throw selectedError;
 
     // Get staging count
     const { count: stagingCount, error: stagingError } = await supabase
@@ -47,6 +63,36 @@ serve(async (req) => {
       .eq('staging_requested', true);
 
     if (stagingError) throw stagingError;
+
+    // Get client details
+    const { data: galleryClients, error: clientsError } = await supabase
+      .from('gallery_clients')
+      .select(`
+        clients (
+          vorname,
+          nachname,
+          anrede,
+          email
+        )
+      `)
+      .eq('gallery_id', gallery_id);
+
+    if (clientsError) throw clientsError;
+
+    // Build client names and emails
+    const clientNames = galleryClients
+      ?.map(gc => {
+        const client = gc.clients as any;
+        return `${client.vorname} ${client.nachname}`;
+      })
+      .filter(Boolean) || [];
+
+    const clientEmails = galleryClients
+      ?.map(gc => {
+        const client = gc.clients as any;
+        return client.email;
+      })
+      .filter(Boolean) || [];
 
     // Get admin email (first admin user)
     const { data: adminRole, error: adminError } = await supabase
@@ -80,14 +126,26 @@ serve(async (req) => {
     }
 
     const eventId = crypto.randomUUID();
+    const adminGalleryUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/rest/v1', '')}/admin/galleries/${gallery.slug}`;
+    const companyName = gallery.companies && !Array.isArray(gallery.companies) 
+      ? (gallery.companies as any).name 
+      : '';
+
     const payload = {
       event_id: eventId,
       timestamp: new Date().toISOString(),
       event_type: 'gallery_reviewed',
       gallery_name: gallery.name,
+      gallery_address: gallery.address || '',
+      gallery_url: adminGalleryUrl,
+      package_target_count: gallery.package_target_count,
+      photos_count: photosCount || 0,
       selected_count: selectedCount || 0,
       staging_count: stagingCount || 0,
+      client_names: clientNames,
+      client_emails: clientEmails,
       admin_email: adminProfile.email,
+      company_name: companyName,
       salutation: gallery.salutation_type,
     };
 
