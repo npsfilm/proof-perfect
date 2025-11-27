@@ -15,17 +15,10 @@ interface ClientPhotoGridProps {
 export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: ClientPhotoGridProps) {
   const { toggleSelection } = usePhotoSelection(galleryId);
   const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
-  const [imageOrientations, setImageOrientations] = useState<Record<string, 'vertical' | 'horizontal'>>({});
 
   const handleCheckClick = (e: React.MouseEvent, photo: Photo) => {
     e.stopPropagation();
     toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
-  };
-
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>, photoId: string) => {
-    const img = e.currentTarget;
-    const orientation = img.naturalHeight > img.naturalWidth ? 'vertical' : 'horizontal';
-    setImageOrientations(prev => ({ ...prev, [photoId]: orientation }));
   };
 
   if (isLoading || urlsLoading) {
@@ -47,8 +40,6 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {photos.map((photo, index) => {
-        const isVertical = imageOrientations[photo.id] === 'vertical';
-        
         return (
           <div
             key={photo.id}
@@ -60,16 +51,13 @@ export function ClientPhotoGrid({ photos, isLoading, onPhotoClick, galleryId }: 
           >
             {/* Image Container */}
             <div 
-              className={`relative bg-muted/20 cursor-pointer overflow-hidden ${
-                isVertical ? 'h-80' : 'h-56'
-              }`}
+              className="relative bg-muted/30 cursor-pointer overflow-hidden h-64"
               onClick={() => onPhotoClick(photo.id)}
             >
               <img
                 src={signedUrls[photo.id] || photo.storage_url}
                 alt={photo.filename}
                 className="w-full h-full object-contain hover:scale-105 transition-transform"
-                onLoad={(e) => handleImageLoad(e, photo.id)}
               />
               
               {/* Badges */}
