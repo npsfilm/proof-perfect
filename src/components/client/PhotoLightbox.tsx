@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight, Keyboard, Menu } from 'lucide-react';
+import { X, Heart, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -27,45 +27,101 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const [showKeyboardHints, setShowKeyboardHints] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Zoom state
+  const [zoom, setZoom] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const imageRef = useRef<HTMLImageElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const touchEndY = useRef<number | null>(null);
+  const initialPinchDistance = useRef<number | null>(null);
+  const lastPanX = useRef(0);
+  const lastPanY = useRef(0);
 
   const currentIndex = photos.findIndex(p => p.id === photo.id);
 
+  // Reset zoom when photo changes
+  useEffect(() => {
+    setZoom(1);
+    setPanX(0);
+    setPanY(0);
+  }, [photo.id]);
+
+  // Pinch-to-zoom handling
+  const getPinchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
   // Swipe gesture handling
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+    if (e.touches.length === 2) {
+      // Pinch gesture
+      initialPinchDistance.current = getPinchDistance(e.touches);
+      e.preventDefault();
+    } else if (e.touches.length === 1) {
+      // Single touch for swipe or pan
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      lastPanX.current = panX;
+      lastPanY.current = panY;
+      if (zoom > 1) {
+        setIsDragging(true);
+      }
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-    touchEndY.current = e.touches[0].clientY;
+    if (e.touches.length === 2 && initialPinchDistance.current) {
+      // Pinch zoom
+      const currentDistance = getPinchDistance(e.touches);
+      const scale = currentDistance / initialPinchDistance.current;
+      const newZoom = Math.min(Math.max(zoom * scale, 1), 5);
+      setZoom(newZoom);
+      initialPinchDistance.current = currentDistance;
+      e.preventDefault();
+    } else if (e.touches.length === 1 && zoom > 1 && isDragging) {
+      // Pan when zoomed
+      const deltaX = e.touches[0].clientX - (touchStartX.current || 0);
+      const deltaY = e.touches[0].clientY - (touchStartY.current || 0);
+      setPanX(lastPanX.current + deltaX);
+      setPanY(lastPanY.current + deltaY);
+      e.preventDefault();
+    } else {
+      touchEndX.current = e.touches[0].clientX;
+      touchEndY.current = e.touches[0].clientY;
+    }
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current || !touchStartY.current || !touchEndY.current) return;
-    
-    const diffX = touchStartX.current - touchEndX.current;
-    const diffY = touchStartY.current - touchEndY.current;
-    const minSwipeDistance = 50;
+    initialPinchDistance.current = null;
+    setIsDragging(false);
 
-    // Vertical swipe down to close (only if in fullscreen mode on mobile)
-    if (Math.abs(diffY) > Math.abs(diffX) && diffY < -minSwipeDistance && isFullscreen) {
-      onClose();
-    }
-    // Horizontal swipe for navigation
-    else if (Math.abs(diffX) > minSwipeDistance) {
-      if (diffX > 0 && currentIndex < photos.length - 1) {
-        // Swiped left - go to next
-        onNavigate('next');
-      } else if (diffX < 0 && currentIndex > 0) {
-        // Swiped right - go to previous
-        onNavigate('prev');
+    // Only handle swipe if not zoomed
+    if (zoom <= 1 && touchStartX.current && touchEndX.current && touchStartY.current && touchEndY.current) {
+      const diffX = touchStartX.current - touchEndX.current;
+      const diffY = touchStartY.current - touchEndY.current;
+      const minSwipeDistance = 50;
+
+      // Vertical swipe down to close (only if in fullscreen mode on mobile)
+      if (Math.abs(diffY) > Math.abs(diffX) && diffY < -minSwipeDistance && isFullscreen) {
+        onClose();
+      }
+      // Horizontal swipe for navigation
+      else if (Math.abs(diffX) > minSwipeDistance) {
+        if (diffX > 0 && currentIndex < photos.length - 1) {
+          onNavigate('next');
+        } else if (diffX < 0 && currentIndex > 0) {
+          onNavigate('prev');
+        }
       }
     }
 
@@ -73,6 +129,64 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     touchEndX.current = null;
     touchStartY.current = null;
     touchEndY.current = null;
+  };
+
+  // Wheel zoom for desktop
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = -e.deltaY * 0.01;
+      const newZoom = Math.min(Math.max(zoom + delta, 1), 5);
+      setZoom(newZoom);
+      if (newZoom === 1) {
+        setPanX(0);
+        setPanY(0);
+      }
+    }
+  };
+
+  // Mouse drag for panning when zoomed
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      lastPanX.current = panX;
+      lastPanY.current = panY;
+      touchStartX.current = e.clientX;
+      touchStartY.current = e.clientY;
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1 && touchStartX.current && touchStartY.current) {
+      const deltaX = e.clientX - touchStartX.current;
+      const deltaY = e.clientY - touchStartY.current;
+      setPanX(lastPanX.current + deltaX);
+      setPanY(lastPanY.current + deltaY);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Zoom controls
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.5, 5));
+  };
+
+  const handleZoomOut = () => {
+    const newZoom = Math.max(zoom - 0.5, 1);
+    setZoom(newZoom);
+    if (newZoom === 1) {
+      setPanX(0);
+      setPanY(0);
+    }
+  };
+
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPanX(0);
+    setPanY(0);
   };
 
   // Toggle keyboard hints with '?' key
@@ -213,6 +327,10 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
               <kbd className="px-2 py-1 bg-white/20 rounded">?</kbd>
               <span>Diese Hilfe ein/ausblenden</span>
             </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white/20 rounded">Strg + Scroll</kbd>
+              <span>Zoomen</span>
+            </div>
           </div>
         </div>
       )}
@@ -242,6 +360,44 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         </button>
       )}
 
+      {/* Zoom Controls */}
+      {zoom > 1 && (
+        <div className="absolute top-20 right-4 z-10 flex flex-col gap-2 bg-black/60 rounded-lg p-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleResetZoom}
+            className="text-white hover:text-white hover:bg-white/20"
+            title="Zoom zurücksetzen"
+          >
+            <Maximize2 className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
+
+      <div className="lg:hidden absolute bottom-24 right-4 z-10 flex flex-col gap-2 bg-black/60 rounded-lg p-2">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={handleZoomIn}
+          className="text-white hover:text-white hover:bg-white/20"
+          title="Vergrößern"
+          disabled={zoom >= 5}
+        >
+          <ZoomIn className="h-5 w-5" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={handleZoomOut}
+          className="text-white hover:text-white hover:bg-white/20"
+          title="Verkleinern"
+          disabled={zoom <= 1}
+        >
+          <ZoomOut className="h-5 w-5" />
+        </Button>
+      </div>
+
       {/* Mobile Bottom Action Button */}
       <button
         onClick={(e) => {
@@ -263,14 +419,27 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         onClick={(e) => e.stopPropagation()}
       >
         {/* Image */}
-        <div className="flex-1 flex items-center justify-center">
+        <div 
+          className="flex-1 flex items-center justify-center overflow-hidden"
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+        >
           <img
+            ref={imageRef}
             src={photo.storage_url}
             alt={photo.filename}
             className={cn(
-              "object-contain",
+              "object-contain transition-transform",
               isFullscreen ? "w-full h-full" : "max-w-full max-h-full"
             )}
+            style={{
+              transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
+              transformOrigin: 'center center',
+            }}
           />
         </div>
 

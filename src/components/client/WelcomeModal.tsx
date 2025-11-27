@@ -36,6 +36,9 @@ const TUTORIAL_STEPS = [
         <p className="text-muted-foreground">
           Nutzen Sie die <span className="font-semibold text-foreground">Pfeiltasten</span> oder <span className="font-semibold text-foreground">wischen</span> Sie, um zwischen Fotos zu navigieren.
         </p>
+        <p className="text-muted-foreground">
+          <span className="font-semibold text-foreground">Zoomen:</span> Strg + Scrollen (Desktop) oder Pinch-Geste (Mobile)
+        </p>
         <div className="bg-muted/50 rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <kbd className="px-2 py-1 bg-background border rounded">←</kbd>
