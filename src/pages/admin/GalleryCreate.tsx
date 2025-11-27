@@ -24,7 +24,6 @@ export default function GalleryCreate() {
   const [selectedClients, setSelectedClients] = useState<Client[]>([]);
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
     package_target_count: 20,
     salutation_type: 'Du' as 'Du' | 'Sie',
     company_id: '',
@@ -45,7 +44,6 @@ export default function GalleryCreate() {
     try {
       const submitData = {
         name: formData.name,
-        address: formData.address || null,
         package_target_count: formData.package_target_count,
         salutation_type: formData.salutation_type,
         company_id: formData.company_id || null,
@@ -119,21 +117,6 @@ export default function GalleryCreate() {
                 />
                 <p className="text-xs text-muted-foreground">
                   Ein URL-freundlicher Slug wird automatisch generiert
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Immobilien-Adresse</Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Musterstraße 123, 12345 Musterstadt"
-                  rows={3}
-                  disabled={createGalleryMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Die Adresse der Immobilie hilft bei der Organisation
                 </p>
               </div>
             </FormSection>
