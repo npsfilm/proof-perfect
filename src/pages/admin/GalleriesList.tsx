@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGalleries } from '@/hooks/useGalleries';
+import { useGalleries, useDeleteGallery } from '@/hooks/useGalleries';
 import { useBatchGalleryOperations } from '@/hooks/useBatchGalleryOperations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,8 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function GalleriesList() {
-  const { galleries, isLoading, deleteGallery } = useGalleries();
+  const { data: galleries, isLoading } = useGalleries();
+  const deleteGalleryMutation = useDeleteGallery();
   const { duplicateGalleries, bulkStatusUpdate, bulkDelete } = useBatchGalleryOperations();
   const navigate = useNavigate();
   const [selectedGalleries, setSelectedGalleries] = useState<Set<string>>(new Set());
@@ -176,7 +177,7 @@ export default function GalleriesList() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => deleteGallery.mutate(gallery.id)}
+                            onClick={() => deleteGalleryMutation.mutate(gallery.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Löschen

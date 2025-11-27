@@ -28,7 +28,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
     if (!searchQuery) return allClients;
 
     const query = searchQuery.toLowerCase();
-    return allClients.filter((client: any) => {
+    return allClients.filter((client: Client & { companies?: { name?: string } }) => {
       const fullName = `${client.vorname} ${client.nachname}`.toLowerCase();
       const email = client.email.toLowerCase();
       const company = client.companies?.name?.toLowerCase() || '';
@@ -37,7 +37,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
     });
   }, [allClients, searchQuery]);
 
-  const handleSelectClient = (client: any) => {
+  const handleSelectClient = (client: Client) => {
     const isSelected = selectedClients.some(c => c.id === client.id);
     
     if (isSelected) {
@@ -51,7 +51,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
     onClientsChange(selectedClients.filter(c => c.id !== clientId));
   };
 
-  const handleClientCreated = (newClient: any) => {
+  const handleClientCreated = (newClient: Client) => {
     onClientsChange([...selectedClients, newClient]);
   };
 
@@ -103,7 +103,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
                   </div>
                 </CommandEmpty>
                 <CommandGroup>
-                  {filteredClients.map((client: any) => {
+                  {filteredClients.map((client: Client & { companies?: { name?: string } }) => {
                     const isSelected = selectedClients.some(c => c.id === client.id);
                     const displayName = `${client.anrede ? client.anrede + ' ' : ''}${client.vorname} ${client.nachname}`;
                     

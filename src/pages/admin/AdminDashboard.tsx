@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, FolderOpen } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { galleries, isLoading } = useGalleries();
+  const { data: galleries, isLoading } = useGalleries();
   const navigate = useNavigate();
 
   const stats = {

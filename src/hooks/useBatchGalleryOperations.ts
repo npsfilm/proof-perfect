@@ -74,13 +74,13 @@ export function useBatchGalleryOperations() {
     onSuccess: (duplicatedIds) => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Galleries duplicated!',
-        description: `Successfully created ${duplicatedIds.length} ${duplicatedIds.length === 1 ? 'copy' : 'copies'}.`,
+        title: 'Galerien dupliziert!',
+        description: `${duplicatedIds.length} ${duplicatedIds.length === 1 ? 'Kopie' : 'Kopien'} erfolgreich erstellt.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -99,13 +99,13 @@ export function useBatchGalleryOperations() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Status updated!',
-        description: `Updated ${variables.galleryIds.length} ${variables.galleryIds.length === 1 ? 'gallery' : 'galleries'} to ${variables.status}.`,
+        title: 'Status aktualisiert!',
+        description: `${variables.galleryIds.length} ${variables.galleryIds.length === 1 ? 'Galerie' : 'Galerien'} auf ${variables.status} aktualisiert.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });
@@ -127,13 +127,13 @@ export function useBatchGalleryOperations() {
     onSuccess: (_, galleryIds) => {
       queryClient.invalidateQueries({ queryKey: ['galleries'] });
       toast({
-        title: 'Galleries deleted!',
-        description: `Successfully deleted ${galleryIds.length} ${galleryIds.length === 1 ? 'gallery' : 'galleries'}.`,
+        title: 'Galerien gelöscht!',
+        description: `${galleryIds.length} ${galleryIds.length === 1 ? 'Galerie' : 'Galerien'} erfolgreich gelöscht.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: 'Fehler',
         description: error.message,
         variant: 'destructive',
       });

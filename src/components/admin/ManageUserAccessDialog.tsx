@@ -38,7 +38,7 @@ export function ManageUserAccessDialog({
   onOpenChange,
 }: ManageUserAccessDialogProps) {
   const { data: userAccess, isLoading } = useUserGalleryAccess(user.user_id);
-  const { galleries } = useGalleries();
+  const { data: galleries } = useGalleries();
   const addAccess = useAddUserGalleryAccess();
   const removeAccess = useRemoveUserGalleryAccess();
   const [selectedGalleryId, setSelectedGalleryId] = useState('');

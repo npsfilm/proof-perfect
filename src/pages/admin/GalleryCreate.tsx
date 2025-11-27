@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGalleries } from '@/hooks/useGalleries';
+import { useCreateGallery } from '@/hooks/useGalleries';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Client } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
-  const { createGallery } = useGalleries();
+  const createGalleryMutation = useCreateGallery();
   const { data: companies } = useCompanies();
   const [selectedClients, setSelectedClients] = useState<Client[]>([]);
   const [formData, setFormData] = useState({
@@ -49,7 +49,7 @@ export default function GalleryCreate() {
         company_id: formData.company_id || null,
       };
       
-      const result = await createGallery.mutateAsync(submitData);
+      const result = await createGalleryMutation.mutateAsync(submitData);
       
       if (result) {
         // Link clients to gallery
@@ -105,7 +105,7 @@ export default function GalleryCreate() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="z.B. Sonnenuntergang Villa Shooting"
                 required
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               />
               <p className="text-xs text-muted-foreground">
                 Ein URL-freundlicher Slug wird automatisch generiert
@@ -120,7 +120,7 @@ export default function GalleryCreate() {
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="Musterstraße 123, 12345 Musterstadt"
                 rows={2}
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               />
               <p className="text-xs text-muted-foreground">
                 Die Adresse der Immobilie oder des Shooting-Ortes
@@ -138,7 +138,7 @@ export default function GalleryCreate() {
                   setFormData({ ...formData, package_target_count: parseInt(e.target.value) })
                 }
                 required
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               />
               <p className="text-xs text-muted-foreground">
                 Anzahl der Fotos im Kundenpaket
@@ -148,7 +148,7 @@ export default function GalleryCreate() {
             <ClientPicker
               selectedClients={selectedClients}
               onClientsChange={setSelectedClients}
-              disabled={createGallery.isPending}
+              disabled={createGalleryMutation.isPending}
             />
 
             <div className="space-y-3">
@@ -158,7 +158,7 @@ export default function GalleryCreate() {
                 onValueChange={(value) =>
                   setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
                 }
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Du" id="du" />
@@ -180,7 +180,7 @@ export default function GalleryCreate() {
               <Select
                 value={formData.company_id}
                 onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               >
                 <SelectTrigger id="company">
                   <SelectValue placeholder="Unternehmen auswählen..." />
@@ -204,12 +204,12 @@ export default function GalleryCreate() {
                 type="button"
                 variant="outline"
                 onClick={() => navigate('/admin/galleries')}
-                disabled={createGallery.isPending}
+                disabled={createGalleryMutation.isPending}
               >
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={createGallery.isPending}>
-                {createGallery.isPending ? 'Wird erstellt...' : 'Galerie erstellen'}
+              <Button type="submit" disabled={createGalleryMutation.isPending}>
+                {createGalleryMutation.isPending ? 'Wird erstellt...' : 'Galerie erstellen'}
               </Button>
             </div>
           </form>
