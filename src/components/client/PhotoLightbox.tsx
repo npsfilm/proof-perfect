@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -21,6 +22,7 @@ interface PhotoLightboxProps {
 }
 
 export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }: PhotoLightboxProps) {
+  const { signedUrl, isLoading: urlLoading } = useSignedPhotoUrl(photo);
   const [comment, setComment] = useState(photo.client_comment || '');
   const [stagingRequested, setStagingRequested] = useState(photo.staging_requested);
   const [stagingStyle, setStagingStyle] = useState(photo.staging_style || 'Modern');
@@ -430,7 +432,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         >
           <img
             ref={imageRef}
-            src={photo.storage_url}
+            src={signedUrl || photo.storage_url}
             alt={photo.filename}
             className={cn(
               "object-contain transition-transform",

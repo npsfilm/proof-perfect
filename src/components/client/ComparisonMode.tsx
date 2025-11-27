@@ -1,6 +1,7 @@
 import { X, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/database';
+import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 
 interface ComparisonModeProps {
   photo1: Photo;
@@ -10,6 +11,8 @@ interface ComparisonModeProps {
 }
 
 export function ComparisonMode({ photo1, photo2, onClose, onSwap }: ComparisonModeProps) {
+  const { signedUrl: signedUrl1 } = useSignedPhotoUrl(photo1);
+  const { signedUrl: signedUrl2 } = useSignedPhotoUrl(photo2);
   return (
     <div 
       className="fixed inset-0 bg-black/95 z-50 flex flex-col"
@@ -43,7 +46,7 @@ export function ComparisonMode({ photo1, photo2, onClose, onSwap }: ComparisonMo
         {/* Photo 1 */}
         <div className="flex-1 flex flex-col items-center justify-center bg-black p-4">
           <img
-            src={photo1.storage_url}
+            src={signedUrl1 || photo1.storage_url}
             alt={photo1.filename}
             className="max-w-full max-h-full object-contain"
           />
@@ -58,7 +61,7 @@ export function ComparisonMode({ photo1, photo2, onClose, onSwap }: ComparisonMo
         {/* Photo 2 */}
         <div className="flex-1 flex flex-col items-center justify-center bg-black p-4">
           <img
-            src={photo2.storage_url}
+            src={signedUrl2 || photo2.storage_url}
             alt={photo2.filename}
             className="max-w-full max-h-full object-contain"
           />

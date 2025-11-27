@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Photo } from '@/types/database';
 import { Upload } from 'lucide-react';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 
 interface FinalizeModalsProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface FinalizeModalsProps {
 }
 
 export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: FinalizeModalsProps) {
+  const { signedUrls } = useSignedPhotoUrls(selectedPhotos);
   const [step, setStep] = useState<'feedback' | 'staging'>('feedback');
   const [feedback, setFeedback] = useState('');
   const [stagingSelections, setStagingSelections] = useState<Record<string, boolean>>({});
@@ -126,7 +128,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                         onCheckedChange={(checked) => handleStagingToggle(photo.id, checked as boolean)}
                       />
                       <img
-                        src={photo.storage_url}
+                        src={signedUrls[photo.id] || photo.storage_url}
                         alt={photo.filename}
                         className="w-16 h-16 object-cover rounded"
                       />
