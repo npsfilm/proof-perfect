@@ -5,6 +5,7 @@ import { AdminSidebar } from '@/components/AdminSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/admin/PageTransition';
+import { Eye } from 'lucide-react';
 
 export default function AdminLayout() {
   const { user, role, loading, signOut } = useAuth();
@@ -38,6 +39,16 @@ export default function AdminLayout() {
               <SidebarTrigger className="transition-transform duration-200 hover:scale-110 active:scale-95" />
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="gap-2 rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed transition-all duration-200 hover:scale-105 active:scale-95"
+                title="Zur Kunden-Ansicht wechseln"
+              >
+                <Eye className="h-4 w-4" />
+                <span className="hidden sm:inline">Kunden-Ansicht</span>
+              </Button>
               <span className="text-sm text-muted-foreground hidden sm:inline transition-colors duration-200 hover:text-foreground">{user.email}</span>
               <Button 
                 variant="soft" 
