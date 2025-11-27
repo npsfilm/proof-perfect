@@ -20,19 +20,19 @@ export function SelectionFooter({ selectedCount, targetCount, onFinalize, disabl
             <Heart className="h-5 w-5 text-primary fill-primary" />
             <div>
               <p className="font-semibold">
-                Selected: {selectedCount} / {targetCount}
+                Ausgewählt: {selectedCount} / {targetCount}
               </p>
               {remaining > 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  You have {remaining} {remaining === 1 ? 'photo' : 'photos'} left in your package
+                  Sie haben noch {remaining} {remaining === 1 ? 'Foto' : 'Fotos'} in Ihrem Paket
                 </p>
               ) : isOver ? (
                 <p className="text-sm text-orange-600 font-medium">
-                  You've selected more than your package. Upgrade now for better pricing!
+                  Sie haben mehr als Ihr Paket ausgewählt. Upgraden Sie jetzt für bessere Preise!
                 </p>
               ) : (
                 <p className="text-sm text-green-600 font-medium">
-                  Package complete! You can still adjust your selection.
+                  Paket vollständig! Sie können Ihre Auswahl noch anpassen.
                 </p>
               )}
             </div>
@@ -42,7 +42,7 @@ export function SelectionFooter({ selectedCount, targetCount, onFinalize, disabl
             size="lg"
             disabled={selectedCount === 0 || disabled}
           >
-            Finalize Selection
+            Auswahl abschließen
           </Button>
         </div>
       </div>

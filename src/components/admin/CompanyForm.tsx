@@ -68,25 +68,25 @@ export function CompanyForm({ open, onOpenChange, company }: CompanyFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{company ? 'Edit Company' : 'Create Company'}</DialogTitle>
+          <DialogTitle>{company ? 'Unternehmen bearbeiten' : 'Unternehmen erstellen'}</DialogTitle>
           <DialogDescription>
-            {company ? 'Update company details.' : 'Add a new client company.'}
+            {company ? 'Unternehmensdaten aktualisieren.' : 'Neues Kundenunternehmen hinzufügen.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Company Name *</Label>
+              <Label htmlFor="name">Unternehmensname *</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Acme Real Estate"
+                placeholder="Acme Immobilien"
                 required
               />
               {slugPreview && (
                 <p className="text-xs text-muted-foreground">
-                  Slug preview: {slugPreview}
+                  Slug-Vorschau: {slugPreview}
                 </p>
               )}
             </div>
@@ -96,10 +96,10 @@ export function CompanyForm({ open, onOpenChange, company }: CompanyFormProps) {
                 id="domain"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
-                placeholder="acmerealty.com"
+                placeholder="acmeimmobilien.com"
               />
               <p className="text-xs text-muted-foreground">
-                Optional: helps with grouping and search
+                Optional: Hilft bei Gruppierung und Suche
               </p>
             </div>
           </div>
@@ -109,13 +109,13 @@ export function CompanyForm({ open, onOpenChange, company }: CompanyFormProps) {
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Abbrechen
             </Button>
             <Button
               type="submit"
               disabled={!name || createCompany.isPending || updateCompany.isPending}
             >
-              {company ? 'Update' : 'Create'}
+              {company ? 'Aktualisieren' : 'Erstellen'}
             </Button>
           </DialogFooter>
         </form>

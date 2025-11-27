@@ -48,14 +48,14 @@ export default function CompanyDetail() {
         </div>
         <Button variant="outline" onClick={() => setIsEditOpen(true)}>
           <Edit className="mr-2 h-4 w-4" />
-          Edit
+          Bearbeiten
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Galleries</CardTitle>
+            <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -64,7 +64,7 @@ export default function CompanyDetail() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+            <CardTitle className="text-sm font-medium">Teammitglieder</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -73,7 +73,7 @@ export default function CompanyDetail() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Photos Uploaded</CardTitle>
+            <CardTitle className="text-sm font-medium">Hochgeladene Fotos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -83,7 +83,7 @@ export default function CompanyDetail() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Selected</CardTitle>
+            <CardTitle className="text-sm font-medium">Ausgewählt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -95,8 +95,8 @@ export default function CompanyDetail() {
 
       <Tabs defaultValue="galleries" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="galleries">Galleries</TabsTrigger>
-          <TabsTrigger value="members">Team Members</TabsTrigger>
+          <TabsTrigger value="galleries">Galerien</TabsTrigger>
+          <TabsTrigger value="members">Teammitglieder</TabsTrigger>
         </TabsList>
 
         <TabsContent value="galleries" className="space-y-4">
@@ -106,40 +106,40 @@ export default function CompanyDetail() {
               size="sm"
               onClick={() => setStatusFilter('all')}
             >
-              All
+              Alle
             </Button>
             <Button
               variant={statusFilter === 'Draft' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('Draft')}
             >
-              Draft
+              Entwurf
             </Button>
             <Button
               variant={statusFilter === 'Sent' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('Sent')}
             >
-              Sent
+              Gesendet
             </Button>
             <Button
               variant={statusFilter === 'Reviewed' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('Reviewed')}
             >
-              Reviewed
+              Überprüft
             </Button>
             <Button
               variant={statusFilter === 'Delivered' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('Delivered')}
             >
-              Delivered
+              Geliefert
             </Button>
           </div>
 
           {galleriesLoading ? (
-            <div>Loading galleries...</div>
+            <div>Galerien werden geladen...</div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredGalleries?.map((gallery) => (
@@ -156,10 +156,10 @@ export default function CompanyDetail() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-1 text-sm text-muted-foreground">
-                      <p>{gallery.photos_count} photos</p>
-                      <p>{gallery.selected_count} selected</p>
+                      <p>{gallery.photos_count} Fotos</p>
+                      <p>{gallery.selected_count} ausgewählt</p>
                       {gallery.staging_count > 0 && (
-                        <p>{gallery.staging_count} staging requests</p>
+                        <p>{gallery.staging_count} Staging-Anfragen</p>
                       )}
                     </div>
                   </CardContent>
@@ -168,7 +168,7 @@ export default function CompanyDetail() {
               {filteredGalleries?.length === 0 && (
                 <Card className="col-span-full">
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No galleries found
+                    Keine Galerien gefunden
                   </CardContent>
                 </Card>
               )}

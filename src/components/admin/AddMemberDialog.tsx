@@ -37,7 +37,7 @@ export function AddMemberDialog({ companyId, open, onOpenChange }: AddMemberDial
         .single();
 
       if (profileError || !profile) {
-        setError('No user found with this email address');
+        setError('Kein Benutzer mit dieser E-Mail-Adresse gefunden');
         return;
       }
 
@@ -51,9 +51,9 @@ export function AddMemberDialog({ companyId, open, onOpenChange }: AddMemberDial
     } catch (err: any) {
       console.error('Error adding member:', err);
       if (err.message?.includes('duplicate')) {
-        setError('This user is already a member of this company');
+        setError('Dieser Benutzer ist bereits Mitglied dieses Unternehmens');
       } else {
-        setError('Failed to add member. Please try again.');
+        setError('Fehler beim Hinzufügen des Mitglieds. Bitte versuchen Sie es erneut.');
       }
     }
   };
@@ -62,15 +62,15 @@ export function AddMemberDialog({ companyId, open, onOpenChange }: AddMemberDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Team Member</DialogTitle>
+          <DialogTitle>Teammitglied hinzufügen</DialogTitle>
           <DialogDescription>
-            Add an existing user to this company by their email address.
+            Fügen Sie einen bestehenden Benutzer über seine E-Mail-Adresse zu diesem Unternehmen hinzu.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">E-Mail-Adresse *</Label>
               <Input
                 id="email"
                 type="email"
@@ -79,7 +79,7 @@ export function AddMemberDialog({ companyId, open, onOpenChange }: AddMemberDial
                   setEmail(e.target.value);
                   setError('');
                 }}
-                placeholder="user@example.com"
+                placeholder="benutzer@beispiel.de"
                 required
               />
               {error && <p className="text-sm text-destructive">{error}</p>}
@@ -95,10 +95,10 @@ export function AddMemberDialog({ companyId, open, onOpenChange }: AddMemberDial
                 setError('');
               }}
             >
-              Cancel
+              Abbrechen
             </Button>
             <Button type="submit" disabled={!email || addMember.isPending}>
-              Add Member
+              Mitglied hinzufügen
             </Button>
           </DialogFooter>
         </form>

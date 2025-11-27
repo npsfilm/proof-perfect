@@ -63,14 +63,14 @@ export default function UsersList() {
     <div className="flex-1 space-y-4 p-4 md:p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-          <p className="text-muted-foreground">Manage user roles and gallery access</p>
+          <h1 className="text-3xl font-bold tracking-tight">Benutzer</h1>
+          <p className="text-muted-foreground">Benutzerrollen und Galeriezugriff verwalten</p>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
-          placeholder="Search by email..."
+          placeholder="Nach E-Mail suchen..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
@@ -81,7 +81,7 @@ export default function UsersList() {
             size="sm"
             onClick={() => setRoleFilter('all')}
           >
-            All
+            Alle
           </Button>
           <Button
             variant={roleFilter === 'admin' ? 'default' : 'outline'}
@@ -95,7 +95,7 @@ export default function UsersList() {
             size="sm"
             onClick={() => setRoleFilter('client')}
           >
-            Clients
+            Kunden
           </Button>
         </div>
       </div>
@@ -114,19 +114,19 @@ export default function UsersList() {
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Rolle</TableHead>
                 <TableHead className="hidden md:table-cell">
                   <button
                     onClick={() => handleSort('last_sign_in_at')}
                     className="flex items-center gap-2 hover:text-foreground"
                   >
-                    Last Login
+                    Letzte Anmeldung
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </TableHead>
-                <TableHead className="hidden lg:table-cell">Galleries</TableHead>
-                <TableHead className="hidden lg:table-cell">Selections</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="hidden lg:table-cell">Galerien</TableHead>
+                <TableHead className="hidden lg:table-cell">Auswahl</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,7 +134,7 @@ export default function UsersList() {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     <Users className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                    <p>No users found</p>
+                    <p>Keine Benutzer gefunden</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -148,9 +148,9 @@ export default function UsersList() {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {user.last_sign_in_at ? (
-                        format(new Date(user.last_sign_in_at), 'MMM d, yyyy HH:mm')
+                        format(new Date(user.last_sign_in_at), 'dd.MM.yyyy HH:mm')
                       ) : (
-                        <span className="text-muted-foreground">Never</span>
+                        <span className="text-muted-foreground">Nie</span>
                       )}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
@@ -165,7 +165,7 @@ export default function UsersList() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setEditRoleUser(user)}
-                          title="Edit role"
+                          title="Rolle bearbeiten"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -173,7 +173,7 @@ export default function UsersList() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setManageAccessUser(user)}
-                          title="Manage gallery access"
+                          title="Galeriezugriff verwalten"
                         >
                           <Key className="h-4 w-4" />
                         </Button>

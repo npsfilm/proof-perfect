@@ -15,11 +15,11 @@ import {
 
 const items = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Galleries', url: '/admin/galleries', icon: FolderOpen },
-  { title: 'Companies', url: '/admin/companies', icon: Building2 },
-  { title: 'Users', url: '/admin/users', icon: Users },
-  { title: 'Analytics', url: '/admin/analytics', icon: BarChart3 },
-  { title: 'Settings', url: '/admin/settings', icon: Settings },
+  { title: 'Galerien', url: '/admin/galleries', icon: FolderOpen },
+  { title: 'Unternehmen', url: '/admin/companies', icon: Building2 },
+  { title: 'Benutzer', url: '/admin/users', icon: Users },
+  { title: 'Analytik', url: '/admin/analytics', icon: BarChart3 },
+  { title: 'Einstellungen', url: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar() {
