@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { EmailTemplatePreview } from '@/components/admin/EmailTemplatePreview';
+import { EmailTemplateEditor } from '@/components/admin/EmailTemplateEditor';
 import { Save } from 'lucide-react';
 
 export default function AdminSettings() {
@@ -14,6 +14,12 @@ export default function AdminSettings() {
   const queryClient = useQueryClient();
   const [webhookSend, setWebhookSend] = useState('');
   const [webhookDeliver, setWebhookDeliver] = useState('');
+  const [sendSubject, setSendSubject] = useState('');
+  const [sendBody, setSendBody] = useState('');
+  const [reviewSubject, setReviewSubject] = useState('');
+  const [reviewBody, setReviewBody] = useState('');
+  const [deliverSubject, setDeliverSubject] = useState('');
+  const [deliverBody, setDeliverBody] = useState('');
 
   const { data: settings } = useQuery({
     queryKey: ['system-settings'],
@@ -31,6 +37,12 @@ export default function AdminSettings() {
     if (settings) {
       setWebhookSend(settings.zapier_webhook_send || '');
       setWebhookDeliver(settings.zapier_webhook_deliver || '');
+      setSendSubject(settings.email_send_subject || '');
+      setSendBody(settings.email_send_body || '');
+      setReviewSubject(settings.email_review_subject || '');
+      setReviewBody(settings.email_review_body || '');
+      setDeliverSubject(settings.email_deliver_subject || '');
+      setDeliverBody(settings.email_deliver_body || '');
     }
   }, [settings]);
 
@@ -41,6 +53,12 @@ export default function AdminSettings() {
         .update({
           zapier_webhook_send: webhookSend || null,
           zapier_webhook_deliver: webhookDeliver || null,
+          email_send_subject: sendSubject || null,
+          email_send_body: sendBody || null,
+          email_review_subject: reviewSubject || null,
+          email_review_body: reviewBody || null,
+          email_deliver_subject: deliverSubject || null,
+          email_deliver_body: deliverBody || null,
         })
         .eq('id', settings!.id);
 
@@ -109,7 +127,20 @@ export default function AdminSettings() {
         </CardContent>
       </Card>
 
-      <EmailTemplatePreview />
+      <EmailTemplateEditor
+        sendSubject={sendSubject}
+        sendBody={sendBody}
+        reviewSubject={reviewSubject}
+        reviewBody={reviewBody}
+        deliverSubject={deliverSubject}
+        deliverBody={deliverBody}
+        onSendSubjectChange={setSendSubject}
+        onSendBodyChange={setSendBody}
+        onReviewSubjectChange={setReviewSubject}
+        onReviewBodyChange={setReviewBody}
+        onDeliverSubjectChange={setDeliverSubject}
+        onDeliverBodyChange={setDeliverBody}
+      />
     </div>
   );
 }
