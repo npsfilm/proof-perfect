@@ -12,6 +12,14 @@ import {
   getCompanyName 
 } from "../_shared/gallery-helpers.ts";
 import { logWebhookAttempt } from "../_shared/webhook-logger.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+// Input validation schema
+const deliverWebhookSchema = z.object({
+  gallery_id: z.string().uuid({ message: "Invalid gallery_id format" }),
+  client_emails: z.array(z.string().email({ message: "Invalid email format" })).min(1, { message: "At least one client email required" }),
+  download_link: z.string().url({ message: "Invalid download_link format" })
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -60,7 +68,22 @@ serve(async (req) => {
 
     console.log('[webhook-deliver] Authenticated admin user:', user.id);
 
-    const { gallery_id, client_emails, download_link } = await req.json();
+    // 4. Parse and validate input
+    const body = await req.json();
+    const validationResult = deliverWebhookSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      console.error('[webhook-deliver] Input validation failed:', validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validationResult.error.flatten().fieldErrors 
+        }), 
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const { gallery_id, client_emails, download_link } = validationResult.data;
 
     console.log('Processing delivery webhook for gallery:', gallery_id);
 
