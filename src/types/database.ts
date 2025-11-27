@@ -24,6 +24,7 @@ export interface Gallery {
   package_target_count: number;
   salutation_type: SalutationType;
   company_id?: string;
+  address?: string;
   final_delivery_link?: string;
   is_locked: boolean;
   reviewed_at?: string;
@@ -101,6 +102,25 @@ export interface CompanyMember {
   id: string;
   company_id: string;
   user_id: string;
+  created_at: string;
+}
+
+export interface Client {
+  id: string;
+  email: string;
+  anrede?: 'Herr' | 'Frau' | 'Divers';
+  vorname: string;
+  nachname: string;
+  ansprache: 'Du' | 'Sie';
+  company_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GalleryClient {
+  id: string;
+  gallery_id: string;
+  client_id: string;
   created_at: string;
 }
 

@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Gallery, Photo } from '@/types/database';
+import { Gallery, Photo, Client } from '@/types/database';
 import { useCompanies } from '@/hooks/useCompanies';
+import { useGalleryClients } from '@/hooks/useClients';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ClientEmailInput } from '@/components/admin/ClientEmailInput';
+import { ClientPicker } from '@/components/admin/ClientPicker';
 import { PhotoUploader } from '@/components/admin/PhotoUploader';
 import { ArrowLeft, Send, Loader2 } from 'lucide-react';
 
@@ -20,7 +21,7 @@ export default function GalleryDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: companies } = useCompanies();
-  const [clientEmails, setClientEmails] = useState<string[]>([]);
+  const [selectedClients, setSelectedClients] = useState<Client[]>([]);
   const [sending, setSending] = useState(false);
 
   const { data: gallery, isLoading: galleryLoading } = useQuery({
@@ -49,24 +50,14 @@ export default function GalleryDetail() {
     },
   });
 
-  const { data: accessList } = useQuery({
-    queryKey: ['gallery-access', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('gallery_access')
-        .select('user_id, profiles(email)')
-        .eq('gallery_id', id!);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: galleryClients } = useGalleryClients(id);
 
   useEffect(() => {
-    if (accessList) {
-      const emails = accessList.map((a: any) => a.profiles.email);
-      setClientEmails(emails);
+    if (galleryClients) {
+      const clients = galleryClients.map((gc: any) => gc.clients);
+      setSelectedClients(clients);
     }
-  }, [accessList]);
+  }, [galleryClients]);
 
   const handleCompanyChange = async (companyId: string) => {
     try {
@@ -90,10 +81,10 @@ export default function GalleryDetail() {
   };
 
   const handleSendToClient = async () => {
-    if (clientEmails.length === 0) {
+    if (selectedClients.length === 0) {
       toast({
         title: 'Keine Kunden',
-        description: 'Bitte fügen Sie mindestens eine Kunden-E-Mail hinzu.',
+        description: 'Bitte wählen Sie mindestens einen Kunden aus.',
         variant: 'destructive',
       });
       return;
@@ -110,18 +101,29 @@ export default function GalleryDetail() {
 
     setSending(true);
     try {
-      // Add clients to gallery
-      const { data: addResult, error: addError } = await supabase.rpc(
-        'add_clients_to_gallery',
-        {
-          p_gallery_id: id!,
-          p_emails: clientEmails,
-        }
-      );
-
-      if (addError) throw addError;
-
-      const result = addResult as any;
+      // Update existing gallery_clients
+      const existingClientIds = galleryClients?.map((gc: any) => gc.client_id) || [];
+      const newClientIds = selectedClients.map(c => c.id);
+      
+      // Remove clients that were deselected
+      const toRemove = existingClientIds.filter((id: string) => !newClientIds.includes(id));
+      if (toRemove.length > 0) {
+        await supabase
+          .from('gallery_clients')
+          .delete()
+          .eq('gallery_id', id!)
+          .in('client_id', toRemove);
+      }
+      
+      // Add new clients
+      const toAdd = newClientIds.filter(id => !existingClientIds.includes(id));
+      if (toAdd.length > 0) {
+        const galleryClientRecords = toAdd.map(clientId => ({
+          gallery_id: id!,
+          client_id: clientId,
+        }));
+        await supabase.from('gallery_clients').insert(galleryClientRecords);
+      }
 
       // Update gallery status
       const { error: updateError } = await supabase
@@ -133,33 +135,28 @@ export default function GalleryDetail() {
 
       // Send webhook notification
       const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
-      const newPasswords = result.created?.map((c: any) => ({
-        email: c.email,
-        temp_password: c.temp_password,
-      })) || [];
+      const clientEmails = selectedClients.map(c => c.email);
 
       const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
         body: {
           gallery_id: id!,
           client_emails: clientEmails,
-          new_passwords: newPasswords,
+          new_passwords: [], // No new passwords since clients already exist
           gallery_url: galleryUrl,
         },
       });
 
       if (webhookError) {
         console.error('Webhook error:', webhookError);
-        // Don't fail the whole process if webhook fails
       }
 
       toast({
         title: 'Galerie gesendet!',
-        description: `An ${clientEmails.length} Kunde(n) gesendet. ${
-          result.created?.length > 0 ? `${result.created.length} neue(s) Konto(s) erstellt.` : ''
-        }`,
+        description: `An ${selectedClients.length} Kunde(n) gesendet.`,
       });
 
       queryClient.invalidateQueries({ queryKey: ['gallery', id] });
+      queryClient.invalidateQueries({ queryKey: ['gallery-clients', id] });
     } catch (error: any) {
       toast({
         title: 'Fehler',
@@ -172,10 +169,10 @@ export default function GalleryDetail() {
   };
 
   const handleResendToClient = async () => {
-    if (clientEmails.length === 0) {
+    if (selectedClients.length === 0) {
       toast({
         title: 'Keine Kunden',
-        description: 'Bitte fügen Sie mindestens eine Kunden-E-Mail hinzu.',
+        description: 'Bitte wählen Sie mindestens einen Kunden aus.',
         variant: 'destructive',
       });
       return;
@@ -185,12 +182,13 @@ export default function GalleryDetail() {
     try {
       // Send webhook notification without changing status
       const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
+      const clientEmails = selectedClients.map(c => c.email);
 
       const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
         body: {
           gallery_id: id!,
           client_emails: clientEmails,
-          new_passwords: [], // No new passwords on resend
+          new_passwords: [],
           gallery_url: galleryUrl,
         },
       });
@@ -201,7 +199,7 @@ export default function GalleryDetail() {
 
       toast({
         title: 'Galerie erneut gesendet!',
-        description: `Benachrichtigung an ${clientEmails.length} Kunde(n) gesendet.`,
+        description: `Benachrichtigung an ${selectedClients.length} Kunde(n) gesendet.`,
       });
     } catch (error: any) {
       toast({
@@ -285,6 +283,12 @@ export default function GalleryDetail() {
               <p className="text-sm text-muted-foreground">Anrede</p>
               <p className="font-medium">{gallery.salutation_type}</p>
             </div>
+            {gallery.address && (
+              <div>
+                <p className="text-sm text-muted-foreground">Adresse</p>
+                <p className="font-medium whitespace-pre-line">{gallery.address}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">Hochgeladene Fotos</p>
               <p className="font-medium">{photos?.length ?? 0} Fotos</p>
@@ -316,13 +320,13 @@ export default function GalleryDetail() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Kundenzugriff</CardTitle>
-            <CardDescription>Kunden-E-Mails hinzufügen, um Zugriff auf die Galerie zu gewähren</CardDescription>
+            <CardTitle>Kunden</CardTitle>
+            <CardDescription>Wählen Sie die Kunden aus, die Zugriff auf diese Galerie haben sollen</CardDescription>
           </CardHeader>
           <CardContent>
-            <ClientEmailInput
-              emails={clientEmails}
-              onChange={setClientEmails}
+            <ClientPicker
+              selectedClients={selectedClients}
+              onClientsChange={setSelectedClients}
               disabled={gallery.status !== 'Draft'}
             />
           </CardContent>

@@ -2,20 +2,27 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGalleries } from '@/hooks/useGalleries';
 import { useCompanies } from '@/hooks/useCompanies';
+import { Client } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { ClientPicker } from '@/components/admin/ClientPicker';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
   const { createGallery } = useGalleries();
   const { data: companies } = useCompanies();
+  const [selectedClients, setSelectedClients] = useState<Client[]>([]);
   const [formData, setFormData] = useState({
     name: '',
+    address: '',
     package_target_count: 20,
     salutation_type: 'Du' as 'Du' | 'Sie',
     company_id: '',
@@ -23,13 +30,55 @@ export default function GalleryCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submitData = {
-      ...formData,
-      company_id: formData.company_id || null,
-    };
-    const result = await createGallery.mutateAsync(submitData);
-    if (result) {
-      navigate(`/admin/galleries/${result.id}`);
+    
+    if (selectedClients.length === 0) {
+      toast({
+        title: 'Keine Kunden ausgewählt',
+        description: 'Bitte wählen Sie mindestens einen Kunden für die Galerie aus.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const submitData = {
+        name: formData.name,
+        address: formData.address || null,
+        package_target_count: formData.package_target_count,
+        salutation_type: formData.salutation_type,
+        company_id: formData.company_id || null,
+      };
+      
+      const result = await createGallery.mutateAsync(submitData);
+      
+      if (result) {
+        // Link clients to gallery
+        const galleryClients = selectedClients.map(client => ({
+          gallery_id: result.id,
+          client_id: client.id,
+        }));
+
+        const { error: linkError } = await supabase
+          .from('gallery_clients')
+          .insert(galleryClients);
+
+        if (linkError) {
+          console.error('Error linking clients:', linkError);
+          toast({
+            title: 'Warnung',
+            description: 'Galerie erstellt, aber Kunden konnten nicht verknüpft werden.',
+            variant: 'destructive',
+          });
+        }
+
+        navigate(`/admin/galleries/${result.id}`);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Fehler',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -49,7 +98,7 @@ export default function GalleryCreate() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Galerie-Name</Label>
+              <Label htmlFor="name">Galerie-Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -64,7 +113,22 @@ export default function GalleryCreate() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="target">Ziel-Paketanzahl</Label>
+              <Label htmlFor="address">Adresse (Optional)</Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Musterstraße 123, 12345 Musterstadt"
+                rows={2}
+                disabled={createGallery.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                Die Adresse der Immobilie oder des Shooting-Ortes
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="target">Ziel-Paketanzahl *</Label>
               <Input
                 id="target"
                 type="number"
@@ -81,8 +145,14 @@ export default function GalleryCreate() {
               </p>
             </div>
 
+            <ClientPicker
+              selectedClients={selectedClients}
+              onClientsChange={setSelectedClients}
+              disabled={createGallery.isPending}
+            />
+
             <div className="space-y-3">
-              <Label>Anredeform</Label>
+              <Label>Anredeform (Standard für Kunden-Kommunikation) *</Label>
               <RadioGroup
                 value={formData.salutation_type}
                 onValueChange={(value) =>
