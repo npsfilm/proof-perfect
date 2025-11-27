@@ -33,16 +33,16 @@ export default function Auth() {
 
       if (error) {
         toast({
-          title: 'Error',
+          title: 'Fehler',
           description: error.message,
           variant: 'destructive',
         });
       } else {
         toast({
-          title: isLogin ? 'Welcome back!' : 'Account created',
+          title: isLogin ? 'Willkommen zurück!' : 'Konto erstellt',
           description: isLogin 
-            ? 'You have successfully signed in.' 
-            : 'Your account has been created successfully.',
+            ? 'Sie haben sich erfolgreich angemeldet.' 
+            : 'Ihr Konto wurde erfolgreich erstellt.',
         });
       }
     } catch (error: any) {
@@ -61,22 +61,22 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
-            {isLogin ? 'Sign in' : 'Create account'}
+            {isLogin ? 'Anmelden' : 'Konto erstellen'}
           </CardTitle>
           <CardDescription>
             {isLogin 
-              ? 'Enter your credentials to access your account' 
-              : 'Enter your details to create a new account'}
+              ? 'Geben Sie Ihre Zugangsdaten ein, um auf Ihr Konto zuzugreifen' 
+              : 'Geben Sie Ihre Daten ein, um ein neues Konto zu erstellen'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-Mail</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="name@beispiel.de"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -84,11 +84,11 @@ export default function Auth() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Passwort</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Geben Sie Ihr Passwort ein"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -97,7 +97,7 @@ export default function Auth() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Loading...' : (isLogin ? 'Sign in' : 'Sign up')}
+              {loading ? 'Lädt...' : (isLogin ? 'Anmelden' : 'Registrieren')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
@@ -107,7 +107,7 @@ export default function Auth() {
               className="text-primary hover:underline"
               disabled={loading}
             >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              {isLogin ? "Noch kein Konto? Registrieren" : 'Bereits ein Konto? Anmelden'}
             </button>
           </div>
         </CardContent>
