@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, FolderOpen } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { StatCardSkeletonGrid } from '@/components/admin/skeletons/StatCardSkeleton';
 
 export default function AdminDashboard() {
   const { data: galleries, isLoading } = useGalleries();
@@ -31,7 +32,10 @@ export default function AdminDashboard() {
           }
         />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {isLoading ? (
+        <StatCardSkeletonGrid count={4} />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
@@ -69,6 +73,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       <Card>
         <CardHeader>

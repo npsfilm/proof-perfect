@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { TableSkeleton } from '@/components/admin/skeletons/TableSkeleton';
 
 export default function WebhookLogs() {
   const { data: logs, isLoading } = useWebhookLogs();
@@ -64,14 +65,6 @@ export default function WebhookLogs() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Lade Webhook-Logs...</div>
-      </div>
-    );
-  }
-
   return (
     <PageContainer size="xl">
       <div className="space-y-6">
@@ -121,7 +114,9 @@ export default function WebhookLogs() {
             </div>
           </div>
 
-          {filteredLogs && filteredLogs.length > 0 ? (
+          {isLoading ? (
+            <TableSkeleton columns={5} rows={8} showHeader={false} />
+          ) : filteredLogs && filteredLogs.length > 0 ? (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>

@@ -13,6 +13,7 @@ import { Plus, Eye, Trash2 } from 'lucide-react';
 import { GalleryStatus } from '@/types/database';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { GalleryCardSkeletonGrid } from '@/components/admin/skeletons/GalleryCardSkeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -143,11 +144,7 @@ export default function GalleriesList() {
       />
 
       {isLoading ? (
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">Lade Galerien...</p>
-          </CardContent>
-        </Card>
+        <GalleryCardSkeletonGrid count={6} />
       ) : filteredGalleries.length > 0 ? (
         <>
           {activeFilterCount > 0 && (
