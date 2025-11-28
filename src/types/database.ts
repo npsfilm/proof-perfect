@@ -30,6 +30,7 @@ export interface Gallery {
   reviewed_at?: string;
   reviewed_by?: string;
   delivered_at?: string;
+  express_delivery_requested: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -51,6 +52,7 @@ export interface Photo {
   client_comment?: string;
   staging_requested: boolean;
   staging_style?: string;
+  blue_hour_requested: boolean;
   created_at: string;
   updated_at: string;
 }

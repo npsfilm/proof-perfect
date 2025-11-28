@@ -180,6 +180,11 @@ export default function GalleriesList() {
                     >
                       <div className="flex items-center gap-2 flex-wrap">
                         <CardTitle className="text-lg">{gallery.name}</CardTitle>
+                        {gallery.express_delivery_requested && (
+                          <Badge className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                            24H
+                          </Badge>
+                        )}
                         {gallery.status === 'Closed' && gallery.reviewed_at && (
                           <TimeElapsed 
                             startTime={gallery.reviewed_at}
