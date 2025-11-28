@@ -364,7 +364,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
 
     if (step === 'services') {
       return (
-        <div className="py-6">
+        <div className="py-6 relative">
           <div className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3")}>
             {/* 24h Lieferung */}
             <Card 
@@ -445,7 +445,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
             {/* Virtuelle Blaue Stunde */}
             <Card 
               className={cn(
-                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat relative overflow-hidden",
+                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat",
                 selectedServices.blueHour && "ring-2 ring-primary shadow-neu-float"
               )}
               onClick={() => toggleService('blueHour')}
@@ -489,14 +489,14 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                   </div>
                 </div>
               </CardContent>
-              
-              {/* Overlay - covers entire card when expanded */}
-              <BlueHourInfoCard
-                isExpanded={isBlueHourInfoExpanded}
-                onToggle={() => setIsBlueHourInfoExpanded(!isBlueHourInfoExpanded)}
-              />
             </Card>
           </div>
+
+          {/* BlueHourInfoCard overlay - covers entire services step */}
+          <BlueHourInfoCard
+            isExpanded={isBlueHourInfoExpanded}
+            onToggle={() => setIsBlueHourInfoExpanded(false)}
+          />
         </div>
       );
     }
