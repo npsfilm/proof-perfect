@@ -82,17 +82,38 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
             <DialogHeader>
               <DialogTitle>Teilen Sie Ihr Feedback</DialogTitle>
               <DialogDescription>
-                Lassen Sie uns Ihre allgemeinen Gedanken zum Fotoshooting wissen
+                Sie haben {selectedPhotos.length} Fotos ausgewählt
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4">
-              <Textarea
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Ihr Feedback hilft uns, zukünftige Shootings zu verbessern..."
-                rows={6}
-                className="resize-none"
-              />
+            <div className="py-4 space-y-6">
+              {/* Selected Photos Overview */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Ausgewählte Fotos</Label>
+                <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto border rounded-lg p-3">
+                  {selectedPhotos.map((photo) => (
+                    <div key={photo.id} className="relative aspect-square rounded overflow-hidden">
+                      <img
+                        src={signedUrls[photo.id] || photo.storage_url}
+                        alt={photo.filename}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Feedback Textarea */}
+              <div className="space-y-2">
+                <Label htmlFor="feedback">Ihr Feedback (Optional)</Label>
+                <Textarea
+                  id="feedback"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Ihr Feedback hilft uns, zukünftige Shootings zu verbessern..."
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={onClose}>Abbrechen</Button>
