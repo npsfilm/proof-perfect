@@ -245,7 +245,7 @@ export default function GalleryReview() {
     <PageContainer size="xl">
       <div className="space-y-6">
         <PageHeader
-          title={`Überprüfung: ${gallery.name}`}
+          title={gallery.status === 'Delivered' ? `Geliefert: ${gallery.name}` : `In Bearbeitung: ${gallery.name}`}
           description="Kundenauswahl und Feedback"
           breadcrumbs={[
             { label: 'Galerien', href: '/admin/galleries' },

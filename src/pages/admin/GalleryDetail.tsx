@@ -66,7 +66,14 @@ export default function GalleryDetail() {
   }
 
   const isDraft = gallery.status === 'Planning';
-  const isClosed = gallery.status === 'Closed' || gallery.status === 'Processing' || gallery.status === 'Delivered';
+  const isClosed = gallery.status === 'Closed';
+
+  // Auto-redirect to review page for Processing/Delivered galleries
+  useEffect(() => {
+    if (gallery && (gallery.status === 'Processing' || gallery.status === 'Delivered')) {
+      navigate(`/admin/galleries/${gallery.id}/review`, { replace: true });
+    }
+  }, [gallery, navigate]);
 
   const handleReopenGallery = async () => {
     try {
@@ -122,9 +129,9 @@ export default function GalleryDetail() {
                 </svg>
                 Kunden-Ansicht
               </Button>
-              {(gallery.status === 'Closed' || gallery.status === 'Processing' || gallery.status === 'Delivered') && (
+              {gallery.status === 'Closed' && (
                 <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
-                  {gallery.status === 'Processing' ? 'Bearbeitung ansehen' : 'Überprüfung ansehen'}
+                  Bearbeitung starten
                 </Button>
               )}
             </div>
