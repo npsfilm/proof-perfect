@@ -1,8 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
 import { Camera, Heart, Home, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GalleryStatus } from '@/constants/gallery-status';
 
 interface GalleryHeroCardProps {
   name: string;
@@ -94,18 +95,12 @@ export function GalleryHeroCard({
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-white/90">
-              <span>
-                {selectedCount} von {photosCount} ausgewählt
-              </span>
-              <span className="font-medium">{progress}%</span>
-            </div>
-            <Progress 
-              value={progress} 
-              className="h-2 bg-white/20"
-              aria-label={`${selectedCount} von ${photosCount} Fotos ausgewählt`}
+          {/* Gallery Status Progress */}
+          <div className="mt-1">
+            <GalleryProgressBar 
+              currentStatus={status as GalleryStatus}
+              compact={true}
+              className="scale-90 origin-left"
             />
           </div>
         </div>
