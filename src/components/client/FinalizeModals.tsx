@@ -11,7 +11,7 @@ import { Upload, Clock, Home, Sunset, Check, Sparkles, ChevronDown, Camera, Gift
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { STAGING_STYLES } from '@/constants/staging';
 import { Card, CardContent } from '@/components/ui/card';
-import { BlueHourSlider } from './BlueHourSlider';
+import { BlueHourInfoCard } from './BlueHourInfoCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -190,6 +190,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
   const [stagingComment, setStagingComment] = useState('');
   const [referenceFile, setReferenceFile] = useState<File | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBlueHourInfoExpanded, setIsBlueHourInfoExpanded] = useState(false);
 
   // Photo numbering map
   const photoNumberMap = selectedPhotos.reduce((acc, photo, index) => {
@@ -471,7 +472,12 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                   <p className="text-sm text-muted-foreground leading-relaxed mb-2">
                     Außenaufnahmen zur goldenen Stunde verwandeln
                   </p>
-                  <BlueHourSlider />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <BlueHourInfoCard
+                      isExpanded={isBlueHourInfoExpanded}
+                      onToggle={() => setIsBlueHourInfoExpanded(!isBlueHourInfoExpanded)}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -1,6 +1,12 @@
 import { useState, useRef } from "react";
 
-export const BlueHourSlider = () => {
+interface BlueHourSliderProps {
+  beforeImage?: string;
+  afterImage?: string;
+  title?: string;
+}
+
+export const BlueHourSlider = ({ beforeImage, afterImage, title }: BlueHourSliderProps) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -34,26 +40,49 @@ export const BlueHourSlider = () => {
   };
 
   return (
-    <div className="mt-3 w-full">
+    <div className="w-full">
+      {title && (
+        <p className="text-sm font-medium text-foreground mb-2">{title}</p>
+      )}
       <div
         ref={containerRef}
-        className="relative h-20 overflow-hidden rounded-xl cursor-ew-resize select-none"
+        className="relative h-32 overflow-hidden rounded-2xl cursor-ew-resize select-none shadow-neu-flat"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onTouchMove={handleTouchMove}
       >
-        {/* Before - Daylight gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-200 via-blue-100 to-amber-50" />
+        {/* Before - Daylight image or gradient */}
+        {beforeImage ? (
+          <img 
+            src={beforeImage} 
+            alt="Vorher" 
+            className="absolute inset-0 w-full h-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-200 via-blue-100 to-amber-50" />
+        )}
         
-        {/* After - Blue hour gradient with clip-path */}
+        {/* After - Blue hour image or gradient with clip-path */}
         <div
-          className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-orange-600"
+          className="absolute inset-0"
           style={{
             clipPath: `inset(0 0 0 ${sliderPosition}%)`,
           }}
-        />
+        >
+          {afterImage ? (
+            <img 
+              src={afterImage} 
+              alt="Nachher" 
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-orange-600" />
+          )}
+        </div>
 
         {/* Vorher Label */}
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-700 uppercase tracking-wide pointer-events-none">
