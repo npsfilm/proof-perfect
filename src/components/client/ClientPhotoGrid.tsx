@@ -54,7 +54,7 @@ export function ClientPhotoGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {photos.map((photo, index) => {
         const comparisonIndex = comparisonPhotos.indexOf(photo.id);
         const isInComparison = comparisonIndex !== -1;
@@ -79,7 +79,7 @@ export function ClientPhotoGrid({
           >
             {/* Image Container */}
             <div 
-              className="relative bg-muted/30 cursor-pointer overflow-hidden h-64"
+              className="relative bg-muted/30 cursor-pointer overflow-hidden aspect-[4/3]"
               onClick={() => !isDisabled && onPhotoClick(photo.id)}
             >
               <img
