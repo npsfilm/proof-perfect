@@ -45,10 +45,9 @@ function StepIndicator({ currentStep }: { currentStep: 'feedback' | 'services' |
   ];
 
   const currentIndex = steps.findIndex(s => s.key === currentStep);
-  const progress = ((currentIndex + 1) / steps.length) * 100;
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="mb-8">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isActive = index === currentIndex;
@@ -92,13 +91,6 @@ function StepIndicator({ currentStep }: { currentStep: 'feedback' | 'services' |
             </div>
           );
         })}
-      </div>
-      {/* Overall Progress Bar */}
-      <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden shadow-neu-pressed">
-        <div 
-          className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-700 ease-out rounded-full"
-          style={{ width: `${progress}%` }}
-        />
       </div>
     </div>
   );
