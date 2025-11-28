@@ -29,11 +29,17 @@ export function useGalleryCoverPhotos(galleryIds: string[]) {
           if (photos && photos.length > 0) {
             const photo = photos[0];
             
-            // Create signed URL
+            // Extract the path from the full storage URL
+            // Format: https://.../storage/v1/object/public/proofs/testgalerie/IMG_8650.jpg
+            // We need: testgalerie/IMG_8650.jpg
+            const urlParts = photo.storage_url.split('/proofs/');
+            const filePath = urlParts.length > 1 ? urlParts[1] : photo.storage_url;
+
+            // Create signed URL using just the file path
             const { data: signedData } = await supabase
               .storage
               .from('proofs')
-              .createSignedUrl(photo.storage_url, 3600);
+              .createSignedUrl(filePath, 3600);
 
             coverPhotos[galleryId] = {
               gallery_id: galleryId,
