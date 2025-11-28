@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -99,8 +100,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRole(null);
   };
 
+  const resetPassword = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/auth/reset-password`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.toLowerCase().trim(),
+      {
+        redirectTo: redirectUrl,
+      }
+    );
+
+    // If successful, trigger webhook to notify via Zapier
+    if (!error) {
+      try {
+        await supabase.functions.invoke('webhook-password-reset', {
+          body: {
+            email: email.toLowerCase().trim(),
+            reset_link: redirectUrl,
+          }
+        });
+      } catch (webhookError) {
+        console.error('Failed to send password reset webhook:', webhookError);
+        // Don't fail the reset if webhook fails
+      }
+    }
+
+    return { error };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, role, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, role, loading, signIn, signUp, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
