@@ -261,9 +261,20 @@ export default function GalleryReview() {
   const photosWithAnnotations = allAnnotations ? 
     [...new Set(allAnnotations.map(a => a.photo_id))].length : 0;
 
+  // Status translations
+  const statusLabels: Record<string, string> = {
+    'Planning': 'Planung',
+    'Open': 'Offen',
+    'Closed': 'Geschlossen',
+    'Processing': 'In Bearbeitung',
+    'Delivered': 'Geliefert',
+  };
+
+  const hasServices = gallery.express_delivery_requested || stagingPhotos.length > 0 || blueHourPhotos.length > 0;
+
   return (
     <PageContainer size="xl">
-      <div className="space-y-6">
+      <div className="space-y-4">
         <PageHeader
           title={gallery.status === 'Delivered' ? `Geliefert: ${gallery.name}` : `In Bearbeitung: ${gallery.name}`}
           description="Kundenauswahl und Feedback"
@@ -282,48 +293,49 @@ export default function GalleryReview() {
                 />
               )}
               <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
-                {gallery.status}
+                {statusLabels[gallery.status] || gallery.status}
               </Badge>
             </div>
           }
         />
 
-      {/* Service Tags - Prominent display */}
-      {(gallery.express_delivery_requested || stagingPhotos.length > 0 || blueHourPhotos.length > 0) && (
-        <Card className={gallery.express_delivery_requested ? 'border-2 border-red-500 shadow-lg' : ''}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      {/* Service Tags - Always visible */}
+      <Card className={gallery.express_delivery_requested ? 'border-2 border-red-500 shadow-lg' : ''}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            {gallery.express_delivery_requested && (
+              <span className="text-red-600">⚡</span>
+            )}
+            Ausgewählte Services
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!hasServices ? (
+            <p className="text-sm text-muted-foreground">Keine Zusatzleistungen gebucht</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
               {gallery.express_delivery_requested && (
-                <span className="text-red-600">⚡</span>
-              )}
-              Ausgewählte Services
-            </CardTitle>
-            <CardDescription>Vom Kunden beauftragte Zusatzleistungen</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {gallery.express_delivery_requested && (
-                <Badge className="bg-red-600 hover:bg-red-700 text-white text-base px-4 py-2 animate-pulse">
-                  <Clock className="h-5 w-5 mr-2" />
-                  24H EXPRESS - DRINGEND EILIG
+                <Badge className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 animate-pulse">
+                  <Clock className="h-4 w-4 mr-1" />
+                  24H EXPRESS
                 </Badge>
               )}
               {stagingPhotos.length > 0 && (
-                <Badge className="bg-purple-600 hover:bg-purple-700 text-white text-base px-4 py-2">
-                  <Home className="h-5 w-5 mr-2" />
-                  {stagingPhotos.length}× Virtuelles Staging
+                <Badge className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1">
+                  <Home className="h-4 w-4 mr-1" />
+                  {stagingPhotos.length}× Staging
                 </Badge>
               )}
               {blueHourPhotos.length > 0 && (
-                <Badge className="bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white text-base px-4 py-2">
-                  <Sunrise className="h-5 w-5 mr-2" />
+                <Badge className="bg-gradient-to-r from-blue-600 to-orange-500 text-white px-3 py-1">
+                  <Sunrise className="h-4 w-4 mr-1" />
                   {blueHourPhotos.length}× Blaue Stunde
                 </Badge>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {gallery.status !== 'Closed' && gallery.status !== 'Delivered' && (
         <Alert>
@@ -333,63 +345,71 @@ export default function GalleryReview() {
         </Alert>
       )}
 
-      {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Summary Stats - Compact */}
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Ausgewählte Fotos</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Ausgewählte Fotos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{selectedPhotos?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              von {gallery.package_target_count} im Paket
-            </p>
+            <div className="text-xl font-bold">{selectedPhotos?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">von {gallery.package_target_count}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Staging-Anfragen</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Staging</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stagingPhotos.length}</div>
-            <p className="text-xs text-muted-foreground">Fotos benötigen Staging</p>
+            <div className="text-xl font-bold">{stagingPhotos.length}</div>
+            <p className="text-xs text-muted-foreground">Anfragen</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Kommentare</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Kommentare</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{photosWithComments.length}</div>
-            <p className="text-xs text-muted-foreground">Fotos mit Notizen</p>
+            <div className="text-xl font-bold">{photosWithComments.length}</div>
+            <p className="text-xs text-muted-foreground">Fotos</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Anmerkungen</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Anmerkungen</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{photosWithAnnotations}</div>
-            <p className="text-xs text-muted-foreground">Fotos mit Markierungen</p>
+            <div className="text-xl font-bold">{photosWithAnnotations}</div>
+            <p className="text-xs text-muted-foreground">Markierungen</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Blaue Stunde</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">{blueHourPhotos.length}</div>
+            <p className="text-xs text-muted-foreground">Fotos</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Reference Images */}
+      {/* Reference Images - Compact */}
       {stagingReferences && stagingReferences.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Referenzbilder</CardTitle>
-            <CardDescription>Vom Kunden hochgeladene Staging-Referenzen</CardDescription>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Referenzbilder ({stagingReferences.length})</CardTitle>
+            <CardDescription className="text-xs">Staging-Referenzen</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {stagingReferences.map((ref) => (
-                <div key={ref.id} className="space-y-2">
-                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500">
+                <div key={ref.id} className="space-y-1">
+                  <div className="aspect-square rounded-md overflow-hidden border border-purple-500">
                     <img
                       src={ref.file_url}
                       alt="Staging Referenz"
@@ -397,7 +417,7 @@ export default function GalleryReview() {
                     />
                   </div>
                   {ref.notes && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">{ref.notes}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1">{ref.notes}</p>
                   )}
                 </div>
               ))}
@@ -450,34 +470,34 @@ export default function GalleryReview() {
         </div>
       )}
 
-      {/* Selected Photos Grid */}
+      {/* Selected Photos Grid - Compact with aspect-[4/3] */}
       {selectedPhotos && selectedPhotos.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Ausgewählte Fotos ({selectedPhotos.length})</CardTitle>
-            <CardDescription>Vom Kunden gewählte Fotos</CardDescription>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Ausgewählte Fotos ({selectedPhotos.length})</CardTitle>
+            <CardDescription className="text-xs">Vom Kunden gewählte Fotos</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {selectedPhotos.map((photo) => {
                 const photoAnnotations = allAnnotations?.filter(a => a.photo_id === photo.id) || [];
                 
                 // Determine border styling based on services
-                let borderClass = 'border-2 border-muted';
+                let borderClass = 'border border-muted';
                 if (photo.staging_requested) {
-                  borderClass = 'border-4 border-purple-500 shadow-lg shadow-purple-200';
+                  borderClass = 'border-2 border-purple-500';
                 } else if (photo.blue_hour_requested) {
-                  borderClass = 'border-4 border-transparent bg-gradient-to-br from-blue-500 to-orange-500 p-0.5 shadow-lg';
+                  borderClass = 'border-2 border-transparent bg-gradient-to-br from-blue-500 to-orange-500 p-0.5';
                 }
                 
                 return (
                   <div key={photo.id} className="relative group">
-                    <div className={`aspect-square rounded-lg overflow-hidden relative ${borderClass}`}>
-                      <div className={photo.blue_hour_requested ? 'w-full h-full rounded-md overflow-hidden' : ''}>
+                    <div className={`aspect-[4/3] rounded-md overflow-hidden relative ${borderClass}`}>
+                      <div className={photo.blue_hour_requested ? 'w-full h-full rounded-sm overflow-hidden' : ''}>
                         <img
                           src={photo.storage_url}
                           alt={photo.filename}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain bg-muted"
                         />
                       </div>
                       
@@ -497,55 +517,50 @@ export default function GalleryReview() {
                                     }}
                                   >
                                     <div className="relative">
-                                      {/* Marker Pin */}
-                                      <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold shadow-lg border-2 border-background hover:scale-110 transition-transform">
+                                      <div className="w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-[10px] font-bold shadow-md border border-background hover:scale-110 transition-transform">
                                         {idx + 1}
                                       </div>
-                                      {/* Pointer */}
-                                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-primary"></div>
+                                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-primary"></div>
                                     </div>
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent 
-                                  side="top" 
-                                  className="max-w-xs"
-                                  sideOffset={8}
-                                >
-                                  <p className="text-sm font-medium mb-1">Anmerkung {idx + 1}</p>
-                                  <p className="text-xs">{annotation.comment}</p>
+                                <TooltipContent side="top" className="max-w-xs" sideOffset={8}>
+                                  <p className="text-xs font-medium mb-1">Anmerkung {idx + 1}</p>
+                                  <p className="text-[10px]">{annotation.comment}</p>
                                 </TooltipContent>
                               </Tooltip>
                             ))}
                           </div>
                           
-                          {/* Count Badge */}
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
+                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md">
                             {photoAnnotations.length}
                           </div>
                         </TooltipProvider>
                       )}
                     </div>
                     
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs font-mono truncate">{photo.filename}</p>
+                    <div className="mt-1 space-y-0.5">
+                      <p className="text-[10px] font-mono truncate">{photo.filename}</p>
                       
-                      {photo.staging_requested && (
-                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-300">
-                          <Wand2 className="h-3 w-3 mr-1" />
-                          Staging: {photo.staging_style || 'Modern'}
-                        </Badge>
-                      )}
-                      
-                      {photo.blue_hour_requested && (
-                        <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-orange-100 text-blue-700 border-blue-300">
-                          <Sunrise className="h-3 w-3 mr-1" />
-                          Blaue Stunde
-                        </Badge>
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {photo.staging_requested && (
+                          <Badge className="bg-purple-100 text-purple-700 text-[9px] px-1 py-0">
+                            <Wand2 className="h-2 w-2 mr-0.5" />
+                            {photo.staging_style || 'Modern'}
+                          </Badge>
+                        )}
+                        
+                        {photo.blue_hour_requested && (
+                          <Badge className="bg-gradient-to-r from-blue-100 to-orange-100 text-blue-700 text-[9px] px-1 py-0">
+                            <Sunrise className="h-2 w-2 mr-0.5" />
+                            Blaue Stunde
+                          </Badge>
+                        )}
+                      </div>
                       
                       {photo.client_comment && (
-                        <div className="flex items-start gap-1 text-xs text-muted-foreground">
-                          <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                        <div className="flex items-start gap-1 text-[10px] text-muted-foreground">
+                          <MessageSquare className="h-2.5 w-2.5 mt-0.5 flex-shrink-0" />
                           <span className="line-clamp-2">{photo.client_comment}</span>
                         </div>
                       )}
