@@ -158,7 +158,7 @@ export function ComparisonMode({
               <img 
                 src={watermarkLogo} 
                 alt="" 
-                className="h-12 w-auto opacity-70 select-none"
+                className="h-20 w-auto opacity-70 select-none"
                 draggable={false}
               />
             </div>
@@ -262,7 +262,7 @@ export function ComparisonMode({
               <img 
                 src={watermarkLogo} 
                 alt="" 
-                className="h-10 w-auto opacity-70 select-none"
+                className="h-16 w-auto opacity-70 select-none"
                 draggable={false}
               />
             </div>
@@ -330,7 +330,7 @@ export function ComparisonMode({
               <img 
                 src={watermarkLogo} 
                 alt="" 
-                className="h-10 w-auto opacity-70 select-none"
+                className="h-16 w-auto opacity-70 select-none"
                 draggable={false}
               />
             </div>

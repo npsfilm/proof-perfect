@@ -420,7 +420,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
               <img 
                 src={watermarkLogo} 
                 alt="" 
-                className="h-12 w-auto opacity-70 select-none"
+                className="h-24 w-auto opacity-70 select-none"
                 draggable={false}
               />
             </div>
