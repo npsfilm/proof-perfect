@@ -40,6 +40,14 @@ export default function GalleryDetail() {
     }
   }, [galleryClients]);
 
+  // Auto-redirect to review page for Processing/Delivered galleries
+  // MUST be before any conditional returns to avoid hook ordering issues
+  useEffect(() => {
+    if (gallery && (gallery.status === 'Processing' || gallery.status === 'Delivered')) {
+      navigate(`/admin/galleries/${gallery.id}/review`, { replace: true });
+    }
+  }, [gallery, navigate]);
+
   const handleCopyUrl = () => {
     if (gallery) {
       navigator.clipboard.writeText(`${window.location.origin}/gallery/${gallery.slug}`);
@@ -67,13 +75,6 @@ export default function GalleryDetail() {
 
   const isDraft = gallery.status === 'Planning';
   const isClosed = gallery.status === 'Closed';
-
-  // Auto-redirect to review page for Processing/Delivered galleries
-  useEffect(() => {
-    if (gallery && (gallery.status === 'Processing' || gallery.status === 'Delivered')) {
-      navigate(`/admin/galleries/${gallery.id}/review`, { replace: true });
-    }
-  }, [gallery, navigate]);
 
   const handleReopenGallery = async () => {
     try {
