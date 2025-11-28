@@ -1,13 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Check, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2, MessageSquarePlus } from 'lucide-react';
+import { X, Check, Menu, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoBottomSheet } from './PhotoBottomSheet';
-import { AnnotationMarker } from './AnnotationMarker';
-import { AnnotationPopover } from './AnnotationPopover';
 import { Photo } from '@/types/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 import { usePhotoAnnotations } from '@/hooks/usePhotoAnnotations';
+import { ImageZoomControls } from './lightbox/ImageZoomControls';
+import { useImageZoom } from './lightbox/useImageZoom';
+import { useImagePan } from './lightbox/useImagePan';
+import { AnnotationLayer } from './lightbox/AnnotationLayer';
+import { LightboxNavigation } from './lightbox/LightboxNavigation';
+import { StagingControls } from './lightbox/StagingControls';
+import { KeyboardShortcuts } from './lightbox/KeyboardShortcuts';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -33,12 +36,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // Zoom state
-  const [zoom, setZoom] = useState(1);
-  const [panX, setPanX] = useState(0);
-  const [panY, setPanY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  
   // Annotation state
   const [annotationMode, setAnnotationMode] = useState(false);
   const [pendingAnnotation, setPendingAnnotation] = useState<{ x: number; y: number } | null>(null);
@@ -49,16 +46,39 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const { toast } = useToast();
   const { annotations, addAnnotation, deleteAnnotation } = usePhotoAnnotations(photo.id);
   const imageRef = useRef<HTMLImageElement>(null);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const touchEndY = useRef<number | null>(null);
-  const initialPinchDistance = useRef<number | null>(null);
-  const lastPanX = useRef(0);
-  const lastPanY = useRef(0);
 
   const currentIndex = photos.findIndex(p => p.id === photo.id);
+
+  // Use custom hooks for zoom and pan
+  const {
+    zoom,
+    handleZoomIn,
+    handleZoomOut,
+    handleResetZoom,
+    handleWheel,
+    handlePinchStart,
+    handlePinchMove,
+    handlePinchEnd,
+  } = useImageZoom();
+
+  const {
+    panX,
+    panY,
+    isDragging,
+    resetPan,
+    handlers: panHandlers,
+  } = useImagePan(zoom);
+
+  // Reset pan when zoom resets to 1
+  useEffect(() => {
+    if (zoom === 1) {
+      resetPan();
+    }
+  }, [zoom, resetPan]);
 
   // Get current user ID
   useEffect(() => {
@@ -89,9 +109,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     
     const rect = imageRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     setPendingAnnotation({
       x: e.clientX - rect.left,
@@ -125,63 +142,41 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
 
   // Reset zoom and annotation mode when photo changes
   useEffect(() => {
-    setZoom(1);
-    setPanX(0);
-    setPanY(0);
+    handleResetZoom();
+    resetPan();
     setAnnotationMode(false);
     setPendingAnnotation(null);
   }, [photo.id]);
 
-  // Pinch-to-zoom handling
-  const getPinchDistance = (touches: React.TouchList) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
   // Swipe gesture handling
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
-      // Pinch gesture
-      initialPinchDistance.current = getPinchDistance(e.touches);
+      handlePinchStart(e.touches);
       e.preventDefault();
     } else if (e.touches.length === 1) {
-      // Single touch for swipe or pan
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
-      lastPanX.current = panX;
-      lastPanY.current = panY;
-      if (zoom > 1) {
-        setIsDragging(true);
-      }
+      panHandlers.onTouchStart(e);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2 && initialPinchDistance.current) {
-      // Pinch zoom
-      const currentDistance = getPinchDistance(e.touches);
-      const scale = currentDistance / initialPinchDistance.current;
-      const newZoom = Math.min(Math.max(zoom * scale, 1), 5);
-      setZoom(newZoom);
-      initialPinchDistance.current = currentDistance;
+    const isPinching = handlePinchMove(e.touches);
+    if (isPinching) {
       e.preventDefault();
-    } else if (e.touches.length === 1 && zoom > 1 && isDragging) {
-      // Pan when zoomed
-      const deltaX = e.touches[0].clientX - (touchStartX.current || 0);
-      const deltaY = e.touches[0].clientY - (touchStartY.current || 0);
-      setPanX(lastPanX.current + deltaX);
-      setPanY(lastPanY.current + deltaY);
-      e.preventDefault();
-    } else {
+    } else if (e.touches.length === 1) {
+      // Handle pan if zoomed, otherwise track for swipe
+      if (zoom > 1 && isDragging) {
+        panHandlers.onTouchMove(e);
+      }
       touchEndX.current = e.touches[0].clientX;
       touchEndY.current = e.touches[0].clientY;
     }
   };
 
   const handleTouchEnd = () => {
-    initialPinchDistance.current = null;
-    setIsDragging(false);
+    handlePinchEnd();
+    panHandlers.onTouchEnd();
 
     // Only handle swipe if not zoomed
     if (zoom <= 1 && touchStartX.current && touchEndX.current && touchStartY.current && touchEndY.current) {
@@ -209,64 +204,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     touchEndY.current = null;
   };
 
-  // Wheel zoom for desktop
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      const delta = -e.deltaY * 0.01;
-      const newZoom = Math.min(Math.max(zoom + delta, 1), 5);
-      setZoom(newZoom);
-      if (newZoom === 1) {
-        setPanX(0);
-        setPanY(0);
-      }
-    }
-  };
-
-  // Mouse drag for panning when zoomed
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      lastPanX.current = panX;
-      lastPanY.current = panY;
-      touchStartX.current = e.clientX;
-      touchStartY.current = e.clientY;
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoom > 1 && touchStartX.current && touchStartY.current) {
-      const deltaX = e.clientX - touchStartX.current;
-      const deltaY = e.clientY - touchStartY.current;
-      setPanX(lastPanX.current + deltaX);
-      setPanY(lastPanY.current + deltaY);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Zoom controls
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.5, 5));
-  };
-
-  const handleZoomOut = () => {
-    const newZoom = Math.max(zoom - 0.5, 1);
-    setZoom(newZoom);
-    if (newZoom === 1) {
-      setPanX(0);
-      setPanY(0);
-    }
-  };
-
-  const handleResetZoom = () => {
-    setZoom(1);
-    setPanX(0);
-    setPanY(0);
-  };
-
   // Toggle keyboard hints with '?' key
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -290,7 +227,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos', galleryId] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Fehler',
         description: error.message,
@@ -371,74 +308,21 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         <X className="h-8 w-8" />
       </button>
 
-      {/* Keyboard Hints Toggle (Desktop only) */}
-      <button
-        onClick={() => setShowKeyboardHints(!showKeyboardHints)}
-        className="hidden lg:block absolute top-4 left-4 text-white/60 hover:text-white z-10"
-        title="Tastaturkürzel anzeigen"
-      >
-        <Keyboard className="h-6 w-6" />
-      </button>
+      {/* Keyboard Shortcuts */}
+      <KeyboardShortcuts 
+        show={showKeyboardHints}
+        onToggle={() => setShowKeyboardHints(!showKeyboardHints)}
+      />
 
-      {/* Keyboard Shortcuts Overlay */}
-      {showKeyboardHints && (
-        <div className="absolute top-16 left-4 bg-black/80 text-white rounded-lg p-4 z-10 backdrop-blur-sm">
-          <h3 className="font-medium mb-3 text-sm">Tastaturkürzel</h3>
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">←</kbd>
-              <span>Vorheriges Foto</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">→</kbd>
-              <span>Nächstes Foto</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">Leertaste</kbd>
-              <span>Foto auswählen</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">ESC</kbd>
-              <span>Schließen</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">?</kbd>
-              <span>Diese Hilfe ein/ausblenden</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="px-2 py-1 bg-white/20 rounded">Strg + Scroll</kbd>
-              <span>Zoomen</span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Navigation */}
+      <LightboxNavigation
+        currentIndex={currentIndex}
+        totalPhotos={photos.length}
+        isFullscreen={isFullscreen}
+        onNavigate={onNavigate}
+      />
 
-      {/* Navigation (Desktop only, mobile uses swipe) */}
-      {!isFullscreen && currentIndex > 0 && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate('prev');
-          }}
-          className="hidden lg:block absolute left-4 text-white hover:text-gray-300 z-10"
-        >
-          <ChevronLeft className="h-12 w-12" />
-        </button>
-      )}
-      
-      {!isFullscreen && currentIndex < photos.length - 1 && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate('next');
-          }}
-          className="hidden lg:block absolute right-4 text-white hover:text-gray-300 z-10"
-        >
-          <ChevronRight className="h-12 w-12" />
-        </button>
-      )}
-
-      {/* Annotation Mode Toggle (Desktop & Mobile) */}
+      {/* Annotation Mode Toggle */}
       <div className="absolute top-20 lg:left-4 right-4 lg:right-auto z-10 flex flex-col gap-2">
         <Button
           size="icon"
@@ -457,42 +341,25 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       </div>
 
       {/* Zoom Controls */}
-      {zoom > 1 && (
-        <div className="absolute top-20 right-4 z-10 flex flex-col gap-2 bg-black/60 rounded-lg p-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleResetZoom}
-            className="text-white hover:text-white hover:bg-white/20"
-            title="Zoom zurücksetzen"
-          >
-            <Maximize2 className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-
-      <div className="lg:hidden absolute bottom-24 right-4 z-10 flex flex-col gap-2 bg-black/60 rounded-lg p-2">
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={handleZoomIn}
-          className="text-white hover:text-white hover:bg-white/20"
-          title="Vergrößern"
-          disabled={zoom >= 5}
-        >
-          <ZoomIn className="h-5 w-5" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={handleZoomOut}
-          className="text-white hover:text-white hover:bg-white/20"
-          title="Verkleinern"
-          disabled={zoom <= 1}
-        >
-          <ZoomOut className="h-5 w-5" />
-        </Button>
-      </div>
+      <ImageZoomControls
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetZoom={() => {
+          handleResetZoom();
+          resetPan();
+        }}
+      />
+      <ImageZoomControls
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetZoom={() => {
+          handleResetZoom();
+          resetPan();
+        }}
+        isMobile
+      />
 
       {/* Mobile Bottom Action Button */}
       <button
@@ -516,13 +383,9 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       >
         {/* Image */}
         <div 
-          ref={imageContainerRef}
           className="flex-1 flex items-center justify-center relative"
           onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          {...panHandlers}
           onClick={handleImageClick}
           style={{ 
             cursor: annotationMode && zoom === 1 ? 'crosshair' : zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' 
@@ -542,33 +405,18 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
             }}
           />
 
-          {/* Annotation Markers */}
-          {zoom === 1 && annotations.map((annotation, index) => (
-            <AnnotationMarker
-              key={annotation.id}
-              annotation={annotation}
-              number={index + 1}
-              isOwner={annotation.author_user_id === currentUserId}
-              onDelete={handleDeleteAnnotation}
-              containerSize={imageContainerSize}
-            />
-          ))}
-
-          {/* Pending Annotation Popover */}
-          {pendingAnnotation && (
-            <AnnotationPopover
-              position={pendingAnnotation}
-              onSave={handleSaveAnnotation}
-              onCancel={handleCancelAnnotation}
-            />
-          )}
-
-          {/* Annotation Mode Indicator */}
-          {annotationMode && zoom === 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg z-10">
-              Klicken Sie auf das Bild, um eine Anmerkung hinzuzufügen
-            </div>
-          )}
+          {/* Annotation Layer */}
+          <AnnotationLayer
+            annotations={annotations}
+            pendingAnnotation={pendingAnnotation}
+            annotationMode={annotationMode}
+            zoom={zoom}
+            currentUserId={currentUserId}
+            imageContainerSize={imageContainerSize}
+            onSaveAnnotation={handleSaveAnnotation}
+            onCancelAnnotation={handleCancelAnnotation}
+            onDeleteAnnotation={handleDeleteAnnotation}
+          />
         </div>
 
         {/* Controls (Desktop only) */}
@@ -624,39 +472,12 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
           )}
 
           {/* Virtual Staging */}
-          <div className="space-y-4 border-t pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="staging" className="text-base">Virtuelles Staging</Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Möbel digital hinzufügen
-                </p>
-              </div>
-              <Switch
-                id="staging"
-                checked={stagingRequested}
-                onCheckedChange={handleStagingToggle}
-              />
-            </div>
-
-            {stagingRequested && (
-              <div className="space-y-2">
-                <Label htmlFor="staging-style">Stil</Label>
-                <Select value={stagingStyle} onValueChange={handleStagingStyleChange}>
-                  <SelectTrigger id="staging-style">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Modern">Modern</SelectItem>
-                    <SelectItem value="Scandinavian">Skandinavisch</SelectItem>
-                    <SelectItem value="Industrial">Industriell</SelectItem>
-                    <SelectItem value="Minimalist">Minimalistisch</SelectItem>
-                    <SelectItem value="Traditional">Traditionell</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
+          <StagingControls
+            stagingRequested={stagingRequested}
+            stagingStyle={stagingStyle}
+            onStagingToggle={handleStagingToggle}
+            onStagingStyleChange={handleStagingStyleChange}
+          />
         </div>
       </div>
 
