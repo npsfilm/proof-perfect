@@ -15,7 +15,9 @@ import { SelectionSummary } from '@/components/client/SelectionSummary';
 import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
 import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
-import { usePhotoOrientations, Orientation } from '@/hooks/usePhotoOrientations';
+import { usePhotoOrientations } from '@/hooks/usePhotoOrientations';
+import { useComparisonMode } from '@/hooks/useComparisonMode';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -27,17 +29,34 @@ export default function ClientGallery() {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
-  const [isComparisonMode, setIsComparisonMode] = useState(false);
-  const [comparisonPhotos, setComparisonPhotos] = useState<string[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [firstComparisonOrientation, setFirstComparisonOrientation] = useState<Orientation | null>(null);
-  const [showComparisonOverlay, setShowComparisonOverlay] = useState(false);
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
   const { orientations, detectOrientation } = usePhotoOrientations(photos);
+
+  // Use comparison mode hook
+  const {
+    isComparisonMode,
+    comparisonPhotos,
+    firstComparisonOrientation,
+    showComparisonOverlay,
+    handlePhotoClick: handleComparisonPhotoClick,
+    handleComparisonToggle,
+    handleStartComparison,
+    handleComparisonNavigate,
+    handleComparisonSwap,
+    handleCloseComparison,
+    handleToggleSelectionInComparison,
+  } = useComparisonMode({
+    photos,
+    orientations,
+    onToggleSelection: (photoId, currentState) => {
+      toggleSelection.mutate({ photoId, currentState });
+    },
+  });
 
   // Filter photos based on active filter - MUST be before early returns
   const filteredPhotos = useMemo(() => {
@@ -87,111 +106,7 @@ export default function ClientGallery() {
     setShowWelcome(true);
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (!photos || photos.length === 0) return;
-      
-      // Don't trigger if user is typing in an input or textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        if (selectedPhotoId) {
-          handleNavigate('prev');
-        } else {
-          // Navigate to last photo if no photo selected
-          setSelectedPhotoId(photos[photos.length - 1].id);
-        }
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        if (selectedPhotoId) {
-          handleNavigate('next');
-        } else {
-          // Navigate to first photo if no photo selected
-          setSelectedPhotoId(photos[0].id);
-        }
-      } else if (e.key === 'Escape' && selectedPhotoId) {
-        e.preventDefault();
-        setSelectedPhotoId(null);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [photos, selectedPhotoId]);
-
-  const handlePhotoClick = (photoId: string) => {
-    // If in comparison mode, add to comparison
-    if (isComparisonMode && comparisonPhotos.length < 2) {
-      if (!comparisonPhotos.includes(photoId)) {
-        const orientation = orientations[photoId];
-        
-        // First photo selection - set the orientation filter
-        if (comparisonPhotos.length === 0) {
-          setFirstComparisonOrientation(orientation);
-          setComparisonPhotos([photoId]);
-        } 
-        // Second photo - only allow if same orientation
-        else if (orientation === firstComparisonOrientation) {
-          setComparisonPhotos([...comparisonPhotos, photoId]);
-          // DON'T auto-open comparison - wait for button click
-        }
-      }
-    } else {
-      setSelectedPhotoId(photoId);
-    }
-  };
-
-  const handleComparisonToggle = () => {
-    if (isComparisonMode) {
-      // Exit comparison mode
-      setIsComparisonMode(false);
-      setComparisonPhotos([]);
-      setFirstComparisonOrientation(null);
-      setShowComparisonOverlay(false);
-    } else {
-      // Enter comparison mode
-      setIsComparisonMode(true);
-      setComparisonPhotos([]);
-      setFirstComparisonOrientation(null);
-      setShowComparisonOverlay(false);
-    }
-  };
-
-  const handleStartComparison = () => {
-    if (comparisonPhotos.length === 2) {
-      setShowComparisonOverlay(true);
-    }
-  };
-
-  const handleComparisonNavigate = (slot: 1 | 2, direction: 'prev' | 'next') => {
-    const currentPhotoId = comparisonPhotos[slot - 1];
-    const currentIndex = filteredPhotos.findIndex(p => p.id === currentPhotoId);
-    
-    let newIndex;
-    if (direction === 'prev') {
-      newIndex = Math.max(0, currentIndex - 1);
-    } else {
-      newIndex = Math.min(filteredPhotos.length - 1, currentIndex + 1);
-    }
-    
-    const newPhotoId = filteredPhotos[newIndex].id;
-    setComparisonPhotos(prev => 
-      slot === 1 ? [newPhotoId, prev[1]] : [prev[0], newPhotoId]
-    );
-  };
-
-  const handleComparisonSwap = () => {
-    setComparisonPhotos([comparisonPhotos[1], comparisonPhotos[0]]);
-  };
-
-  const handleRemoveSelection = (photoId: string) => {
-    toggleSelection.mutate({ photoId, currentState: true });
-  };
-
+  // Keyboard navigation hook
   const handleNavigate = (direction: 'prev' | 'next') => {
     if (!photos || !selectedPhotoId) return;
     
@@ -201,6 +116,21 @@ export default function ClientGallery() {
     } else if (direction === 'next' && currentIndex < photos.length - 1) {
       setSelectedPhotoId(photos[currentIndex + 1].id);
     }
+  };
+
+  useKeyboardNavigation({
+    photos,
+    selectedPhotoId,
+    onSetSelectedPhotoId: setSelectedPhotoId,
+    onNavigate: handleNavigate,
+  });
+
+  const handlePhotoClick = (photoId: string) => {
+    handleComparisonPhotoClick(photoId, setSelectedPhotoId);
+  };
+
+  const handleRemoveSelection = (photoId: string) => {
+    toggleSelection.mutate({ photoId, currentState: true });
   };
 
   const handleFinalize = () => {
@@ -370,20 +300,10 @@ export default function ClientGallery() {
           photo1={comparisonPhoto1}
           photo2={comparisonPhoto2}
           photos={filteredPhotos}
-          onClose={() => {
-            setShowComparisonOverlay(false);
-            setComparisonPhotos([]);
-            setFirstComparisonOrientation(null);
-            setIsComparisonMode(false);
-          }}
+          onClose={handleCloseComparison}
           onSwap={handleComparisonSwap}
-          onNavigate={handleComparisonNavigate}
-          onToggleSelection={(photoId) => {
-            const photo = photos?.find(p => p.id === photoId);
-            if (photo) {
-              toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
-            }
-          }}
+          onNavigate={(slot, direction) => handleComparisonNavigate(slot, direction, filteredPhotos)}
+          onToggleSelection={handleToggleSelectionInComparison}
         />
       )}
 
