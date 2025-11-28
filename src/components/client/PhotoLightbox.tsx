@@ -345,23 +345,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
         onNavigate={onNavigate}
       />
 
-      {/* Annotation Mode Toggle */}
-      <div className="absolute top-20 lg:left-4 right-4 lg:right-auto z-10 flex flex-col gap-2">
-        <Button
-          size="icon"
-          variant={annotationMode ? 'default' : 'secondary'}
-          onClick={(e) => {
-            e.stopPropagation();
-            setAnnotationMode(!annotationMode);
-          }}
-          className={cn(
-            annotationMode && "bg-primary text-primary-foreground"
-          )}
-          title={annotationMode ? "Anmerkungs-Modus deaktivieren" : "Anmerkungs-Modus aktivieren"}
-        >
-          <MessageSquarePlus className="h-5 w-5" />
-        </Button>
-      </div>
 
       {/* Zoom Controls */}
       <ImageZoomControls
@@ -495,6 +478,28 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
               onBlur={handleCommentBlur}
               rows={4}
             />
+          </div>
+
+          {/* Annotation Mode Toggle */}
+          <div className="space-y-3 border-t pt-4">
+            <div className="space-y-2">
+              <Label className="text-base">Anmerkung hinzufügen</Label>
+              <p className="text-xs text-muted-foreground">
+                Klicken Sie auf das Bild, um eine Anmerkung zu platzieren
+              </p>
+            </div>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setAnnotationMode(!annotationMode);
+              }}
+              variant={annotationMode ? 'default' : 'outline'}
+              className="w-full"
+              size="lg"
+            >
+              <MessageSquarePlus className="h-5 w-5 mr-2" />
+              {annotationMode ? 'Anmerkungs-Modus aktiv' : 'Anmerkungs-Modus aktivieren'}
+            </Button>
           </div>
 
           {/* Annotations List */}
