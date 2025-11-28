@@ -13,6 +13,7 @@ import { KpiCard } from '@/components/ui/KpiCard';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GallerySelectionStats } from '@/types/database';
+import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
 
 type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'selected_desc';
 type StatusFilter = 'all' | 'Draft' | 'Sent' | 'Reviewed' | 'Delivered';
@@ -229,7 +230,7 @@ export function ClientDashboard() {
               ? Math.round((gallery.selected_count || 0) / gallery.photos_count * 100)
               : 0;
             
-            const isLocked = gallery.status === 'Reviewed' || gallery.status === 'Delivered';
+            const isLocked = gallery.status === 'Closed' || gallery.status === 'Delivered';
 
             return (
               <Card key={gallery.gallery_id} className="shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200">
@@ -240,10 +241,8 @@ export function ClientDashboard() {
                       <code className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
                         /{gallery.slug}
                       </code>
-                      <Badge variant={getStatusBadgeVariant(gallery.status || 'Draft')}>
-                        {getStatusLabel(gallery.status || 'Draft')}
-                      </Badge>
                     </div>
+                    <GalleryProgressBar currentStatus={gallery.status || 'Planning'} compact />
                   </div>
                 </CardHeader>
                 

@@ -109,23 +109,23 @@ export default function CompanyDetail() {
               Alle
             </Button>
             <Button
-              variant={statusFilter === 'Draft' ? 'default' : 'outline'}
+              variant={statusFilter === 'Planning' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter('Draft')}
+              onClick={() => setStatusFilter('Planning')}
             >
               Entwurf
             </Button>
             <Button
-              variant={statusFilter === 'Sent' ? 'default' : 'outline'}
+              variant={statusFilter === 'Open' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter('Sent')}
+              onClick={() => setStatusFilter('Open')}
             >
               Gesendet
             </Button>
             <Button
-              variant={statusFilter === 'Reviewed' ? 'default' : 'outline'}
+              variant={statusFilter === 'Closed' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter('Reviewed')}
+              onClick={() => setStatusFilter('Closed')}
             >
               Überprüft
             </Button>

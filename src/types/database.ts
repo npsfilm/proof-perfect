@@ -1,5 +1,5 @@
 export type RoleType = 'admin' | 'client';
-export type GalleryStatus = 'Draft' | 'Sent' | 'Reviewed' | 'Delivered';
+export type GalleryStatus = 'Planning' | 'Open' | 'Closed' | 'Processing' | 'Delivered';
 export type SalutationType = 'Du' | 'Sie';
 
 export interface Profile {

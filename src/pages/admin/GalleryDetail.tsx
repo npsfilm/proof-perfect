@@ -9,6 +9,7 @@ import { useGallery } from '@/hooks/useGallery';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { EditableGalleryInfo } from '@/components/admin/gallery/EditableGalleryInfo';
 import { GalleryClientsCard } from '@/components/admin/gallery/GalleryClientsCard';
@@ -18,6 +19,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryDetailSkeleton } from '@/components/admin/skeletons/GalleryDetailSkeleton';
 import { Copy } from 'lucide-react';
+import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
 
 export default function GalleryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +65,7 @@ export default function GalleryDetail() {
     );
   }
 
-  const isDraft = gallery.status === 'Draft';
+  const isDraft = gallery.status === 'Planning';
 
   return (
     <PageContainer size="full">
@@ -95,17 +97,21 @@ export default function GalleryDetail() {
                 </svg>
                 Kunden-Ansicht
               </Button>
-              {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
+              {(gallery.status === 'Closed' || gallery.status === 'Delivered') && (
                 <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
                   Überprüfung ansehen
                 </Button>
               )}
-              <Badge variant={isDraft ? 'secondary' : 'default'}>
-                {gallery.status}
-              </Badge>
             </div>
           }
         />
+
+        {/* Gallery Progress Bar */}
+        <Card>
+          <CardContent className="pt-6">
+            <GalleryProgressBar currentStatus={gallery.status} />
+          </CardContent>
+        </Card>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content - Left Side (2 columns) */}

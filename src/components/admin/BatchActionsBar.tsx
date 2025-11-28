@@ -31,7 +31,7 @@ export function BatchActionsBar({
 }: BatchActionsBarProps) {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<GalleryStatus>('Draft');
+  const [selectedStatus, setSelectedStatus] = useState<GalleryStatus>('Planning');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleStatusUpdate = async () => {
@@ -133,10 +133,11 @@ export function BatchActionsBar({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Draft">Draft</SelectItem>
-                  <SelectItem value="Sent">Sent</SelectItem>
-                  <SelectItem value="Reviewed">Reviewed</SelectItem>
-                  <SelectItem value="Delivered">Delivered</SelectItem>
+                  <SelectItem value="Planning">Planung</SelectItem>
+                  <SelectItem value="Open">Offen</SelectItem>
+                  <SelectItem value="Closed">Geschlossen</SelectItem>
+                  <SelectItem value="Processing">Bearbeitung</SelectItem>
+                  <SelectItem value="Delivered">Geliefert</SelectItem>
                 </SelectContent>
               </Select>
             </div>

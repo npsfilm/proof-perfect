@@ -66,7 +66,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
       // Update gallery status
       const { error: updateError } = await supabase
         .from('galleries')
-        .update({ status: 'Sent' })
+        .update({ status: 'Open' })
         .eq('id', gallery.id);
 
       if (updateError) throw updateError;
@@ -151,7 +151,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
 
   return (
     <div className="flex justify-end gap-3">
-      {gallery.status === 'Draft' && (
+      {gallery.status === 'Planning' && (
         <Button onClick={handleSendToClient} disabled={sending} size="lg">
           {sending ? (
             <>
@@ -167,7 +167,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
         </Button>
       )}
       
-      {gallery.status !== 'Draft' && (
+      {gallery.status !== 'Planning' && (
         <Button onClick={handleResendToClient} disabled={sending} size="lg" variant="outline">
           {sending ? (
             <>

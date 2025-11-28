@@ -98,7 +98,7 @@ export function useGalleryFinalization(gallery: Gallery | undefined, userId: str
       const { error: galleryError } = await supabase
         .from('galleries')
         .update({
-          status: 'Reviewed',
+          status: 'Closed',
           is_locked: true,
           reviewed_at: new Date().toISOString(),
           reviewed_by: userId,

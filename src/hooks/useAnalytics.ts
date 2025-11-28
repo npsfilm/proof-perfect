@@ -80,7 +80,7 @@ export function useAnalytics() {
 
       // Average review time (in hours)
       const reviewTimes = galleries
-        ?.filter(g => g.status === 'Reviewed' || g.status === 'Delivered')
+        ?.filter(g => g.status === 'Closed' || g.status === 'Delivered')
         .map(g => {
           // For now, just calculate based on created_at to reviewed_at
           // In production, you'd track when status changed to 'Sent'
@@ -120,8 +120,8 @@ export function useAnalytics() {
           if (!acc[date]) {
             acc[date] = { sent: 0, reviewed: 0, delivered: 0 };
           }
-          if (g.status === 'Sent') acc[date].sent++;
-          if (g.status === 'Reviewed') acc[date].reviewed++;
+          if (g.status === 'Open') acc[date].sent++;
+          if (g.status === 'Closed') acc[date].reviewed++;
           if (g.status === 'Delivered') acc[date].delivered++;
         }
         return acc;

@@ -236,7 +236,7 @@ export default function GalleryReview() {
           }
         />
 
-      {gallery.status !== 'Reviewed' && gallery.status !== 'Delivered' && (
+      {gallery.status !== 'Closed' && gallery.status !== 'Delivered' && (
         <Alert>
           <AlertDescription>
             Diese Galerie wurde vom Kunden noch nicht überprüft. Ausgewählte Fotos erscheinen hier, sobald der Kunde seine Auswahl finalisiert hat.

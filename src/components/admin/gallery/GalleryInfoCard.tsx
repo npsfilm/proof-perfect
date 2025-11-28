@@ -71,7 +71,7 @@ export function GalleryInfoCard({ gallery, photoCount, companies, onCompanyChang
           <Select
             value={gallery.company_id || 'none'}
             onValueChange={(value) => onCompanyChange(value === 'none' ? '' : value)}
-            disabled={gallery.status !== 'Draft'}
+            disabled={gallery.status !== 'Planning'}
           >
             <SelectTrigger id="company-select" className="mt-2">
               <SelectValue placeholder="Unternehmen auswählen..." />

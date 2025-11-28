@@ -14,9 +14,9 @@ export default function AdminDashboard() {
 
   const stats = {
     total: galleries?.length ?? 0,
-    draft: galleries?.filter((g) => g.status === 'Draft').length ?? 0,
-    sent: galleries?.filter((g) => g.status === 'Sent').length ?? 0,
-    reviewed: galleries?.filter((g) => g.status === 'Reviewed').length ?? 0,
+    draft: galleries?.filter((g) => g.status === 'Planning').length ?? 0,
+    sent: galleries?.filter((g) => g.status === 'Open').length ?? 0,
+    reviewed: galleries?.filter((g) => g.status === 'Closed').length ?? 0,
   };
 
   return (
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium truncate">{gallery.name}</p>
-                      {gallery.status === 'Reviewed' && gallery.reviewed_at && (
+                      {gallery.status === 'Closed' && gallery.reviewed_at && (
                         <TimeElapsed 
                           startTime={gallery.reviewed_at}
                           variant="secondary"

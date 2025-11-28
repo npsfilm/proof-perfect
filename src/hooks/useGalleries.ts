@@ -46,7 +46,7 @@ export function useCreateGallery() {
           salutation_type: gallery.salutation_type,
           address: gallery.address,
           company_id: gallery.company_id,
-          status: 'Draft',
+          status: 'Planning',
         })
         .select()
         .single();
