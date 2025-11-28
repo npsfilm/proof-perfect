@@ -141,8 +141,15 @@ export default function ClientGallery() {
 
   const handleFinalizeSubmit = async (data: {
     feedback: string;
+    services: {
+      expressDelivery: boolean;
+      virtualStaging: boolean;
+      blueHour: boolean;
+    };
     stagingSelections: { photoId: string; staging: boolean; style?: string }[];
+    blueHourSelections: string[];
     referenceFile?: File;
+    stagingComment?: string;
   }) => {
     const success = await finalizeGallery(data);
     if (success) {
