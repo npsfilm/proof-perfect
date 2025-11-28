@@ -21,7 +21,7 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
 
       setUploading(true);
       const filesArray = Array.from(files);
-      const successfulUploads: string[] = [];
+      setUploadProgress(filesArray.map((f) => f.name));
 
       try {
         // Get current max upload_order
@@ -32,13 +32,13 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
           .order('upload_order', { ascending: false })
           .limit(1);
 
-        let currentOrder = existingPhotos?.[0]?.upload_order ?? 0;
+        const startOrder = existingPhotos?.[0]?.upload_order ?? 0;
 
-        for (const file of filesArray) {
-          setUploadProgress((prev) => [...prev, file.name]);
-
-          // Upload to storage
+        // Upload all files in parallel using Promise.allSettled
+        const uploadPromises = filesArray.map(async (file, index) => {
           const filePath = `${gallerySlug}/${file.name}`;
+          
+          // Upload to storage
           const { error: uploadError } = await supabase.storage
             .from('proofs')
             .upload(filePath, file, {
@@ -47,8 +47,7 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
             });
 
           if (uploadError) {
-            console.error(`Error uploading ${file.name}:`, uploadError);
-            continue;
+            throw new Error(`${file.name}: ${uploadError.message}`);
           }
 
           // Get public URL
@@ -56,28 +55,41 @@ export function PhotoUploader({ galleryId, gallerySlug, onUploadComplete }: Phot
             .from('proofs')
             .getPublicUrl(filePath);
 
-          // Insert photo record
-          currentOrder++;
+          // Insert photo record with sequential order
           const { error: dbError } = await supabase.from('photos').insert({
             gallery_id: galleryId,
             filename: file.name,
             storage_url: publicUrl,
-            upload_order: currentOrder,
+            upload_order: startOrder + index + 1,
           });
 
           if (dbError) {
-            console.error(`Error saving ${file.name}:`, dbError);
-          } else {
-            successfulUploads.push(file.name);
+            throw new Error(`${file.name}: ${dbError.message}`);
           }
-        }
 
-        if (successfulUploads.length > 0) {
+          return file.name;
+        });
+
+        const results = await Promise.allSettled(uploadPromises);
+        
+        const successful = results.filter((r) => r.status === 'fulfilled');
+        const failed = results.filter((r) => r.status === 'rejected');
+
+        if (successful.length > 0) {
           toast({
             title: 'Upload abgeschlossen',
-            description: `Erfolgreich ${successfulUploads.length} Foto(s) hochgeladen.`,
+            description: `Erfolgreich ${successful.length} von ${filesArray.length} Foto(s) hochgeladen.`,
           });
           onUploadComplete();
+        }
+
+        if (failed.length > 0) {
+          const errors = failed.map((r) => (r as PromiseRejectedResult).reason.message);
+          toast({
+            title: 'Teilweise fehlgeschlagen',
+            description: `${failed.length} Datei(en) konnten nicht hochgeladen werden: ${errors.join(', ')}`,
+            variant: 'destructive',
+          });
         }
       } catch (error: any) {
         toast({
