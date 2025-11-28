@@ -8,6 +8,7 @@ import { PageContainer } from '@/components/admin/PageContainer';
 import { StatCardSkeletonGrid } from '@/components/admin/skeletons/StatCardSkeleton';
 import { TimeElapsed } from '@/components/admin/TimeElapsed';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import { ActionRequiredInbox } from '@/components/admin/ActionRequiredInbox';
 
 export default function AdminDashboard() {
   const { data: galleries, isLoading } = useGalleries();
@@ -33,6 +34,8 @@ export default function AdminDashboard() {
             </Button>
           }
         />
+
+        <ActionRequiredInbox />
 
       {isLoading ? (
         <StatCardSkeletonGrid count={4} />
