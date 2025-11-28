@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Copy, Send, Loader2, MessageSquare, Wand2, Check, MapPin } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
@@ -385,10 +386,49 @@ export default function GalleryReview() {
                         alt={photo.filename}
                         className="w-full h-full object-cover"
                       />
+                      
+                      {/* Annotation Markers Overlay */}
                       {photoAnnotations.length > 0 && (
-                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                          {photoAnnotations.length}
-                        </div>
+                        <TooltipProvider>
+                          <div className="absolute inset-0 pointer-events-none">
+                            {photoAnnotations.map((annotation, idx) => (
+                              <Tooltip key={annotation.id} delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className="absolute pointer-events-auto cursor-help"
+                                    style={{
+                                      left: `${annotation.x_position}%`,
+                                      top: `${annotation.y_position}%`,
+                                      transform: 'translate(-50%, -50%)',
+                                    }}
+                                  >
+                                    <div className="relative">
+                                      {/* Marker Pin */}
+                                      <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold shadow-lg border-2 border-background hover:scale-110 transition-transform">
+                                        {idx + 1}
+                                      </div>
+                                      {/* Pointer */}
+                                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-primary"></div>
+                                    </div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent 
+                                  side="top" 
+                                  className="max-w-xs"
+                                  sideOffset={8}
+                                >
+                                  <p className="text-sm font-medium mb-1">Anmerkung {idx + 1}</p>
+                                  <p className="text-xs">{annotation.comment}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ))}
+                          </div>
+                          
+                          {/* Count Badge */}
+                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
+                            {photoAnnotations.length}
+                          </div>
+                        </TooltipProvider>
                       )}
                     </div>
                     
@@ -415,11 +455,9 @@ export default function GalleryReview() {
                             <MapPin className="h-3 w-3" />
                             <span>{photoAnnotations.length} Markierung(en)</span>
                           </div>
-                          {photoAnnotations.map((annotation, idx) => (
-                            <div key={annotation.id} className="text-xs text-muted-foreground pl-4">
-                              <span className="font-bold">{idx + 1}.</span> {annotation.comment}
-                            </div>
-                          ))}
+                          <p className="text-xs text-muted-foreground italic">
+                            Hover über die Marker im Bild für Details
+                          </p>
                         </div>
                       )}
                     </div>
