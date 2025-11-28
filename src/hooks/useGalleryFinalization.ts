@@ -96,18 +96,27 @@ export function useGalleryFinalization(gallery: Gallery | undefined, userId: str
       }
 
       // 5. Lock gallery and set status to Reviewed
+      console.log('🔍 DEBUG: Finalizing with express_delivery:', data.services.expressDelivery);
+      const updateData = {
+        status: 'Closed' as const,
+        is_locked: true,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: userId,
+        express_delivery_requested: data.services.expressDelivery,
+      };
+      console.log('🔍 DEBUG: Update payload:', updateData);
+      
       const { error: galleryError } = await supabase
         .from('galleries')
-        .update({
-          status: 'Closed',
-          is_locked: true,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: userId,
-          express_delivery_requested: data.services.expressDelivery,
-        })
+        .update(updateData)
         .eq('id', gallery.id);
 
-      if (galleryError) throw galleryError;
+      if (galleryError) {
+        console.error('❌ DEBUG: Gallery update error:', galleryError);
+        throw galleryError;
+      }
+      
+      console.log('✅ DEBUG: Gallery updated successfully');
 
       // 6. Send webhook notification with service data
       const { error: webhookError } = await supabase.functions.invoke('webhook-review', {
