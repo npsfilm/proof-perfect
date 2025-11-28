@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +37,38 @@ export default function GalleryReview() {
       return data as Gallery;
     },
   });
+
+  // Automatically set status to Processing when opening review page
+  useEffect(() => {
+    const updateStatusToProcessing = async () => {
+      if (gallery && gallery.status === 'Closed') {
+        try {
+          const { error } = await supabase
+            .from('galleries')
+            .update({ status: 'Processing' })
+            .eq('id', gallery.id);
+
+          if (error) {
+            console.error('Error updating status:', error);
+            return;
+          }
+
+          // Invalidate queries to update UI
+          queryClient.invalidateQueries({ queryKey: ['gallery', id] });
+          queryClient.invalidateQueries({ queryKey: ['galleries'] });
+
+          toast({
+            title: 'Status aktualisiert',
+            description: 'Galerie ist jetzt in Bearbeitung.',
+          });
+        } catch (error) {
+          console.error('Error updating gallery status:', error);
+        }
+      }
+    };
+
+    updateStatusToProcessing();
+  }, [gallery, id, queryClient, toast]);
 
   const { data: selectedPhotos } = useQuery({
     queryKey: ['selected-photos', id],
