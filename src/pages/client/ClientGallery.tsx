@@ -18,6 +18,7 @@ import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { usePhotoOrientations } from '@/hooks/usePhotoOrientations';
 import { useComparisonMode } from '@/hooks/useComparisonMode';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
@@ -33,6 +34,7 @@ export default function ClientGallery() {
 
   const { data: gallery, isLoading: galleryLoading } = useGalleryBySlug(slug, !!user);
   const { data: photos, isLoading: photosLoading } = useGalleryPhotos(gallery?.id);
+  const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
   const { orientations, detectOrientation } = usePhotoOrientations(photos);
@@ -272,9 +274,10 @@ export default function ClientGallery() {
         )}
       <ClientPhotoGrid
         photos={filteredPhotos}
-        isLoading={photosLoading}
+        isLoading={photosLoading || urlsLoading}
         onPhotoClick={handlePhotoClick}
         galleryId={gallery.id}
+        signedUrls={signedUrls}
         comparisonPhotos={comparisonPhotos}
         isComparisonMode={isComparisonMode}
         photoOrientations={orientations}
@@ -291,6 +294,7 @@ export default function ClientGallery() {
           onClose={() => setSelectedPhotoId(null)}
           onNavigate={handleNavigate}
           galleryId={gallery.id}
+          signedUrls={signedUrls}
         />
       )}
 

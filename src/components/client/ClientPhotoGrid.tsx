@@ -1,8 +1,6 @@
 import { Photo } from '@/types/database';
 import { Loader2, Check, RectangleVertical, RectangleHorizontal, Square } from 'lucide-react';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
-import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Orientation } from '@/hooks/usePhotoOrientations';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
@@ -12,6 +10,7 @@ interface ClientPhotoGridProps {
   isLoading: boolean;
   onPhotoClick: (photoId: string) => void;
   galleryId?: string;
+  signedUrls: Record<string, string>;
   comparisonPhotos?: string[];
   isComparisonMode?: boolean;
   photoOrientations?: Record<string, Orientation>;
@@ -23,7 +22,8 @@ export function ClientPhotoGrid({
   photos, 
   isLoading, 
   onPhotoClick, 
-  galleryId, 
+  galleryId,
+  signedUrls,
   comparisonPhotos = [],
   isComparisonMode = false,
   photoOrientations = {},
@@ -31,14 +31,13 @@ export function ClientPhotoGrid({
   onOrientationDetected
 }: ClientPhotoGridProps) {
   const { toggleSelection } = usePhotoSelection(galleryId);
-  const { signedUrls, isLoading: urlsLoading } = useSignedPhotoUrls(photos);
 
   const handleCheckClick = (e: React.MouseEvent, photo: Photo) => {
     e.stopPropagation();
     toggleSelection.mutate({ photoId: photo.id, currentState: photo.is_selected });
   };
 
-  if (isLoading || urlsLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
