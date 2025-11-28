@@ -46,7 +46,7 @@ export const BlueHourSlider = ({ beforeImage, afterImage, title }: BlueHourSlide
       )}
       <div
         ref={containerRef}
-        className="relative h-32 overflow-hidden rounded-2xl cursor-ew-resize select-none shadow-neu-flat"
+        className="relative aspect-[3/2] overflow-hidden rounded-2xl cursor-ew-resize select-none shadow-neu-flat"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
