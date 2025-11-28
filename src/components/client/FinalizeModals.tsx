@@ -10,6 +10,7 @@ import { Upload, Clock, Home, Sunset, Check } from 'lucide-react';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { STAGING_STYLES } from '@/constants/staging';
 import { Card, CardContent } from '@/components/ui/card';
+import { BlueHourSlider } from './BlueHourSlider';
 
 interface FinalizeModalsProps {
   isOpen: boolean;
@@ -265,12 +266,10 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                     <div className="space-y-2">
                       <h3 className="font-semibold text-lg">Virtuelle Blaue Stunde</h3>
                       <p className="text-2xl font-bold text-primary">+49€<span className="text-sm font-normal">/Bild</span></p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground mb-2">
                         Außenaufnahmen zur goldenen Stunde verwandeln
                       </p>
-                      <div className="bg-muted px-3 py-2 rounded-lg text-center">
-                        <p className="text-xs text-muted-foreground">Vorher/Nachher-Effekt</p>
-                      </div>
+                      <BlueHourSlider />
                     </div>
                   </CardContent>
                 </Card>
