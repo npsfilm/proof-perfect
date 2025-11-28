@@ -278,7 +278,7 @@ export default function ClientGallery() {
       </div>
 
       {/* Photo Grid */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="max-w-[1920px] w-full mx-auto px-4 lg:px-6 xl:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <GalleryFilterBar
             activeFilter={photoFilter}
