@@ -445,7 +445,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
             {/* Virtuelle Blaue Stunde */}
             <Card 
               className={cn(
-                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat",
+                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat relative",
                 selectedServices.blueHour && "ring-2 ring-primary shadow-neu-float"
               )}
               onClick={() => toggleService('blueHour')}
