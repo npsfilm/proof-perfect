@@ -97,7 +97,7 @@ export function ClientPhotoGrid({
                 <img 
                   src={watermarkLogo} 
                   alt="" 
-                  className="h-8 w-auto opacity-70 select-none"
+                  className="h-12 w-auto opacity-70 select-none"
                   draggable={false}
                 />
               </div>
