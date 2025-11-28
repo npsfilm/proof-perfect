@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 import { usePhotoAnnotations } from '@/hooks/usePhotoAnnotations';
 import { ImageZoomControls } from './lightbox/ImageZoomControls';
 import { useImageZoom } from './lightbox/useImageZoom';
@@ -26,10 +25,11 @@ interface PhotoLightboxProps {
   onClose: () => void;
   onNavigate: (direction: 'prev' | 'next') => void;
   galleryId: string;
+  signedUrls: Record<string, string>;
 }
 
-export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }: PhotoLightboxProps) {
-  const { signedUrl, isLoading: urlLoading } = useSignedPhotoUrl(photo);
+export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, signedUrls }: PhotoLightboxProps) {
+  const signedUrl = signedUrls[photo.id] || photo.storage_url;
   const [comment, setComment] = useState(photo.client_comment || '');
   const [stagingRequested, setStagingRequested] = useState(photo.staging_requested);
   const [stagingStyle, setStagingStyle] = useState(photo.staging_style || 'Modern');
@@ -148,6 +148,28 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
     setAnnotationMode(false);
     setPendingAnnotation(null);
   }, [photo.id]);
+
+  // Preload adjacent images for smooth navigation
+  useEffect(() => {
+    const currentIndex = photos.findIndex(p => p.id === photo.id);
+    const preloadIndices: number[] = [];
+    
+    // Preload next 2 images
+    if (currentIndex + 1 < photos.length) preloadIndices.push(currentIndex + 1);
+    if (currentIndex + 2 < photos.length) preloadIndices.push(currentIndex + 2);
+    
+    // Preload previous 2 images
+    if (currentIndex - 1 >= 0) preloadIndices.push(currentIndex - 1);
+    if (currentIndex - 2 >= 0) preloadIndices.push(currentIndex - 2);
+    
+    // Preload images
+    preloadIndices.forEach(index => {
+      const photoToPreload = photos[index];
+      const url = signedUrls[photoToPreload.id] || photoToPreload.storage_url;
+      const img = new Image();
+      img.src = url;
+    });
+  }, [photo.id, photos, signedUrls]);
 
   // Swipe gesture handling
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -395,7 +417,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
           <div className="relative">
             <img
               ref={imageRef}
-              src={signedUrl || photo.storage_url}
+              src={signedUrl}
               alt={photo.filename}
               className={cn(
                 "object-contain transition-transform select-none",
