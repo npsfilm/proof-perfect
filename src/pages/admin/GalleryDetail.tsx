@@ -122,9 +122,9 @@ export default function GalleryDetail() {
                 </svg>
                 Kunden-Ansicht
               </Button>
-              {(gallery.status === 'Closed' || gallery.status === 'Delivered') && (
+              {(gallery.status === 'Closed' || gallery.status === 'Processing' || gallery.status === 'Delivered') && (
                 <Button onClick={() => navigate(`/admin/galleries/${gallery.id}/review`)}>
-                  Überprüfung ansehen
+                  {gallery.status === 'Processing' ? 'Bearbeitung ansehen' : 'Überprüfung ansehen'}
                 </Button>
               )}
             </div>
