@@ -33,11 +33,12 @@ interface FinalizeModalsProps {
 }
 
 // Step Indicator Component with Icons
-function StepIndicator({ currentStep }: { currentStep: 'feedback' | 'services' | 'staging' | 'summary' }) {
+function StepIndicator({ currentStep }: { currentStep: 'feedback' | 'services' | 'staging' | 'blueHour' | 'summary' }) {
   const steps = [
     { key: 'feedback', label: 'Übersicht', icon: Camera },
     { key: 'services', label: 'Leistungen', icon: Gift },
-    { key: 'staging', label: 'Details', icon: Settings },
+    { key: 'staging', label: 'Staging', icon: Home },
+    { key: 'blueHour', label: 'Blaue Stunde', icon: Sunset },
     { key: 'summary', label: 'Zusammenfassung', icon: Check },
   ];
 
@@ -58,7 +59,7 @@ function StepIndicator({ currentStep }: { currentStep: 'feedback' | 'services' |
                 <div
                   className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-all duration-500",
-                    isActive && "bg-primary text-primary-foreground shadow-neu-float scale-110 animate-pulse",
+                    isActive && "bg-primary text-primary-foreground shadow-neu-float scale-110",
                     isCompleted && "bg-primary text-primary-foreground shadow-neu-flat",
                     !isActive && !isCompleted && "bg-muted text-muted-foreground shadow-neu-pressed"
                   )}
@@ -123,10 +124,10 @@ function PricingSummaryBar({
   const totalPrice = expressPrice + stagingTotal + blueHourPrice;
 
   return (
-    <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background to-transparent pt-6 pb-4 px-6 -mx-6 -mb-6 border-t shadow-neu-float">
+    <div className="mt-6 pt-4 border-t">
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-foreground">Ihre Auswahl:</span>
+          <span className="font-semibold text-foreground">Zusätzliche Kosten:</span>
           <div className="text-right space-y-1">
             {expressDelivery && (
               <div className="flex justify-between gap-8">
@@ -158,7 +159,7 @@ function PricingSummaryBar({
         </div>
         <div className="h-px bg-border" />
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold">Gesamt:</span>
+          <span className="text-lg font-bold">Zusatz gesamt:</span>
           <span className="text-2xl font-bold text-primary">{totalPrice}€</span>
         </div>
         {stagingDiscount > 0 && (
@@ -173,7 +174,7 @@ function PricingSummaryBar({
 
 export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: FinalizeModalsProps) {
   const { signedUrls } = useSignedPhotoUrls(selectedPhotos);
-  const [step, setStep] = useState<'feedback' | 'services' | 'staging' | 'summary'>('feedback');
+  const [step, setStep] = useState<'feedback' | 'services' | 'staging' | 'blueHour' | 'summary'>('feedback');
   const [feedback, setFeedback] = useState('');
   const [selectedServices, setSelectedServices] = useState({
     expressDelivery: false,
@@ -186,8 +187,6 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
   const [stagingComment, setStagingComment] = useState('');
   const [referenceFile, setReferenceFile] = useState<File | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stagingOpen, setStagingOpen] = useState(true);
-  const [blueHourOpen, setBlueHourOpen] = useState(true);
 
   // Photo numbering map
   const photoNumberMap = selectedPhotos.reduce((acc, photo, index) => {
@@ -200,14 +199,24 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
   };
 
   const handleServicesNext = () => {
-    if (selectedServices.virtualStaging || selectedServices.blueHour) {
+    if (selectedServices.virtualStaging) {
       setStep('staging');
+    } else if (selectedServices.blueHour) {
+      setStep('blueHour');
     } else {
       setStep('summary');
     }
   };
 
   const handleStagingNext = () => {
+    if (selectedServices.blueHour) {
+      setStep('blueHour');
+    } else {
+      setStep('summary');
+    }
+  };
+
+  const handleBlueHourNext = () => {
     setStep('summary');
   };
 
@@ -302,13 +311,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
         "max-h-[90vh] overflow-y-auto transition-all duration-500",
         step === 'services' ? "max-w-4xl" : step === 'summary' ? "max-w-3xl" : "max-w-2xl"
       )}>
-        <div className={cn(
-          "transition-all duration-500",
-          step === 'feedback' && "animate-fade-in",
-          step === 'services' && "animate-scale-in",
-          step === 'staging' && "animate-fade-in",
-          step === 'summary' && "animate-scale-in"
-        )}>
+        <div className="transition-all duration-500">
         <StepIndicator currentStep={step} />
 
         {step === 'feedback' ? (
@@ -505,250 +508,153 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
         ) : step === 'staging' ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl">Details zu Zusatzleistungen</DialogTitle>
+              <DialogTitle className="text-2xl">Virtuelles Staging</DialogTitle>
               <DialogDescription className="text-base">
-                Wählen Sie die Details für Ihre ausgewählten Leistungen
+                Wählen Sie die Fotos für virtuelles Staging aus
               </DialogDescription>
             </DialogHeader>
             <div className="py-6 space-y-6">
               {/* Virtual Staging Section */}
-              {selectedServices.virtualStaging && (
-                <Collapsible open={stagingOpen} onOpenChange={setStagingOpen} className="space-y-4">
-                  <div className="rounded-2xl border-2 border-border/50 shadow-neu-flat p-6 space-y-4">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full group">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-primary/10">
-                          <Home className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-lg font-bold">Virtuelles Staging</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {stagingCount} von {selectedPhotos.length} Fotos ausgewählt
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronDown className={cn(
-                        "h-5 w-5 transition-transform text-muted-foreground",
-                        stagingOpen && "rotate-180"
-                      )} />
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent className="space-y-4">
-                      <div className="h-px bg-border/50" />
-                      
-                      {/* Quick Actions */}
-                      <div className="flex gap-2 justify-end">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={selectAllStaging}
-                          className="rounded-full text-xs"
-                        >
-                          Alle auswählen
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={deselectAllStaging}
-                          className="rounded-full text-xs"
-                        >
-                          Alle abwählen
-                        </Button>
-                      </div>
-                      
-                      {/* Photo Grid */}
-                      <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-4 bg-background shadow-neu-pressed rounded-xl">
-                        {selectedPhotos.map((photo) => (
-                          <div 
-                            key={photo.id}
-                            className={cn(
-                              "relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all group",
-                              stagingSelections[photo.id] && "ring-2 ring-primary shadow-lg"
-                            )}
-                            onClick={() => handleStagingToggle(photo.id, !stagingSelections[photo.id])}
-                          >
-                            <img
-                              src={signedUrls[photo.id] || photo.storage_url}
-                              alt={photo.filename}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute bottom-2 left-2 w-7 h-7 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-neu-flat-sm">
-                              <span className="text-xs font-bold text-foreground">{photoNumberMap[photo.id]}</span>
-                            </div>
-                            <div className={cn(
-                              "absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center transition-all",
-                              stagingSelections[photo.id] 
-                                ? "bg-primary shadow-lg animate-scale-in" 
-                                : "bg-background/80 group-hover:bg-background shadow-neu-flat-sm"
-                            )}>
-                              {stagingSelections[photo.id] && (
-                                <Check className="h-4 w-4 text-primary-foreground" />
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {hasStagingRequests && (
-                        <div className="space-y-3">
-                          <Label htmlFor="staging-style" className="text-base font-semibold">Staging-Stil</Label>
-                          <Select value={stagingStyle} onValueChange={setStagingStyle}>
-                            <SelectTrigger id="staging-style" className="shadow-neu-pressed rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {STAGING_STYLES.map(style => (
-                                <SelectItem key={style} value={style}>{style}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
-              )}
-
-              {/* Blue Hour Section */}
-              {selectedServices.blueHour && (
-                <Collapsible open={blueHourOpen} onOpenChange={setBlueHourOpen} className="space-y-4">
-                  <div className="rounded-2xl border-2 border-border/50 shadow-neu-flat p-6 space-y-4">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full group">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-primary/10">
-                          <Sunset className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-lg font-bold">Virtuelle Blaue Stunde</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {blueHourCount} von {selectedPhotos.length} Fotos ausgewählt
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronDown className={cn(
-                        "h-5 w-5 transition-transform text-muted-foreground",
-                        blueHourOpen && "rotate-180"
-                      )} />
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent className="space-y-4">
-                      <div className="h-px bg-border/50" />
-                      
-                      {/* Quick Actions */}
-                      <div className="flex gap-2 justify-end">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={selectAllBlueHour}
-                          className="rounded-full text-xs"
-                        >
-                          Alle auswählen
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={deselectAllBlueHour}
-                          className="rounded-full text-xs"
-                        >
-                          Alle abwählen
-                        </Button>
-                      </div>
-                      
-                      {/* Photo Grid */}
-                      <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-4 bg-background shadow-neu-pressed rounded-xl">
-                        {selectedPhotos.map((photo) => (
-                          <div 
-                            key={photo.id}
-                            className={cn(
-                              "relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all group",
-                              blueHourSelections[photo.id] && "ring-2 ring-primary shadow-lg"
-                            )}
-                            onClick={() => handleBlueHourToggle(photo.id, !blueHourSelections[photo.id])}
-                          >
-                            <img
-                              src={signedUrls[photo.id] || photo.storage_url}
-                              alt={photo.filename}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute bottom-2 left-2 w-7 h-7 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-neu-flat-sm">
-                              <span className="text-xs font-bold text-foreground">{photoNumberMap[photo.id]}</span>
-                            </div>
-                            <div className={cn(
-                              "absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center transition-all",
-                              blueHourSelections[photo.id] 
-                                ? "bg-primary shadow-lg animate-scale-in" 
-                                : "bg-background/80 group-hover:bg-background shadow-neu-flat-sm"
-                            )}>
-                              {blueHourSelections[photo.id] && (
-                                <Check className="h-4 w-4 text-primary-foreground" />
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
-              )}
-
-              {/* Shared fields */}
-              {(hasStagingRequests || hasBlueHourRequests) && (
-                <div className="space-y-6 pt-2">
-                  <div className="h-px bg-border/50" />
-                  
-                  <div className="space-y-3">
-                    <Label htmlFor="staging-comment" className="text-base font-semibold">
-                      Kommentare & Wünsche <span className="text-muted-foreground font-normal">(Optional)</span>
-                    </Label>
-                    <Textarea
-                      id="staging-comment"
-                      value={stagingComment}
-                      onChange={(e) => setStagingComment(e.target.value)}
-                      placeholder="Beschreiben Sie Ihre Vorstellungen oder besondere Wünsche..."
-                      rows={3}
-                      className="resize-none shadow-neu-pressed rounded-2xl"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="reference-file" className="text-base font-semibold">
-                      Referenzbild hochladen <span className="text-muted-foreground font-normal">(Optional)</span>
-                    </Label>
-                    <div className={cn(
-                      "border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer group shadow-neu-pressed",
-                      "hover:border-primary/50 hover:bg-primary/5",
-                      referenceFile && "border-primary bg-primary/5"
-                    )}>
-                      <input
-                        id="reference-file"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                      <label htmlFor="reference-file" className="cursor-pointer block">
-                        {referenceFile ? (
-                          <div className="space-y-2">
-                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                              <Check className="h-6 w-6 text-primary" />
-                            </div>
-                            <p className="text-sm font-medium text-primary">{referenceFile.name}</p>
-                            <p className="text-xs text-muted-foreground">Klicken zum Ändern</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-colors">
-                              <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </div>
-                            <p className="text-sm font-medium">Klicken zum Hochladen</p>
-                            <p className="text-xs text-muted-foreground">PNG, JPG bis zu 10MB</p>
-                          </div>
-                        )}
-                      </label>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <Home className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-lg font-bold">Fotos auswählen</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {stagingCount} von {selectedPhotos.length} Fotos ausgewählt
+                      </p>
                     </div>
                   </div>
+                  {/* Quick Actions */}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={selectAllStaging}
+                      className="rounded-full text-xs"
+                    >
+                      Alle auswählen
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={deselectAllStaging}
+                      className="rounded-full text-xs"
+                    >
+                      Alle abwählen
+                    </Button>
+                  </div>
                 </div>
-              )}
+                
+                {/* Photo Grid */}
+                <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-4 bg-background shadow-neu-pressed rounded-xl">
+                  {selectedPhotos.map((photo) => (
+                    <div 
+                      key={photo.id}
+                      className={cn(
+                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all group",
+                        stagingSelections[photo.id] && "ring-2 ring-primary shadow-lg"
+                      )}
+                      onClick={() => handleStagingToggle(photo.id, !stagingSelections[photo.id])}
+                    >
+                      <img
+                        src={signedUrls[photo.id] || photo.storage_url}
+                        alt={photo.filename}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-2 left-2 w-7 h-7 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-neu-flat-sm">
+                        <span className="text-xs font-bold text-foreground">{photoNumberMap[photo.id]}</span>
+                      </div>
+                      <div className={cn(
+                        "absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center transition-all",
+                        stagingSelections[photo.id] 
+                          ? "bg-primary shadow-lg animate-scale-in" 
+                          : "bg-background/80 group-hover:bg-background shadow-neu-flat-sm"
+                      )}>
+                        {stagingSelections[photo.id] && (
+                          <Check className="h-4 w-4 text-primary-foreground" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {hasStagingRequests && (
+                  <div className="space-y-3">
+                    <Label htmlFor="staging-style" className="text-base font-semibold">Staging-Stil</Label>
+                    <Select value={stagingStyle} onValueChange={setStagingStyle}>
+                      <SelectTrigger id="staging-style" className="shadow-neu-pressed rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STAGING_STYLES.map(style => (
+                          <SelectItem key={style} value={style}>{style}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Shared fields */}
+                {hasStagingRequests && (
+                  <>
+                    <div className="space-y-3">
+                      <Label htmlFor="staging-comment" className="text-base font-semibold">
+                        Kommentare & Wünsche <span className="text-muted-foreground font-normal">(Optional)</span>
+                      </Label>
+                      <Textarea
+                        id="staging-comment"
+                        value={stagingComment}
+                        onChange={(e) => setStagingComment(e.target.value)}
+                        placeholder="Beschreiben Sie Ihre Vorstellungen oder besondere Wünsche..."
+                        rows={3}
+                        className="resize-none shadow-neu-pressed rounded-2xl"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="reference-file" className="text-base font-semibold">
+                        Referenzbild hochladen <span className="text-muted-foreground font-normal">(Optional)</span>
+                      </Label>
+                      <div className={cn(
+                        "border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer group shadow-neu-pressed",
+                        "hover:border-primary/50 hover:bg-primary/5",
+                        referenceFile && "border-primary bg-primary/5"
+                      )}>
+                        <input
+                          id="reference-file"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <label htmlFor="reference-file" className="cursor-pointer block">
+                          {referenceFile ? (
+                            <div className="space-y-2">
+                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                                <Check className="h-6 w-6 text-primary" />
+                              </div>
+                              <p className="text-sm font-medium text-primary">{referenceFile.name}</p>
+                              <p className="text-xs text-muted-foreground">Klicken zum Ändern</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-colors">
+                                <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                              </div>
+                              <p className="text-sm font-medium">Klicken zum Hochladen</p>
+                              <p className="text-xs text-muted-foreground">PNG, JPG bis zu 10MB</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setStep('services')} className="rounded-full px-6">
@@ -756,6 +662,101 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
               </Button>
               <Button 
                 onClick={handleStagingNext} 
+                className="rounded-full px-8 shadow-neu-flat-sm"
+              >
+                {selectedServices.blueHour ? 'Weiter' : 'Weiter zur Zusammenfassung'}
+              </Button>
+            </DialogFooter>
+            <PricingSummaryBar 
+              expressDelivery={selectedServices.expressDelivery}
+              stagingCount={stagingCount}
+              blueHourCount={blueHourCount}
+            />
+          </>
+        ) : step === 'blueHour' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Virtuelle Blaue Stunde</DialogTitle>
+              <DialogDescription className="text-base">
+                Wählen Sie die Fotos für die virtuelle blaue Stunde aus
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-6 space-y-6">
+              {/* Blue Hour Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <Sunset className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-lg font-bold">Fotos auswählen</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {blueHourCount} von {selectedPhotos.length} Fotos ausgewählt
+                      </p>
+                    </div>
+                  </div>
+                  {/* Quick Actions */}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={selectAllBlueHour}
+                      className="rounded-full text-xs"
+                    >
+                      Alle auswählen
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={deselectAllBlueHour}
+                      className="rounded-full text-xs"
+                    >
+                      Alle abwählen
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Photo Grid */}
+                <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-4 bg-background shadow-neu-pressed rounded-xl">
+                  {selectedPhotos.map((photo) => (
+                    <div 
+                      key={photo.id}
+                      className={cn(
+                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all group",
+                        blueHourSelections[photo.id] && "ring-2 ring-primary shadow-lg"
+                      )}
+                      onClick={() => handleBlueHourToggle(photo.id, !blueHourSelections[photo.id])}
+                    >
+                      <img
+                        src={signedUrls[photo.id] || photo.storage_url}
+                        alt={photo.filename}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-2 left-2 w-7 h-7 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-neu-flat-sm">
+                        <span className="text-xs font-bold text-foreground">{photoNumberMap[photo.id]}</span>
+                      </div>
+                      <div className={cn(
+                        "absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center transition-all",
+                        blueHourSelections[photo.id] 
+                          ? "bg-primary shadow-lg animate-scale-in" 
+                          : "bg-background/80 group-hover:bg-background shadow-neu-flat-sm"
+                      )}>
+                        {blueHourSelections[photo.id] && (
+                          <Check className="h-4 w-4 text-primary-foreground" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setStep('staging')} className="rounded-full px-6">
+                Zurück
+              </Button>
+              <Button 
+                onClick={handleBlueHourNext} 
                 className="rounded-full px-8 shadow-neu-flat-sm"
               >
                 Weiter zur Zusammenfassung
@@ -929,7 +930,15 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
             <DialogFooter className="gap-2">
               <Button 
                 variant="outline" 
-                onClick={() => setStep(selectedServices.virtualStaging || selectedServices.blueHour ? 'staging' : 'services')} 
+                onClick={() => {
+                  if (selectedServices.blueHour) {
+                    setStep('blueHour');
+                  } else if (selectedServices.virtualStaging) {
+                    setStep('staging');
+                  } else {
+                    setStep('services');
+                  }
+                }} 
                 className="rounded-full px-6"
                 disabled={isSubmitting}
               >
