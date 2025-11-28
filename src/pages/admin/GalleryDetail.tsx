@@ -7,9 +7,11 @@ import { useCompanies } from '@/hooks/useCompanies';
 import { useGalleryClients } from '@/hooks/useClients';
 import { useGallery } from '@/hooks/useGallery';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
+import { useReopenRequests, useResolveReopenRequest } from '@/hooks/useReopenRequests';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { EditableGalleryInfo } from '@/components/admin/gallery/EditableGalleryInfo';
 import { GalleryClientsCard } from '@/components/admin/gallery/GalleryClientsCard';
@@ -18,7 +20,7 @@ import { GallerySendActions } from '@/components/admin/gallery/GallerySendAction
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryDetailSkeleton } from '@/components/admin/skeletons/GalleryDetailSkeleton';
-import { Copy } from 'lucide-react';
+import { Copy, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
 
 export default function GalleryDetail() {
@@ -32,6 +34,10 @@ export default function GalleryDetail() {
   const { data: gallery, isLoading: galleryLoading } = useGallery(id);
   const { data: photos, refetch: refetchPhotos } = useGalleryPhotos(id);
   const { data: galleryClients } = useGalleryClients(id);
+  const { data: reopenRequests } = useReopenRequests(id);
+  const resolveRequest = useResolveReopenRequest();
+
+  const pendingRequests = reopenRequests?.filter(req => req.status === 'pending') || [];
 
   useEffect(() => {
     if (galleryClients) {
@@ -75,6 +81,21 @@ export default function GalleryDetail() {
 
   const isDraft = gallery.status === 'Planning';
   const isClosed = gallery.status === 'Closed';
+
+  const handleApproveRequest = async (requestId: string) => {
+    resolveRequest.mutate(
+      { requestId, status: 'approved', reopenGallery: true },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['gallery', gallery?.id] });
+        },
+      }
+    );
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    resolveRequest.mutate({ requestId, status: 'rejected' });
+  };
 
   const handleReopenGallery = async () => {
     try {
@@ -138,6 +159,65 @@ export default function GalleryDetail() {
             </div>
           }
         />
+
+        {/* Reopen Requests Alert */}
+        {pendingRequests.length > 0 && (
+          <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+            <AlertCircle className="h-5 w-5 text-orange-600" />
+            <AlertTitle className="text-orange-900 dark:text-orange-100">
+              Anfrage zur Wiedereröffnung
+            </AlertTitle>
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              <div className="space-y-3 mt-2">
+                {pendingRequests.map((request) => (
+                  <div key={request.id} className="flex items-start justify-between gap-4 p-3 bg-white dark:bg-orange-900/20 rounded-lg">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        Ein Kunde bittet um Wiedereröffnung dieser Galerie
+                      </p>
+                      {request.message && (
+                        <p className="text-sm mt-1 text-muted-foreground">
+                          Nachricht: "{request.message}"
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(request.created_at).toLocaleDateString('de-DE', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleApproveRequest(request.id)}
+                        disabled={resolveRequest.isPending}
+                        className="gap-1"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Genehmigen
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejectRequest(request.id)}
+                        disabled={resolveRequest.isPending}
+                        className="gap-1"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Ablehnen
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Gallery Progress Bar */}
         <Card>

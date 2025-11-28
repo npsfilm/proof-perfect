@@ -137,6 +137,17 @@ export interface PhotoAnnotation {
   updated_at: string;
 }
 
+export interface ReopenRequest {
+  id: string;
+  gallery_id: string;
+  user_id: string;
+  message?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  resolved_at?: string;
+  resolved_by?: string;
+}
+
 export interface CompanyGalleryStats {
   company_id: string;
   company_name: string;
