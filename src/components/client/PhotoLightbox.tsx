@@ -438,12 +438,15 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         </button>
       )}
 
-      {/* Annotation Mode Toggle (Desktop) */}
-      <div className="hidden lg:flex absolute top-20 left-4 z-10 flex-col gap-2">
+      {/* Annotation Mode Toggle (Desktop & Mobile) */}
+      <div className="absolute top-20 lg:left-4 right-4 lg:right-auto z-10 flex flex-col gap-2">
         <Button
           size="icon"
           variant={annotationMode ? 'default' : 'secondary'}
-          onClick={() => setAnnotationMode(!annotationMode)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnnotationMode(!annotationMode);
+          }}
           className={cn(
             annotationMode && "bg-primary text-primary-foreground"
           )}
@@ -514,7 +517,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         {/* Image */}
         <div 
           ref={imageContainerRef}
-          className="flex-1 flex items-center justify-center overflow-hidden relative"
+          className="flex-1 flex items-center justify-center relative"
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -673,6 +676,11 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         onCommentBlur={handleCommentBlur}
         onStagingToggle={handleStagingToggle}
         onStagingStyleChange={handleStagingStyleChange}
+        annotationMode={annotationMode}
+        onAnnotationModeToggle={() => setAnnotationMode(!annotationMode)}
+        annotations={annotations}
+        currentUserId={currentUserId}
+        onDeleteAnnotation={handleDeleteAnnotation}
       />
     </div>
   );

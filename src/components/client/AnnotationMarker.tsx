@@ -19,8 +19,9 @@ export function AnnotationMarker({
   onDelete,
   containerSize,
 }: AnnotationMarkerProps) {
-  const left = (annotation.x_position / 100) * containerSize.width;
-  const top = (annotation.y_position / 100) * containerSize.height;
+  // Calculate position as percentage of container
+  const left = `${annotation.x_position}%`;
+  const top = `${annotation.y_position}%`;
 
   return (
     <Popover>
@@ -33,8 +34,8 @@ export function AnnotationMarker({
             "cursor-pointer z-10"
           )}
           style={{
-            left: `${left}px`,
-            top: `${top}px`,
+            left,
+            top,
             transform: 'translate(-50%, -50%)',
           }}
           onClick={(e) => e.stopPropagation()}
