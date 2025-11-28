@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Photo } from '@/types/database';
-import { Upload, Clock, Home, Sunset, Check, Sparkles, ChevronDown, Camera, Gift, Settings, Loader2 } from 'lucide-react';
+import { Upload, Clock, Home, Sunset, Check, Sparkles, ChevronDown, Camera, Gift, Settings, Loader2, Info } from 'lucide-react';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { STAGING_STYLES } from '@/constants/staging';
 import { Card, CardContent } from '@/components/ui/card';
@@ -445,7 +445,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
             {/* Virtuelle Blaue Stunde */}
             <Card 
               className={cn(
-                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat relative",
+                "cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-neu-flat relative overflow-hidden",
                 selectedServices.blueHour && "ring-2 ring-primary shadow-neu-float"
               )}
               onClick={() => toggleService('blueHour')}
@@ -473,13 +473,28 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                     Außenaufnahmen zur goldenen Stunde verwandeln
                   </p>
                   <div onClick={(e) => e.stopPropagation()}>
-                    <BlueHourInfoCard
-                      isExpanded={isBlueHourInfoExpanded}
-                      onToggle={() => setIsBlueHourInfoExpanded(!isBlueHourInfoExpanded)}
-                    />
+                    <Button
+                      variant="soft"
+                      className="flex items-center gap-2 w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsBlueHourInfoExpanded(!isBlueHourInfoExpanded);
+                      }}
+                    >
+                      <Info className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        Beispiele ansehen
+                      </span>
+                    </Button>
                   </div>
                 </div>
               </CardContent>
+              
+              {/* Overlay - covers entire card when expanded */}
+              <BlueHourInfoCard
+                isExpanded={isBlueHourInfoExpanded}
+                onToggle={() => setIsBlueHourInfoExpanded(!isBlueHourInfoExpanded)}
+              />
             </Card>
           </div>
         </div>
