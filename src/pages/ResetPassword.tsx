@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, Mail } from 'lucide-react';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -14,22 +15,35 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [isValidSession, setIsValidSession] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { resetPassword } = useAuth();
 
   useEffect(() => {
     // Check if user has a valid recovery session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
         setIsValidSession(true);
+        setUserEmail(session.user.email || null);
+        
+        // Fetch user role for smart redirect
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        setUserRole(roleData?.role || 'client');
       } else {
         toast({
           title: 'Ungültiger Link',
-          description: 'Der Passwort-Reset-Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.',
+          description: 'Der Passwort-Reset-Link ist ungültig oder abgelaufen.',
           variant: 'destructive',
         });
-        setTimeout(() => navigate('/auth'), 2000);
       }
     });
   }, [navigate, toast]);
@@ -85,12 +99,15 @@ export default function ResetPassword() {
       } else {
         toast({
           title: 'Passwort erfolgreich geändert',
-          description: 'Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Anmeldeseite weitergeleitet.',
+          description: 'Ihr Passwort wurde erfolgreich aktualisiert. Sie werden weitergeleitet.',
         });
         
-        // Sign out and redirect to login
+        // Sign out and smart redirect based on user role
         await supabase.auth.signOut();
-        setTimeout(() => navigate('/auth'), 2000);
+        
+        // Smart redirect: Admin -> /admin, Client -> /dashboard
+        const redirectPath = userRole === 'admin' ? '/admin' : '/';
+        setTimeout(() => navigate(redirectPath), 2000);
       }
     } catch (error: any) {
       toast({
@@ -102,6 +119,74 @@ export default function ResetPassword() {
       setLoading(false);
     }
   };
+
+  const handleResendLink = async () => {
+    if (!userEmail) {
+      toast({
+        title: 'Fehler',
+        description: 'E-Mail-Adresse nicht verfügbar. Bitte kehren Sie zur Anmeldeseite zurück.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setResendLoading(true);
+
+    try {
+      const { error } = await resetPassword(userEmail);
+
+      if (error) {
+        toast({
+          title: 'Fehler',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'E-Mail gesendet',
+          description: 'Ein neuer Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet.',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Fehler',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Show error state if session is invalid
+  if (!isValidSession && userEmail === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-destructive">
+              Ungültiger Link
+            </CardTitle>
+            <CardDescription>
+              Der Passwort-Reset-Link ist ungültig oder abgelaufen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Passwort-Reset-Links sind aus Sicherheitsgründen nur für begrenzte Zeit gültig. 
+              Fordern Sie einen neuen Link an, um fortzufahren.
+            </p>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              className="w-full"
+            >
+              Zur Anmeldeseite
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Show loading state while validating session
   if (!isValidSession) {
@@ -231,12 +316,47 @@ export default function ResetPassword() {
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-4 space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">oder</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleResendLink}
+              disabled={resendLoading || loading}
+              className="w-full"
+            >
+              {resendLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
+                  Sendet...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Link erneut senden
+                </>
+              )}
+            </Button>
+
+            <p className="text-xs text-center text-muted-foreground">
+              Link abgelaufen? Fordern Sie einen neuen an und prüfen Sie Ihr Postfach.
+            </p>
+          </div>
+
+          <div className="mt-4 text-center text-sm border-t pt-4">
             <button
               type="button"
               onClick={() => navigate('/auth')}
               className="text-primary hover:underline"
-              disabled={loading}
+              disabled={loading || resendLoading}
             >
               Zurück zur Anmeldung
             </button>
