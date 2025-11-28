@@ -58,6 +58,7 @@ export function useGalleryFinalization(gallery: Gallery | undefined, userId: str
         const { error: photoError } = await supabase
           .from('photos')
           .update({
+            blue_hour_requested: true,
             client_comment: data.stagingComment || null,
           })
           .eq('id', photoId);
@@ -102,6 +103,7 @@ export function useGalleryFinalization(gallery: Gallery | undefined, userId: str
           is_locked: true,
           reviewed_at: new Date().toISOString(),
           reviewed_by: userId,
+          express_delivery_requested: data.services.expressDelivery,
         })
         .eq('id', gallery.id);
 

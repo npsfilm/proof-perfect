@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Gallery, Photo, GalleryFeedback } from '@/types/database';
+import { Gallery, Photo, GalleryFeedback, StagingReference } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Send, Loader2, MessageSquare, Wand2, Check, MapPin } from 'lucide-react';
+import { Copy, Send, Loader2, MessageSquare, Wand2, Check, MapPin, Clock, Home, Sunrise } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
@@ -131,6 +131,24 @@ export default function GalleryReview() {
     enabled: !!selectedPhotos && selectedPhotos.length > 0,
   });
 
+  // Fetch staging references
+  const { data: stagingReferences } = useQuery({
+    queryKey: ['staging-references', id],
+    queryFn: async () => {
+      if (!selectedPhotos || selectedPhotos.length === 0) return [];
+      
+      const photoIds = selectedPhotos.map(p => p.id);
+      const { data, error } = await supabase
+        .from('staging_references')
+        .select('*')
+        .in('photo_id', photoIds);
+      
+      if (error) throw error;
+      return data as StagingReference[];
+    },
+    enabled: !!selectedPhotos && selectedPhotos.length > 0,
+  });
+
   const handleCopyFilenames = () => {
     if (!selectedPhotos || selectedPhotos.length === 0) {
       toast({
@@ -238,6 +256,7 @@ export default function GalleryReview() {
   }
 
   const stagingPhotos = selectedPhotos?.filter(p => p.staging_requested) || [];
+  const blueHourPhotos = selectedPhotos?.filter(p => p.blue_hour_requested) || [];
   const photosWithComments = selectedPhotos?.filter(p => p.client_comment) || [];
   const photosWithAnnotations = allAnnotations ? 
     [...new Set(allAnnotations.map(a => a.photo_id))].length : 0;
@@ -268,6 +287,43 @@ export default function GalleryReview() {
             </div>
           }
         />
+
+      {/* Service Tags - Prominent display */}
+      {(gallery.express_delivery_requested || stagingPhotos.length > 0 || blueHourPhotos.length > 0) && (
+        <Card className={gallery.express_delivery_requested ? 'border-2 border-red-500 shadow-lg' : ''}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {gallery.express_delivery_requested && (
+                <span className="text-red-600">⚡</span>
+              )}
+              Ausgewählte Services
+            </CardTitle>
+            <CardDescription>Vom Kunden beauftragte Zusatzleistungen</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {gallery.express_delivery_requested && (
+                <Badge className="bg-red-600 hover:bg-red-700 text-white text-base px-4 py-2 animate-pulse">
+                  <Clock className="h-5 w-5 mr-2" />
+                  24H EXPRESS - DRINGEND EILIG
+                </Badge>
+              )}
+              {stagingPhotos.length > 0 && (
+                <Badge className="bg-purple-600 hover:bg-purple-700 text-white text-base px-4 py-2">
+                  <Home className="h-5 w-5 mr-2" />
+                  {stagingPhotos.length}× Virtuelles Staging
+                </Badge>
+              )}
+              {blueHourPhotos.length > 0 && (
+                <Badge className="bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white text-base px-4 py-2">
+                  <Sunrise className="h-5 w-5 mr-2" />
+                  {blueHourPhotos.length}× Blaue Stunde
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {gallery.status !== 'Closed' && gallery.status !== 'Delivered' && (
         <Alert>
@@ -321,6 +377,34 @@ export default function GalleryReview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Reference Images */}
+      {stagingReferences && stagingReferences.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Referenzbilder</CardTitle>
+            <CardDescription>Vom Kunden hochgeladene Staging-Referenzen</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {stagingReferences.map((ref) => (
+                <div key={ref.id} className="space-y-2">
+                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500">
+                    <img
+                      src={ref.file_url}
+                      alt="Staging Referenz"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {ref.notes && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">{ref.notes}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Client Feedback */}
       {feedback && feedback.length > 0 && (
@@ -378,14 +462,24 @@ export default function GalleryReview() {
               {selectedPhotos.map((photo) => {
                 const photoAnnotations = allAnnotations?.filter(a => a.photo_id === photo.id) || [];
                 
+                // Determine border styling based on services
+                let borderClass = 'border-2 border-muted';
+                if (photo.staging_requested) {
+                  borderClass = 'border-4 border-purple-500 shadow-lg shadow-purple-200';
+                } else if (photo.blue_hour_requested) {
+                  borderClass = 'border-4 border-transparent bg-gradient-to-br from-blue-500 to-orange-500 p-0.5 shadow-lg';
+                }
+                
                 return (
                   <div key={photo.id} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary relative">
-                      <img
-                        src={photo.storage_url}
-                        alt={photo.filename}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className={`aspect-square rounded-lg overflow-hidden relative ${borderClass}`}>
+                      <div className={photo.blue_hour_requested ? 'w-full h-full rounded-md overflow-hidden' : ''}>
+                        <img
+                          src={photo.storage_url}
+                          alt={photo.filename}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       
                       {/* Annotation Markers Overlay */}
                       {photoAnnotations.length > 0 && (
@@ -436,10 +530,17 @@ export default function GalleryReview() {
                       <p className="text-xs font-mono truncate">{photo.filename}</p>
                       
                       {photo.staging_requested && (
-                        <div className="flex items-center gap-1 text-xs text-purple-600">
-                          <Wand2 className="h-3 w-3" />
-                          <span>Staging: {photo.staging_style || 'Modern'}</span>
-                        </div>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-300">
+                          <Wand2 className="h-3 w-3 mr-1" />
+                          Staging: {photo.staging_style || 'Modern'}
+                        </Badge>
+                      )}
+                      
+                      {photo.blue_hour_requested && (
+                        <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-orange-100 text-blue-700 border-blue-300">
+                          <Sunrise className="h-3 w-3 mr-1" />
+                          Blaue Stunde
+                        </Badge>
                       )}
                       
                       {photo.client_comment && (

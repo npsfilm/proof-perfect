@@ -148,6 +148,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           delivered_at: string | null
+          express_delivery_requested: boolean
           final_delivery_link: string | null
           id: string
           is_locked: boolean
@@ -165,6 +166,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          express_delivery_requested?: boolean
           final_delivery_link?: string | null
           id?: string
           is_locked?: boolean
@@ -182,6 +184,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          express_delivery_requested?: boolean
           final_delivery_link?: string | null
           id?: string
           is_locked?: boolean
@@ -414,6 +417,7 @@ export type Database = {
       }
       photos: {
         Row: {
+          blue_hour_requested: boolean
           client_comment: string | null
           created_at: string
           filename: string
@@ -427,6 +431,7 @@ export type Database = {
           upload_order: number
         }
         Insert: {
+          blue_hour_requested?: boolean
           client_comment?: string | null
           created_at?: string
           filename: string
@@ -440,6 +445,7 @@ export type Database = {
           upload_order: number
         }
         Update: {
+          blue_hour_requested?: boolean
           client_comment?: string | null
           created_at?: string
           filename?: string
