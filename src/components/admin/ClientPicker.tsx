@@ -38,17 +38,18 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
   }, [allClients, searchQuery]);
 
   const handleSelectClient = (client: Client) => {
-    const isSelected = selectedClients.some(c => c.id === client.id);
+    const validClients = selectedClients.filter(c => c && c.id);
+    const isSelected = validClients.some(c => c.id === client.id);
     
     if (isSelected) {
-      onClientsChange(selectedClients.filter(c => c.id !== client.id));
+      onClientsChange(validClients.filter(c => c.id !== client.id));
     } else {
-      onClientsChange([...selectedClients, client]);
+      onClientsChange([...validClients, client]);
     }
   };
 
   const handleRemoveClient = (clientId: string) => {
-    onClientsChange(selectedClients.filter(c => c.id !== clientId));
+    onClientsChange(selectedClients.filter(c => c && c.id && c.id !== clientId));
   };
 
   const handleClientCreated = (newClient: Client) => {
@@ -102,7 +103,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
                 </CommandEmpty>
                 <CommandGroup>
                   {filteredClients.map((client: Client & { companies?: { name?: string } }) => {
-                    const isSelected = selectedClients.some(c => c.id === client.id);
+                    const isSelected = selectedClients.filter(c => c && c.id).some(c => c.id === client.id);
                     const displayName = `${client.anrede ? client.anrede + ' ' : ''}${client.vorname} ${client.nachname}`;
                     
                     return (
@@ -155,7 +156,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
         {selectedClients.length > 0 && (
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              {selectedClients.map((client) => {
+              {selectedClients.filter(c => c && c.id).map((client) => {
                 const displayName = `${client.anrede ? client.anrede + ' ' : ''}${client.vorname} ${client.nachname}`;
                 
                 return (
