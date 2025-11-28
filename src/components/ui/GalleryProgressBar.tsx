@@ -1,6 +1,14 @@
 import { GALLERY_STATUSES, GALLERY_STATUS_ORDER, GalleryStatus } from '@/constants/gallery-status';
-import { CheckCircle, Circle } from 'lucide-react';
+import { Calendar, Eye, Lock, Settings, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const STATUS_ICONS = {
+  Planning: Calendar,
+  Open: Eye,
+  Closed: Lock,
+  Processing: Settings,
+  Delivered: CheckCircle,
+};
 
 interface GalleryProgressBarProps {
   currentStatus: GalleryStatus;
@@ -48,11 +56,10 @@ export function GalleryProgressBar({
                     isPending && "bg-muted text-muted-foreground shadow-neu-pressed"
                   )}
                 >
-                  {isCompleted ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    <Circle className={cn("w-5 h-5", isActive && "fill-current")} />
-                  )}
+                  {(() => {
+                    const StatusIcon = STATUS_ICONS[status];
+                    return <StatusIcon className="w-5 h-5" />;
+                  })()}
                 </div>
 
                 {/* Label */}
