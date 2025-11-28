@@ -429,20 +429,20 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
                 draggable={false}
               />
             </div>
-          </div>
 
-          {/* Annotation Layer */}
-          <AnnotationLayer
-            annotations={annotations}
-            pendingAnnotation={pendingAnnotation}
-            annotationMode={annotationMode}
-            zoom={zoom}
-            currentUserId={currentUserId}
-            imageContainerSize={imageContainerSize}
-            onSaveAnnotation={handleSaveAnnotation}
-            onCancelAnnotation={handleCancelAnnotation}
-            onDeleteAnnotation={handleDeleteAnnotation}
-          />
+            {/* Annotation Layer */}
+            <AnnotationLayer
+              annotations={annotations}
+              pendingAnnotation={pendingAnnotation}
+              annotationMode={annotationMode}
+              zoom={zoom}
+              currentUserId={currentUserId}
+              imageContainerSize={imageContainerSize}
+              onSaveAnnotation={handleSaveAnnotation}
+              onCancelAnnotation={handleCancelAnnotation}
+              onDeleteAnnotation={handleDeleteAnnotation}
+            />
+          </div>
         </div>
 
         {/* Controls (Desktop only) */}
