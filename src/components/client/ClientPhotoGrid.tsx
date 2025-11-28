@@ -5,6 +5,7 @@ import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Orientation } from '@/hooks/usePhotoOrientations';
+import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
 
 interface ClientPhotoGridProps {
   photos?: Photo[];
@@ -90,6 +91,16 @@ export function ClientPhotoGrid({
                 onContextMenu={(e) => e.preventDefault()}
                 draggable={false}
               />
+              
+              {/* Watermark */}
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center items-end pb-2 pointer-events-none">
+                <img 
+                  src={watermarkLogo} 
+                  alt="" 
+                  className="h-8 w-auto opacity-70 select-none"
+                  draggable={false}
+                />
+              </div>
               
               {/* Comparison Badge */}
               {isInComparison && (
