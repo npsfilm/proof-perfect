@@ -15,6 +15,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Helper function to fetch user role from database
+ * Extracted to eliminate code duplication and improve maintainability
+ */
+const fetchUserRole = async (userId: string): Promise<RoleType> => {
+  const { data } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .single();
+  
+  return data?.role ?? 'client';
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -24,20 +38,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        // Only synchronous state updates in the callback to prevent deadlock
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch user role when session changes
+        // Defer Supabase calls with setTimeout to prevent auth deadlock
+        // This is a Supabase best practice - do not remove
         if (session?.user) {
-          setTimeout(async () => {
-            const { data } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            setRole(data?.role ?? 'client');
+          setTimeout(() => {
+            fetchUserRole(session.user.id).then(setRole);
           }, 0);
         } else {
           setRole(null);
@@ -45,21 +55,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Check for existing session
+    // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            setRole(data?.role ?? 'client');
-            setLoading(false);
-          });
+        fetchUserRole(session.user.id).then((userRole) => {
+          setRole(userRole);
+          setLoading(false);
+        });
       } else {
         setLoading(false);
       }
