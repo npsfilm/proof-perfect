@@ -753,7 +753,12 @@ export type Database = {
       }
     }
     Enums: {
-      gallery_status_t: "Draft" | "Sent" | "Reviewed" | "Delivered"
+      gallery_status_t:
+        | "Planning"
+        | "Open"
+        | "Closed"
+        | "Processing"
+        | "Delivered"
       role_t: "admin" | "client"
       salutation_t: "Du" | "Sie"
     }
@@ -883,7 +888,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      gallery_status_t: ["Draft", "Sent", "Reviewed", "Delivered"],
+      gallery_status_t: [
+        "Planning",
+        "Open",
+        "Closed",
+        "Processing",
+        "Delivered",
+      ],
       role_t: ["admin", "client"],
       salutation_t: ["Du", "Sie"],
     },

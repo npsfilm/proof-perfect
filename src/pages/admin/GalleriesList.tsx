@@ -15,6 +15,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryCardSkeletonGrid } from '@/components/admin/skeletons/GalleryCardSkeleton';
 import { TimeElapsed } from '@/components/admin/TimeElapsed';
+import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -179,7 +180,7 @@ export default function GalleriesList() {
                     >
                       <div className="flex items-center gap-2 flex-wrap">
                         <CardTitle className="text-lg">{gallery.name}</CardTitle>
-                        {gallery.status === 'Reviewed' && gallery.reviewed_at && (
+                        {gallery.status === 'Closed' && gallery.reviewed_at && (
                           <TimeElapsed 
                             startTime={gallery.reviewed_at}
                             variant="secondary"
@@ -191,9 +192,9 @@ export default function GalleriesList() {
                       </p>
                     </label>
                   </div>
-                  <Badge className={statusColors[gallery.status]}>
-                    {gallery.status}
-                  </Badge>
+                  <div className="mt-3">
+                    <GalleryProgressBar currentStatus={gallery.status} compact />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

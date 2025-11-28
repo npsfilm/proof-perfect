@@ -23,12 +23,13 @@ import { GalleryStatus } from '@/types/database';
 import { useCompanies } from '@/hooks/useCompanies';
 import { cn } from '@/lib/utils';
 
-const GALLERY_STATUSES: GalleryStatus[] = ['Draft', 'Sent', 'Reviewed', 'Delivered'];
+const GALLERY_STATUSES: GalleryStatus[] = ['Planning', 'Open', 'Closed', 'Processing', 'Delivered'];
 
 const STATUS_LABELS: Record<GalleryStatus, string> = {
-  Draft: 'Entwurf',
-  Sent: 'Gesendet',
-  Reviewed: 'Überprüft',
+  Planning: 'Planung',
+  Open: 'Offen',
+  Closed: 'Geschlossen',
+  Processing: 'Bearbeitung',
   Delivered: 'Geliefert',
 };
 

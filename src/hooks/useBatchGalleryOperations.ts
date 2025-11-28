@@ -37,7 +37,7 @@ export function useBatchGalleryOperations() {
             slug: newSlug,
             package_target_count: original.package_target_count,
             salutation_type: original.salutation_type,
-            status: 'Draft',
+            status: 'Planning',
             is_locked: false,
           })
           .select()

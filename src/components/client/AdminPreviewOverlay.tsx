@@ -94,7 +94,7 @@ export function AdminPreviewOverlay({ gallery, selectedCount, totalCount }: Admi
                 Galerie bearbeiten
               </Button>
 
-              {(gallery.status === 'Reviewed' || gallery.status === 'Delivered') && (
+              {(gallery.status === 'Closed' || gallery.status === 'Delivered') && (
                 <Button
                   variant="secondary"
                   size="sm"
