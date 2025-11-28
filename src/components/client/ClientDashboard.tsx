@@ -12,6 +12,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
 import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
+import { NextStepsWizard } from '@/components/client/NextStepsWizard';
 import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
 import { GallerySelectionStats } from '@/types/database';
 
@@ -85,6 +86,16 @@ export function ClientDashboard() {
     selected: filteredGalleries.reduce((sum, g) => sum + (g.selected_count || 0), 0),
     staging: filteredGalleries.reduce((sum, g) => sum + (g.staging_count || 0), 0),
   }), [filteredGalleries]);
+
+  // Find galleries that need attention (Open with 0 selections)
+  const nextStepsGalleries = useMemo(() => 
+    filteredGalleries.filter(g => 
+      g.status === 'Open' && 
+      (g.selected_count || 0) === 0 &&
+      (g.photos_count || 0) > 0
+    ),
+    [filteredGalleries]
+  );
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -241,6 +252,20 @@ export function ClientDashboard() {
             description="Angefordert"
           />
         </div>
+
+        {/* Next Steps Wizard - Show for galleries that are Open with 0 selections */}
+        {nextStepsGalleries.length > 0 && (
+          <div className="space-y-4">
+            {nextStepsGalleries.slice(0, 1).map((gallery) => (
+              <NextStepsWizard
+                key={gallery.gallery_id}
+                galleryName={gallery.name || ''}
+                galleryAddress={gallery.name}
+                onStartSelection={() => navigate(`/gallery/${gallery.slug}`)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Gallery Cards Grid */}
         {hasNoGalleries ? (
