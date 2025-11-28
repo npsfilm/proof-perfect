@@ -124,6 +124,17 @@ export interface GalleryClient {
   created_at: string;
 }
 
+export interface PhotoAnnotation {
+  id: string;
+  photo_id: string;
+  author_user_id: string;
+  x_position: number; // 0-100 percentage
+  y_position: number; // 0-100 percentage
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CompanyGalleryStats {
   company_id: string;
   company_name: string;

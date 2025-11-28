@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Send, Loader2, MessageSquare, Wand2, Check } from 'lucide-react';
+import { Copy, Send, Loader2, MessageSquare, Wand2, Check, MapPin } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
@@ -78,6 +78,24 @@ export default function GalleryReview() {
       return data.map((a: any) => a.profiles.email) as string[];
     },
     enabled: !!id,
+  });
+
+  // Fetch all annotations for selected photos
+  const { data: allAnnotations } = useQuery({
+    queryKey: ['all-annotations', id],
+    queryFn: async () => {
+      if (!selectedPhotos || selectedPhotos.length === 0) return [];
+      
+      const photoIds = selectedPhotos.map(p => p.id);
+      const { data, error } = await supabase
+        .from('photo_annotations')
+        .select('*')
+        .in('photo_id', photoIds);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPhotos && selectedPhotos.length > 0,
   });
 
   const handleCopyFilenames = () => {
@@ -188,6 +206,8 @@ export default function GalleryReview() {
 
   const stagingPhotos = selectedPhotos?.filter(p => p.staging_requested) || [];
   const photosWithComments = selectedPhotos?.filter(p => p.client_comment) || [];
+  const photosWithAnnotations = allAnnotations ? 
+    [...new Set(allAnnotations.map(a => a.photo_id))].length : 0;
 
   return (
     <PageContainer size="xl">
@@ -257,6 +277,16 @@ export default function GalleryReview() {
             <p className="text-xs text-muted-foreground">Fotos mit Notizen</p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Anmerkungen</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{photosWithAnnotations}</div>
+            <p className="text-xs text-muted-foreground">Fotos mit Markierungen</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Client Feedback */}
@@ -312,35 +342,58 @@ export default function GalleryReview() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {selectedPhotos.map((photo) => (
-                <div key={photo.id} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary">
-                    <img
-                      src={photo.storage_url}
-                      alt={photo.filename}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs font-mono truncate">{photo.filename}</p>
+              {selectedPhotos.map((photo) => {
+                const photoAnnotations = allAnnotations?.filter(a => a.photo_id === photo.id) || [];
+                
+                return (
+                  <div key={photo.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary relative">
+                      <img
+                        src={photo.storage_url}
+                        alt={photo.filename}
+                        className="w-full h-full object-cover"
+                      />
+                      {photoAnnotations.length > 0 && (
+                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                          {photoAnnotations.length}
+                        </div>
+                      )}
+                    </div>
                     
-                    {photo.staging_requested && (
-                      <div className="flex items-center gap-1 text-xs text-purple-600">
-                        <Wand2 className="h-3 w-3" />
-                        <span>Staging: {photo.staging_style || 'Modern'}</span>
-                      </div>
-                    )}
-                    
-                    {photo.client_comment && (
-                      <div className="flex items-start gap-1 text-xs text-muted-foreground">
-                        <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                        <span className="line-clamp-2">{photo.client_comment}</span>
-                      </div>
-                    )}
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs font-mono truncate">{photo.filename}</p>
+                      
+                      {photo.staging_requested && (
+                        <div className="flex items-center gap-1 text-xs text-purple-600">
+                          <Wand2 className="h-3 w-3" />
+                          <span>Staging: {photo.staging_style || 'Modern'}</span>
+                        </div>
+                      )}
+                      
+                      {photo.client_comment && (
+                        <div className="flex items-start gap-1 text-xs text-muted-foreground">
+                          <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-2">{photo.client_comment}</span>
+                        </div>
+                      )}
+
+                      {photoAnnotations.length > 0 && (
+                        <div className="space-y-1 mt-2 pt-2 border-t">
+                          <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                            <MapPin className="h-3 w-3" />
+                            <span>{photoAnnotations.length} Markierung(en)</span>
+                          </div>
+                          {photoAnnotations.map((annotation, idx) => (
+                            <div key={annotation.id} className="text-xs text-muted-foreground pl-4">
+                              <span className="font-bold">{idx + 1}.</span> {annotation.comment}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
