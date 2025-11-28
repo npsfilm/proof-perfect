@@ -19,13 +19,18 @@ export function AnnotationPopover({ position, onSave, onCancel }: AnnotationPopo
     }
   };
 
+  // Smart positioning: show below if near top of screen
+  const showBelow = position.y < 200;
+  
   return (
     <div
-      className="absolute z-20 bg-background border-2 border-primary rounded-lg shadow-xl p-4 w-80"
+      className="absolute z-20 bg-background border-2 border-primary rounded-lg shadow-xl p-4 w-80 max-w-[90vw]"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        transform: 'translate(-50%, -100%) translateY(-12px)',
+        transform: showBelow 
+          ? 'translate(-50%, 12px)' 
+          : 'translate(-50%, -100%) translateY(-12px)',
       }}
       onClick={(e) => e.stopPropagation()}
     >
