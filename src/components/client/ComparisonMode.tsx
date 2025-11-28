@@ -136,6 +136,7 @@ export function ComparisonMode({
               src={signedUrl2 || photo2.storage_url}
               alt={photo2.filename}
               className="w-full h-auto max-h-[70vh] object-contain select-none"
+              onContextMenu={(e) => e.preventDefault()}
               draggable={false}
             />
             
@@ -147,6 +148,7 @@ export function ComparisonMode({
               style={{ 
                 clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`
               }}
+              onContextMenu={(e) => e.preventDefault()}
               draggable={false}
             />
             
@@ -238,7 +240,9 @@ export function ComparisonMode({
           <img
             src={signedUrl1 || photo1.storage_url}
             alt={photo1.filename}
-            className="max-h-[55vh] max-w-full object-contain rounded-lg"
+            className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
           />
 
           {/* Info */}
@@ -292,7 +296,9 @@ export function ComparisonMode({
           <img
             src={signedUrl2 || photo2.storage_url}
             alt={photo2.filename}
-            className="max-h-[55vh] max-w-full object-contain rounded-lg"
+            className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
           />
 
           {/* Info */}
