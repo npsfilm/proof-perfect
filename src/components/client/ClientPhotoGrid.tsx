@@ -85,8 +85,10 @@ export function ClientPhotoGrid({
               <img
                 src={signedUrls[photo.id] || photo.storage_url}
                 alt={photo.filename}
-                className="w-full h-full object-contain hover:scale-105 transition-transform"
+                className="w-full h-full object-contain hover:scale-105 transition-transform select-none"
                 onLoad={handleImageLoad}
+                onContextMenu={(e) => e.preventDefault()}
+                draggable={false}
               />
               
               {/* Comparison Badge */}

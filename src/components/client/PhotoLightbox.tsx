@@ -396,13 +396,15 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
             src={signedUrl || photo.storage_url}
             alt={photo.filename}
             className={cn(
-              "object-contain transition-transform",
+              "object-contain transition-transform select-none",
               isFullscreen ? "w-full h-full" : "max-w-full max-h-full"
             )}
             style={{
               transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
               transformOrigin: 'center center',
             }}
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
           />
 
           {/* Annotation Layer */}
