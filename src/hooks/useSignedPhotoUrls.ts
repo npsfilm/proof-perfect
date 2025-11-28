@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Photo } from '@/types/database';
 
@@ -15,19 +15,13 @@ function extractStoragePath(storageUrl: string): string {
 }
 
 export function useSignedPhotoUrls(photos: Photo[] | undefined) {
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: signedUrls, isLoading, isRefetching } = useQuery({
+    queryKey: ['signedUrls', photos?.map(p => p.id).sort().join(',')],
+    queryFn: async () => {
+      if (!photos || photos.length === 0) {
+        return {};
+      }
 
-  useEffect(() => {
-    if (!photos || photos.length === 0) {
-      setSignedUrls({});
-      setIsLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-
-    async function generateSignedUrls() {
       const urlMap: Record<string, string> = {};
       
       // Generate signed URLs for all photos (1 hour expiry)
@@ -41,7 +35,6 @@ export function useSignedPhotoUrls(photos: Photo[] | undefined) {
 
             if (error) {
               console.error('[useSignedPhotoUrls] Error creating signed URL:', error);
-              // Fallback to original URL if signing fails
               urlMap[photo.id] = photo.storage_url;
             } else if (data?.signedUrl) {
               urlMap[photo.id] = data.signedUrl;
@@ -55,37 +48,28 @@ export function useSignedPhotoUrls(photos: Photo[] | undefined) {
         })
       );
 
-      if (isMounted) {
-        setSignedUrls(urlMap);
-        setIsLoading(false);
-      }
-    }
+      return urlMap;
+    },
+    enabled: !!photos && photos.length > 0,
+    staleTime: 45 * 60 * 1000,       // 45 minutes - URLs stay fresh
+    refetchInterval: 50 * 60 * 1000, // 50 minutes - proactive refresh before expiry
+    refetchOnWindowFocus: true,       // Refresh when user returns to tab
+  });
 
-    generateSignedUrls();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [photos]);
-
-  return { signedUrls, isLoading };
+  return { 
+    signedUrls: signedUrls ?? {}, 
+    isLoading,
+    isRefetching 
+  };
 }
 
 // Hook for single photo
 export function useSignedPhotoUrl(photo: Photo | null | undefined) {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: signedUrl, isLoading, isRefetching } = useQuery({
+    queryKey: ['signedUrl', photo?.id],
+    queryFn: async () => {
+      if (!photo) return null;
 
-  useEffect(() => {
-    if (!photo) {
-      setSignedUrl(null);
-      setIsLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-
-    async function generateSignedUrl() {
       try {
         const path = extractStoragePath(photo.storage_url);
         const { data, error } = await supabase.storage
@@ -94,26 +78,26 @@ export function useSignedPhotoUrl(photo: Photo | null | undefined) {
 
         if (error) {
           console.error('[useSignedPhotoUrl] Error creating signed URL:', error);
-          if (isMounted) setSignedUrl(photo.storage_url);
+          return photo.storage_url;
         } else if (data?.signedUrl) {
-          if (isMounted) setSignedUrl(data.signedUrl);
+          return data.signedUrl;
         } else {
-          if (isMounted) setSignedUrl(photo.storage_url);
+          return photo.storage_url;
         }
       } catch (err) {
         console.error('[useSignedPhotoUrl] Exception:', err);
-        if (isMounted) setSignedUrl(photo.storage_url);
-      } finally {
-        if (isMounted) setIsLoading(false);
+        return photo.storage_url;
       }
-    }
+    },
+    enabled: !!photo,
+    staleTime: 45 * 60 * 1000,       // 45 minutes
+    refetchInterval: 50 * 60 * 1000, // 50 minutes - refresh before expiry
+    refetchOnWindowFocus: true,
+  });
 
-    generateSignedUrl();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [photo]);
-
-  return { signedUrl, isLoading };
+  return { 
+    signedUrl: signedUrl ?? null, 
+    isLoading,
+    isRefetching 
+  };
 }
