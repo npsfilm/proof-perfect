@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Check, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Keyboard, Menu, ZoomIn, ZoomOut, Maximize2, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoBottomSheet } from './PhotoBottomSheet';
+import { AnnotationMarker } from './AnnotationMarker';
+import { AnnotationPopover } from './AnnotationPopover';
 import { Photo } from '@/types/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
+import { usePhotoAnnotations } from '@/hooks/usePhotoAnnotations';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -36,9 +39,17 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
   const [panY, setPanY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   
+  // Annotation state
+  const [annotationMode, setAnnotationMode] = useState(false);
+  const [pendingAnnotation, setPendingAnnotation] = useState<{ x: number; y: number } | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [imageContainerSize, setImageContainerSize] = useState({ width: 0, height: 0 });
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { annotations, addAnnotation, deleteAnnotation } = usePhotoAnnotations(photo.id);
   const imageRef = useRef<HTMLImageElement>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -49,11 +60,76 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
 
   const currentIndex = photos.findIndex(p => p.id === photo.id);
 
-  // Reset zoom when photo changes
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setCurrentUserId(data.user.id);
+    });
+  }, []);
+
+  // Update image container size on mount and resize
+  useEffect(() => {
+    const updateSize = () => {
+      if (imageRef.current) {
+        const rect = imageRef.current.getBoundingClientRect();
+        setImageContainerSize({ width: rect.width, height: rect.height });
+      }
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [photo.id, zoom]);
+
+  // Handle image click for annotations
+  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!annotationMode || zoom > 1 || isDragging) return;
+    
+    e.stopPropagation();
+    
+    const rect = imageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    setPendingAnnotation({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleSaveAnnotation = async (commentText: string) => {
+    if (!pendingAnnotation || !imageRef.current) return;
+    
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = (pendingAnnotation.x / rect.width) * 100;
+    const y = (pendingAnnotation.y / rect.height) * 100;
+    
+    await addAnnotation.mutateAsync({
+      x_position: Number(x.toFixed(2)),
+      y_position: Number(y.toFixed(2)),
+      comment: commentText,
+    });
+    
+    setPendingAnnotation(null);
+  };
+
+  const handleCancelAnnotation = () => {
+    setPendingAnnotation(null);
+  };
+
+  const handleDeleteAnnotation = async (annotationId: string) => {
+    await deleteAnnotation.mutateAsync(annotationId);
+  };
+
+  // Reset zoom and annotation mode when photo changes
   useEffect(() => {
     setZoom(1);
     setPanX(0);
     setPanY(0);
+    setAnnotationMode(false);
+    setPendingAnnotation(null);
   }, [photo.id]);
 
   // Pinch-to-zoom handling
@@ -362,6 +438,21 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
         </button>
       )}
 
+      {/* Annotation Mode Toggle (Desktop) */}
+      <div className="hidden lg:flex absolute top-20 left-4 z-10 flex-col gap-2">
+        <Button
+          size="icon"
+          variant={annotationMode ? 'default' : 'secondary'}
+          onClick={() => setAnnotationMode(!annotationMode)}
+          className={cn(
+            annotationMode && "bg-primary text-primary-foreground"
+          )}
+          title={annotationMode ? "Anmerkungs-Modus deaktivieren" : "Anmerkungs-Modus aktivieren"}
+        >
+          <MessageSquarePlus className="h-5 w-5" />
+        </Button>
+      </div>
+
       {/* Zoom Controls */}
       {zoom > 1 && (
         <div className="absolute top-20 right-4 z-10 flex flex-col gap-2 bg-black/60 rounded-lg p-2">
@@ -422,13 +513,17 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
       >
         {/* Image */}
         <div 
-          className="flex-1 flex items-center justify-center overflow-hidden"
+          ref={imageContainerRef}
+          className="flex-1 flex items-center justify-center overflow-hidden relative"
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+          onClick={handleImageClick}
+          style={{ 
+            cursor: annotationMode && zoom === 1 ? 'crosshair' : zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' 
+          }}
         >
           <img
             ref={imageRef}
@@ -443,6 +538,34 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
               transformOrigin: 'center center',
             }}
           />
+
+          {/* Annotation Markers */}
+          {zoom === 1 && annotations.map((annotation, index) => (
+            <AnnotationMarker
+              key={annotation.id}
+              annotation={annotation}
+              number={index + 1}
+              isOwner={annotation.author_user_id === currentUserId}
+              onDelete={handleDeleteAnnotation}
+              containerSize={imageContainerSize}
+            />
+          ))}
+
+          {/* Pending Annotation Popover */}
+          {pendingAnnotation && (
+            <AnnotationPopover
+              position={pendingAnnotation}
+              onSave={handleSaveAnnotation}
+              onCancel={handleCancelAnnotation}
+            />
+          )}
+
+          {/* Annotation Mode Indicator */}
+          {annotationMode && zoom === 1 && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg z-10">
+              Klicken Sie auf das Bild, um eine Anmerkung hinzuzufügen
+            </div>
+          )}
         </div>
 
         {/* Controls (Desktop only) */}
@@ -479,6 +602,23 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
               rows={4}
             />
           </div>
+
+          {/* Annotations List */}
+          {annotations.length > 0 && (
+            <div className="space-y-2 border-t pt-4">
+              <Label className="text-base">Anmerkungen ({annotations.length})</Label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {annotations.map((annotation, index) => (
+                  <div key={annotation.id} className="text-sm p-2 bg-muted rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-primary">{index + 1}.</span>
+                      <p className="flex-1">{annotation.comment}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Virtual Staging */}
           <div className="space-y-4 border-t pt-4">

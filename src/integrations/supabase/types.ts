@@ -371,6 +371,47 @@ export type Database = {
           },
         ]
       }
+      photo_annotations: {
+        Row: {
+          author_user_id: string
+          comment: string
+          created_at: string
+          id: string
+          photo_id: string
+          updated_at: string
+          x_position: number
+          y_position: number
+        }
+        Insert: {
+          author_user_id: string
+          comment: string
+          created_at?: string
+          id?: string
+          photo_id: string
+          updated_at?: string
+          x_position: number
+          y_position: number
+        }
+        Update: {
+          author_user_id?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          photo_id?: string
+          updated_at?: string
+          x_position?: number
+          y_position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_annotations_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           client_comment: string | null
