@@ -7,7 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, CheckCircle2, Mail } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, Mail, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { de } from 'date-fns/locale';
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const STORAGE_KEY = 'password_reset_last_sent';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -19,6 +24,9 @@ export default function ResetPassword() {
   const [isValidSession, setIsValidSession] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [lastSentAt, setLastSentAt] = useState<number | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [linkResentSuccess, setLinkResentSuccess] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { resetPassword } = useAuth();
@@ -38,6 +46,18 @@ export default function ResetPassword() {
           .single();
         
         setUserRole(roleData?.role || 'client');
+
+        // Load last sent timestamp from localStorage
+        const storedTimestamp = localStorage.getItem(STORAGE_KEY);
+        if (storedTimestamp) {
+          const timestamp = parseInt(storedTimestamp, 10);
+          setLastSentAt(timestamp);
+          
+          // Calculate remaining cooldown
+          const elapsed = Date.now() - timestamp;
+          const remaining = Math.max(0, RESEND_COOLDOWN_SECONDS - Math.floor(elapsed / 1000));
+          setCooldownRemaining(remaining);
+        }
       } else {
         toast({
           title: 'Ungültiger Link',
@@ -47,6 +67,23 @@ export default function ResetPassword() {
       }
     });
   }, [navigate, toast]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownRemaining]);
 
   const validatePassword = (pwd: string): string | null => {
     if (pwd.length < 6) {
@@ -130,7 +167,18 @@ export default function ResetPassword() {
       return;
     }
 
+    // Check cooldown
+    if (cooldownRemaining > 0) {
+      toast({
+        title: 'Bitte warten',
+        description: `Sie können einen neuen Link in ${cooldownRemaining} Sekunden anfordern.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setResendLoading(true);
+    setLinkResentSuccess(false);
 
     try {
       const { error } = await resetPassword(userEmail);
@@ -142,10 +190,20 @@ export default function ResetPassword() {
           variant: 'destructive',
         });
       } else {
+        // Save timestamp to localStorage
+        const now = Date.now();
+        localStorage.setItem(STORAGE_KEY, now.toString());
+        setLastSentAt(now);
+        setCooldownRemaining(RESEND_COOLDOWN_SECONDS);
+        setLinkResentSuccess(true);
+
         toast({
           title: 'E-Mail gesendet',
           description: 'Ein neuer Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet.',
         });
+
+        // Hide success indicator after 5 seconds
+        setTimeout(() => setLinkResentSuccess(false), 5000);
       }
     } catch (error: any) {
       toast({
@@ -330,13 +388,18 @@ export default function ResetPassword() {
               type="button"
               variant="outline"
               onClick={handleResendLink}
-              disabled={resendLoading || loading}
-              className="w-full"
+              disabled={resendLoading || loading || cooldownRemaining > 0}
+              className="w-full relative"
             >
               {resendLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
                   Sendet...
+                </>
+              ) : cooldownRemaining > 0 ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Erneut senden in {cooldownRemaining}s
                 </>
               ) : (
                 <>
@@ -344,11 +407,34 @@ export default function ResetPassword() {
                   Link erneut senden
                 </>
               )}
+              {linkResentSuccess && !resendLoading && (
+                <CheckCircle2 className="h-4 w-4 text-green-500 absolute right-3" />
+              )}
             </Button>
 
-            <p className="text-xs text-center text-muted-foreground">
-              Link abgelaufen? Fordern Sie einen neuen an und prüfen Sie Ihr Postfach.
-            </p>
+            {lastSentAt && !resendLoading && (
+              <p className="text-xs text-center text-muted-foreground">
+                {linkResentSuccess ? (
+                  <span className="text-green-500 font-medium">
+                    ✓ Link erfolgreich gesendet
+                  </span>
+                ) : (
+                  <>
+                    Zuletzt gesendet{' '}
+                    {formatDistanceToNow(lastSentAt, { 
+                      addSuffix: true, 
+                      locale: de 
+                    })}
+                  </>
+                )}
+              </p>
+            )}
+
+            {!lastSentAt && !linkResentSuccess && (
+              <p className="text-xs text-center text-muted-foreground">
+                Link abgelaufen? Fordern Sie einen neuen an und prüfen Sie Ihr Postfach.
+              </p>
+            )}
           </div>
 
           <div className="mt-4 text-center text-sm border-t pt-4">
