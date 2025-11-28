@@ -6,6 +6,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import blueHourBefore1 from "@/assets/blue-hour-before-1.jpg";
+import blueHourAfter1 from "@/assets/blue-hour-after-1.jpg";
+import blueHourBefore2 from "@/assets/blue-hour-before-2.jpg";
+import blueHourAfter2 from "@/assets/blue-hour-after-2.jpg";
 
 interface BlueHourInfoCardProps {
   isExpanded: boolean;
@@ -56,15 +60,15 @@ export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps
         {/* Example 1 */}
         <BlueHourSlider
           title="Beispiel 1: Einfamilienhaus"
-          beforeImage={undefined}
-          afterImage={undefined}
+          beforeImage={blueHourBefore1}
+          afterImage={blueHourAfter1}
         />
 
         {/* Example 2 */}
         <BlueHourSlider
           title="Beispiel 2: Moderne Villa"
-          beforeImage={undefined}
-          afterImage={undefined}
+          beforeImage={blueHourBefore2}
+          afterImage={blueHourAfter2}
         />
 
         {/* Explanatory text */}
