@@ -18,6 +18,7 @@ import { AnnotationLayer } from './lightbox/AnnotationLayer';
 import { LightboxNavigation } from './lightbox/LightboxNavigation';
 import { StagingControls } from './lightbox/StagingControls';
 import { KeyboardShortcuts } from './lightbox/KeyboardShortcuts';
+import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -391,21 +392,39 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId }:
             cursor: annotationMode && zoom === 1 ? 'crosshair' : zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' 
           }}
         >
-          <img
-            ref={imageRef}
-            src={signedUrl || photo.storage_url}
-            alt={photo.filename}
-            className={cn(
-              "object-contain transition-transform select-none",
-              isFullscreen ? "w-full h-full" : "max-w-full max-h-full"
-            )}
-            style={{
-              transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
-              transformOrigin: 'center center',
-            }}
-            onContextMenu={(e) => e.preventDefault()}
-            draggable={false}
-          />
+          <div className="relative">
+            <img
+              ref={imageRef}
+              src={signedUrl || photo.storage_url}
+              alt={photo.filename}
+              className={cn(
+                "object-contain transition-transform select-none",
+                isFullscreen ? "w-full h-full" : "max-w-full max-h-full"
+              )}
+              style={{
+                transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
+                transformOrigin: 'center center',
+              }}
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
+            />
+            
+            {/* Watermark */}
+            <div 
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                transform: `translateX(-50%) scale(${zoom})`,
+                transformOrigin: 'center bottom',
+              }}
+            >
+              <img 
+                src={watermarkLogo} 
+                alt="" 
+                className="h-12 w-auto opacity-70 select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
 
           {/* Annotation Layer */}
           <AnnotationLayer

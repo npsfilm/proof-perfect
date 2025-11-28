@@ -3,6 +3,7 @@ import { X, ArrowLeftRight, ChevronLeft, ChevronRight, Check } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/database';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
+import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
 
 interface ComparisonModeProps {
   photo1: Photo;
@@ -152,6 +153,16 @@ export function ComparisonMode({
               draggable={false}
             />
             
+            {/* Watermark */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-20">
+              <img 
+                src={watermarkLogo} 
+                alt="" 
+                className="h-12 w-auto opacity-70 select-none"
+                draggable={false}
+              />
+            </div>
+            
             {/* Draggable Divider */}
             <div 
               className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize z-10 pointer-events-none"
@@ -237,13 +248,25 @@ export function ComparisonMode({
           </button>
 
           {/* Image */}
-          <img
-            src={signedUrl1 || photo1.storage_url}
-            alt={photo1.filename}
-            className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
-            onContextMenu={(e) => e.preventDefault()}
-            draggable={false}
-          />
+          <div className="relative">
+            <img
+              src={signedUrl1 || photo1.storage_url}
+              alt={photo1.filename}
+              className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
+            />
+            
+            {/* Watermark */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none">
+              <img 
+                src={watermarkLogo} 
+                alt="" 
+                className="h-10 w-auto opacity-70 select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
 
           {/* Info */}
           <div className="mt-4 flex flex-col items-center gap-2">
@@ -293,13 +316,25 @@ export function ComparisonMode({
           </button>
 
           {/* Image */}
-          <img
-            src={signedUrl2 || photo2.storage_url}
-            alt={photo2.filename}
-            className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
-            onContextMenu={(e) => e.preventDefault()}
-            draggable={false}
-          />
+          <div className="relative">
+            <img
+              src={signedUrl2 || photo2.storage_url}
+              alt={photo2.filename}
+              className="max-h-[55vh] max-w-full object-contain rounded-lg select-none"
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
+            />
+            
+            {/* Watermark */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none">
+              <img 
+                src={watermarkLogo} 
+                alt="" 
+                className="h-10 w-auto opacity-70 select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
 
           {/* Info */}
           <div className="mt-4 flex flex-col items-center gap-2">
