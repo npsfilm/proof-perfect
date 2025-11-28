@@ -16,13 +16,13 @@ export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps
 
   return (
     <div 
-      className="absolute inset-0 z-20 bg-background rounded-[inherit] p-6 flex flex-col overflow-y-auto"
+      className="absolute inset-0 z-30 bg-background rounded-2xl p-6 flex flex-col shadow-neu-float"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header with title and close button */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h4 className="text-lg font-semibold text-foreground">
+          <h4 className="text-xl font-semibold text-foreground">
             Was ist die Blaue Stunde?
           </h4>
           <p className="text-sm text-muted-foreground mt-1">
@@ -39,8 +39,8 @@ export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps
         </Button>
       </div>
 
-      {/* Two sliders side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+      {/* Two large sliders side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0">
         <BlueHourSlider
           title="Beispiel 1: Einfamilienhaus"
           beforeImage={blueHourBefore1}
