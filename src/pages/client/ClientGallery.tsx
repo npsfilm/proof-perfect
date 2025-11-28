@@ -7,7 +7,7 @@ import { useGalleryFinalization } from '@/hooks/useGalleryFinalization';
 import { PhotoLightbox } from '@/components/client/PhotoLightbox';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
-import { ClientPhotoGrid } from '@/components/client/ClientPhotoGrid';
+import { VirtualizedPhotoGrid } from '@/components/client/VirtualizedPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
 import { ComparisonMode } from '@/components/client/ComparisonMode';
 import { WelcomeModal } from '@/components/client/WelcomeModal';
@@ -279,7 +279,7 @@ export default function ClientGallery() {
             </div>
           </div>
         )}
-      <ClientPhotoGrid
+      <VirtualizedPhotoGrid
         photos={filteredPhotos}
         isLoading={photosLoading || urlsLoading}
         onPhotoClick={handlePhotoClick}
