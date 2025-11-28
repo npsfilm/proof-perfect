@@ -1,9 +1,26 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
 import { Photo } from '@/types/database';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { GripVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { SortablePhotoItem } from './SortablePhotoItem';
+import { useState } from 'react';
 
 interface PhotoGridProps {
   photos: Photo[];
@@ -22,44 +39,54 @@ export function PhotoGrid({
   onClearSelection,
   onReorder,
 }: PhotoGridProps) {
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required to start drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const allSelected = photos.length > 0 && selectedPhotos.size === photos.length;
   const someSelected = selectedPhotos.size > 0 && selectedPhotos.size < photos.length;
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
+  // Memoize photo IDs for SortableContext
+  const photoIds = useMemo(() => photos.map((photo) => photo.id), [photos]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverIndex(index);
-  };
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
+    if (over && active.id !== over.id && onReorder) {
+      const oldIndex = photos.findIndex((photo) => photo.id === active.id);
+      const newIndex = photos.findIndex((photo) => photo.id === over.id);
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-      return;
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Call the reorder callback with the photo id and new index
+        onReorder(active.id as string, newIndex);
+      }
     }
 
-    if (onReorder) {
-      const draggedPhoto = photos[draggedIndex];
-      onReorder(draggedPhoto.id, dropIndex);
-    }
-
-    setDraggedIndex(null);
-    setDragOverIndex(null);
+    setActiveId(null);
   };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+
+  // Find the active photo for the drag overlay
+  const activePhoto = useMemo(
+    () => photos.find((photo) => photo.id === activeId),
+    [activeId, photos]
+  );
 
   return (
     <div className="space-y-4">
@@ -92,72 +119,40 @@ export function PhotoGrid({
         )}
       </div>
 
-      {/* Photo Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {photos.map((photo, index) => {
-          const isSelected = selectedPhotos.has(photo.id);
-          const isDragging = draggedIndex === index;
-          const isDragOver = dragOverIndex === index;
-
-          return (
-            <div
-              key={photo.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragEnd={handleDragEnd}
-              onDrop={(e) => handleDrop(e, index)}
-              className={cn(
-                'group relative aspect-square rounded-lg overflow-hidden border border-border transition-all cursor-move',
-                isSelected && 'ring-2 ring-primary ring-offset-2',
-                isDragging && 'opacity-50',
-                isDragOver && 'ring-2 ring-accent'
-              )}
-            >
-              {/* Drag Handle */}
-              <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="bg-background/80 backdrop-blur-sm rounded p-1">
-                  <GripVertical className="h-4 w-4 text-foreground" />
-                </div>
-              </div>
-
-              {/* Selection Checkbox */}
-              <div className="absolute top-2 right-2 z-10">
-                <div className="bg-background/80 backdrop-blur-sm rounded p-1">
-                  <Checkbox
-                    id={`photo-${photo.id}`}
-                    checked={isSelected}
-                    onCheckedChange={() => onPhotoToggle(photo.id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              </div>
-
-              {/* Photo Image */}
-              <img
-                src={photo.storage_url}
-                alt={photo.filename}
-                className="w-full h-full object-cover"
-                loading="lazy"
+      {/* Photo Grid with Drag and Drop */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <SortableContext items={photoIds} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {photos.map((photo) => (
+              <SortablePhotoItem
+                key={photo.id}
+                photo={photo}
+                isSelected={selectedPhotos.has(photo.id)}
+                onToggle={onPhotoToggle}
               />
+            ))}
+          </div>
+        </SortableContext>
 
-              {/* Filename Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-xs text-white truncate">{photo.filename}</p>
-              </div>
-
-              {/* Selection indicators */}
-              {photo.is_selected && (
-                <div className="absolute top-2 left-2 z-10">
-                  <Badge variant="default" className="bg-primary text-primary-foreground">
-                    Ausgewählt
-                  </Badge>
-                </div>
-              )}
+        {/* Drag Overlay - Shows a ghost of the dragged item */}
+        <DragOverlay>
+          {activePhoto ? (
+            <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary shadow-2xl opacity-90 rotate-3 scale-105">
+              <img
+                src={activePhoto.storage_url}
+                alt={activePhoto.filename}
+                className="w-full h-full object-cover"
+              />
             </div>
-          );
-        })}
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }
