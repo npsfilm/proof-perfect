@@ -6,7 +6,7 @@ interface AnalyticsData {
   galleriesByStatus: { status: string; count: number }[];
   averageSelectionRate: number;
   averageReviewTime: number; // in hours
-  stagingRequests: { style: string; count: number }[];
+  stagingRequests: { stagingStyle: string; count: number }[];
   recentActivity: {
     date: string;
     sent: number;
@@ -105,8 +105,8 @@ export function useAnalytics() {
         return acc;
       }, {} as Record<string, number>);
 
-      const stagingRequests = Object.entries(stagingCounts).map(([style, count]) => ({
-        style,
+      const stagingRequests = Object.entries(stagingCounts).map(([stagingStyle, count]) => ({
+        stagingStyle,
         count,
       }));
 

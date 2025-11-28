@@ -149,7 +149,7 @@ export default function Analytics() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={analytics.stagingRequests}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="style" />
+                  <XAxis dataKey="stagingStyle" />
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="count" fill="#233C63" />
