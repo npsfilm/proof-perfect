@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { Search, RefreshCw, FolderOpen, Camera, Heart, Home, ExternalLink, Lock, Unlock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
+import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
+import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
 import { GallerySelectionStats } from '@/types/database';
 
 type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'selected_desc';
@@ -37,6 +38,10 @@ export function ClientDashboard() {
       return data as GallerySelectionStats[];
     },
   });
+
+  // Fetch cover photos for all galleries
+  const galleryIds = useMemo(() => stats?.map(g => g.gallery_id || '').filter(Boolean) || [], [stats]);
+  const { data: coverPhotos } = useGalleryCoverPhotos(galleryIds);
 
   const filteredGalleries = useMemo(() => {
     let result = stats || [];
@@ -265,74 +270,30 @@ export function ClientDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGalleries.map((gallery) => {
-              const progress = gallery.photos_count && gallery.photos_count > 0
-                ? Math.round((gallery.selected_count || 0) / gallery.photos_count * 100)
-                : 0;
-              
               const buttonConfig = getButtonConfig(
                 gallery.status || 'Planning', 
                 gallery.slug || '',
                 gallery.gallery_id || '',
                 gallery.name || ''
               );
-              const ButtonIcon = buttonConfig.icon;
+
+              const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
 
               return (
-                <Card key={gallery.gallery_id} className="shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200">
-                  <CardHeader className="space-y-3">
-                    <div className="space-y-2">
-                      <CardTitle className="text-lg leading-tight">{gallery.name}</CardTitle>
-                      <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground">
-                        {getStatusLabel(gallery.status || 'Planning')}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    {/* Mini Stats */}
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Camera className="h-3.5 w-3.5" />
-                        <span>{gallery.photos_count || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-primary">
-                        <Heart className="h-3.5 w-3.5" />
-                        <span>{gallery.selected_count || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Home className="h-3.5 w-3.5" />
-                        <span>{gallery.staging_count || 0}</span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar with X von Y Label */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          {gallery.selected_count || 0} von {gallery.photos_count || 0} Fotos ausgewählt
-                        </span>
-                        <span className="font-medium text-primary">{progress}%</span>
-                      </div>
-                      <Progress 
-                        value={progress} 
-                        className="h-2"
-                        aria-label={`${gallery.selected_count || 0} von ${gallery.photos_count || 0} Fotos ausgewählt`}
-                      />
-                    </div>
-
-                    {/* CTA Button */}
-                    <Button
-                      onClick={buttonConfig.action}
-                      disabled={buttonConfig.disabled}
-                      variant={buttonConfig.variant || 'default'}
-                      className="w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed gap-2"
-                      size="lg"
-                    >
-                      <ButtonIcon className="h-4 w-4" />
-                      {buttonConfig.label}
-                    </Button>
-                  </CardContent>
-                </Card>
+                <GalleryHeroCard
+                  key={gallery.gallery_id}
+                  name={gallery.name || ''}
+                  status={gallery.status || 'Planning'}
+                  photosCount={gallery.photos_count || 0}
+                  selectedCount={gallery.selected_count || 0}
+                  stagingCount={gallery.staging_count || 0}
+                  coverImageUrl={coverImageUrl}
+                  buttonLabel={buttonConfig.label}
+                  buttonIcon={buttonConfig.icon}
+                  buttonAction={buttonConfig.action}
+                  buttonDisabled={buttonConfig.disabled}
+                  buttonVariant={buttonConfig.variant}
+                />
               );
             })}
           </div>
