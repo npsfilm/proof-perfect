@@ -79,7 +79,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
         body: {
           gallery_id: gallery.id,
           client_emails: clientEmails,
-          new_passwords: [],
+          new_passwords: {},
           gallery_url: galleryUrl,
         },
       });
@@ -125,7 +125,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
         body: {
           gallery_id: gallery.id,
           client_emails: clientEmails,
-          new_passwords: [],
+          new_passwords: {},
           gallery_url: galleryUrl,
         },
       });
