@@ -47,8 +47,19 @@ export function PhotoCard({
     >
       {/* Image Container */}
       <div 
-        className="relative bg-muted/30 cursor-pointer overflow-hidden aspect-[4/3]"
+        role="button"
+        tabIndex={isDisabled ? -1 : 0}
+        aria-label={`Foto ${index + 1} anzeigen: ${photo.filename}${photo.is_selected ? ' (ausgewählt)' : ''}`}
+        aria-disabled={isDisabled}
+        className="relative bg-muted/30 cursor-pointer overflow-hidden aspect-[4/3] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         onClick={() => !isDisabled && onClick()}
+        onKeyDown={(e) => {
+          if (isDisabled) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
       >
         <img
           src={signedUrl}
