@@ -14,6 +14,13 @@ export function NextStepsWizard({
   galleryAddress, 
   onStartSelection 
 }: NextStepsWizardProps) {
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Guten Morgen!';
+    if (hour < 18) return 'Guten Tag!';
+    return 'Guten Abend!';
+  };
+
   return (
     <Card className="relative overflow-hidden border-2 border-primary/30 shadow-neu-float bg-gradient-to-br from-primary/5 to-primary/10">
       {/* Decorative background elements */}
@@ -31,7 +38,7 @@ export function NextStepsWizard({
           {/* Content */}
           <div className="flex-1 space-y-2">
             <h3 className="text-xl md:text-2xl font-bold text-foreground">
-              Bereit loszulegen?
+              {getTimeBasedGreeting()} Bereit loszulegen?
             </h3>
             <p className="text-base text-muted-foreground">
               Starten Sie jetzt mit der Auswahl Ihrer Lieblingsfotos für{' '}
