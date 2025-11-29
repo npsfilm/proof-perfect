@@ -39,9 +39,9 @@ export function PhotoCard({
       style={width ? { width: `${width}px`, flexShrink: 0 } : undefined}
       className={`bg-card rounded-lg overflow-hidden shadow-neu-flat transition-all ${
         photo.is_selected 
-          ? 'ring-2 ring-primary shadow-lg' 
+          ? 'ring-4 ring-primary shadow-lg bg-primary/5' 
           : isInComparison
-          ? 'ring-2 ring-blue-500 shadow-lg'
+          ? 'ring-4 ring-blue-500 shadow-lg bg-blue-500/5'
           : 'hover:shadow-neu-float'
       } ${isDisabled ? 'opacity-40 pointer-events-none' : ''}`}
     >
@@ -114,15 +114,21 @@ export function PhotoCard({
       </div>
 
       {/* Footer with Photo Number and Checkmark */}
-      <div className="flex items-center justify-between p-3 bg-card">
-        <span className="text-sm font-medium text-muted-foreground">
+      <div className={`flex items-center justify-between p-3 transition-colors ${
+        photo.is_selected ? 'bg-primary/10' : 'bg-card'
+      }`}>
+        <span className={`text-sm font-medium ${
+          photo.is_selected ? 'text-primary font-semibold' : 'text-muted-foreground'
+        }`}>
           {index + 1}
         </span>
         <Button
           size="sm"
           variant={photo.is_selected ? 'default' : 'outline'}
           onClick={(e) => onCheckClick(e, photo)}
-          className="h-8 w-8 p-0 rounded-full"
+          className={`h-8 w-8 p-0 rounded-full transition-all ${
+            photo.is_selected ? 'scale-110' : ''
+          }`}
           aria-label={photo.is_selected ? 'Deselektieren' : 'Auswählen'}
         >
           <Check className={`h-4 w-4 ${photo.is_selected ? '' : 'opacity-50'}`} />
