@@ -57,7 +57,7 @@ export function GalleryHeroCard({
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent group-hover:from-black/80 transition-all duration-300" />
           </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -79,46 +79,35 @@ export function GalleryHeroCard({
             {name}
           </h3>
 
+          {/* Selection Progress - Text Based */}
+          <div className="flex items-center gap-2 mb-1">
+            <div className="text-lg font-bold text-white">
+              Auswahl: {selectedCount} / {photosCount} Fotos
+            </div>
+          </div>
+          
           {/* Mini Stats */}
-          <div className="flex items-center gap-4 text-sm text-white/90 mb-4">
-            <div className="flex items-center gap-1.5">
-              <Camera className="h-4 w-4" />
-              <span>{photosCount}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-white">
-              <Heart className="h-4 w-4 fill-white" />
-              <span className="font-medium">{selectedCount}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
+          {stagingCount > 0 && (
+            <div className="flex items-center gap-2 text-sm text-white/80">
               <Home className="h-4 w-4" />
-              <span>{stagingCount}</span>
+              <span>{stagingCount} Staging angefordert</span>
             </div>
-          </div>
-
-          {/* Gallery Status Progress */}
-          <div className="mt-1">
-            <GalleryProgressBar 
-              currentStatus={status as GalleryStatus}
-              compact={true}
-              className="scale-90 origin-left"
-            />
-          </div>
+          )}
         </div>
       </div>
 
       {/* Action Section */}
-      <CardContent className="p-4">
+      <CardContent className="p-5">
         <Button
           onClick={buttonAction}
           disabled={buttonDisabled}
           variant={buttonVariant}
           className={cn(
-            "w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed gap-2",
+            "w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed hover:scale-105 transition-all duration-200 gap-2 h-12 text-base font-semibold",
             buttonVariant === 'default' && "bg-primary text-primary-foreground"
           )}
-          size="lg"
         >
-          <ButtonIcon className="h-4 w-4" />
+          <ButtonIcon className="h-5 w-5" />
           {buttonLabel}
         </Button>
       </CardContent>

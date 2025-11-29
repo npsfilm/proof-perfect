@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Client } from '@/types/database';
 
 interface ClientHeaderProps {
   client: Client | null;
   onSignOut: () => void;
-  onSettingsClick?: () => void;
 }
 
-export function ClientHeader({ client, onSignOut, onSettingsClick }: ClientHeaderProps) {
+export function ClientHeader({ client, onSignOut }: ClientHeaderProps) {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Guten Morgen';
@@ -40,17 +39,6 @@ export function ClientHeader({ client, onSignOut, onSettingsClick }: ClientHeade
             )}
           </div>
           <div className="flex items-center gap-2">
-            {onSettingsClick && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onSettingsClick}
-                className="rounded-full"
-              >
-                <Settings className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Einstellungen</span>
-              </Button>
-            )}
             <Button 
               variant="ghost" 
               size="sm" 

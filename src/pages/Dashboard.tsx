@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientHeader } from '@/components/client/ClientHeader';
-import { ClientNavTabs } from '@/components/client/ClientNavTabs';
 import { ClientDashboard } from '@/components/client/ClientDashboard';
-import { StagingRequestTab } from '@/components/client/StagingRequestTab';
-import { ClientSettingsTab } from '@/components/client/ClientSettingsTab';
 import { useClientProfile } from '@/hooks/useClientProfile';
 
 export default function Dashboard() {
   const { user, role, loading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('galleries');
   
   const { data: clientProfile } = useClientProfile(user?.email);
 
@@ -40,7 +36,6 @@ export default function Dashboard() {
       <ClientHeader 
         client={clientProfile || null}
         onSignOut={signOut}
-        onSettingsClick={() => setActiveTab('settings')}
       />
       
       {role === 'admin' && (
@@ -60,17 +55,8 @@ export default function Dashboard() {
         </div>
       )}
       
-      <ClientNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      
       <main>
-        {activeTab === 'galleries' && <ClientDashboard />}
-        {activeTab === 'staging' && <StagingRequestTab />}
-        {activeTab === 'settings' && (
-          <ClientSettingsTab 
-            client={clientProfile || null}
-            userEmail={user.email || ''}
-          />
-        )}
+        <ClientDashboard />
       </main>
     </div>
   );

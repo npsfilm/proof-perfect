@@ -2,30 +2,22 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Search, RefreshCw, FolderOpen, Camera, Heart, Home, ExternalLink, Lock, Unlock } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { KpiCard } from '@/components/ui/KpiCard';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
 import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
+import { GalleryCompactCard } from '@/components/client/GalleryCompactCard';
 import { NextStepsWizard } from '@/components/client/NextStepsWizard';
 import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
 import { GallerySelectionStats } from '@/types/database';
 
-type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'selected_desc';
-type StatusFilter = 'all' | 'Planning' | 'Open' | 'Closed' | 'Processing' | 'Delivered';
-
 export function ClientDashboard() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('created_desc');
   const [reopenGalleryId, setReopenGalleryId] = useState<string | null>(null);
   const [reopenGalleryName, setReopenGalleryName] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
 
   const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ['client-gallery-stats'],
@@ -44,69 +36,50 @@ export function ClientDashboard() {
   const galleryIds = useMemo(() => stats?.map(g => g.gallery_id || '').filter(Boolean) || [], [stats]);
   const { data: coverPhotos } = useGalleryCoverPhotos(galleryIds);
 
-  const filteredGalleries = useMemo(() => {
-    let result = stats || [];
+  // Section galleries into Active and Completed
+  const { activeGalleries, completedGalleries } = useMemo(() => {
+    const active: GallerySelectionStats[] = [];
+    const completed: GallerySelectionStats[] = [];
     
-    // Status Filter
-    if (statusFilter !== 'all') {
-      result = result.filter(g => g.status === statusFilter);
-    }
+    (stats || []).forEach(gallery => {
+      if (gallery.status === 'Planning' || gallery.status === 'Open' || gallery.status === 'Processing') {
+        active.push(gallery);
+      } else {
+        completed.push(gallery);
+      }
+    });
     
-    // Search Filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(g => 
-        g.name?.toLowerCase().includes(query)
-      );
-    }
-    
-    // Sort
-    switch (sortBy) {
-      case 'created_desc':
-        result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-        break;
-      case 'created_asc':
-        result.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-        break;
-      case 'name_asc':
-        result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        break;
-      case 'selected_desc':
-        result.sort((a, b) => (b.selected_count || 0) - (a.selected_count || 0));
-        break;
-    }
-    
-    return result;
-  }, [stats, statusFilter, searchQuery, sortBy]);
+    return { activeGalleries: active, completedGalleries: completed };
+  }, [stats]);
 
-  // Calculate KPIs from filtered data
-  const kpis = useMemo(() => ({
-    galleries: filteredGalleries.length,
-    photos: filteredGalleries.reduce((sum, g) => sum + (g.photos_count || 0), 0),
-    selected: filteredGalleries.reduce((sum, g) => sum + (g.selected_count || 0), 0),
-    staging: filteredGalleries.reduce((sum, g) => sum + (g.staging_count || 0), 0),
-  }), [filteredGalleries]);
-
-  // Find galleries that need attention (Open with 0 selections)
-  const nextStepsGalleries = useMemo(() => 
-    filteredGalleries.filter(g => 
+  // Find galleries that need immediate attention
+  const nextStepsGallery = useMemo(() => {
+    // Priority 1: Open galleries with 0 selections
+    const openWithZero = activeGalleries.find(g => 
       g.status === 'Open' && 
       (g.selected_count || 0) === 0 &&
       (g.photos_count || 0) > 0
-    ),
-    [filteredGalleries]
-  );
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'Planning': return 'Planung';
-      case 'Open': return 'Offen';
-      case 'Closed': return 'Geschlossen';
-      case 'Processing': return 'Bearbeitung';
-      case 'Delivered': return 'Geliefert';
-      default: return status;
-    }
-  };
+    );
+    if (openWithZero) return { gallery: openWithZero, type: 'select' as const };
+    
+    // Priority 2: Open galleries with partial selections
+    const openWithPartial = activeGalleries.find(g => 
+      g.status === 'Open' && 
+      (g.selected_count || 0) > 0 &&
+      (g.photos_count || 0) > 0
+    );
+    if (openWithPartial) return { gallery: openWithPartial, type: 'continue' as const };
+    
+    // Priority 3: Processing galleries
+    const processing = activeGalleries.find(g => g.status === 'Processing');
+    if (processing) return { gallery: processing, type: 'processing' as const };
+    
+    // Priority 4: Delivered galleries
+    const delivered = completedGalleries.find(g => g.status === 'Delivered');
+    if (delivered) return { gallery: delivered, type: 'delivered' as const };
+    
+    return null;
+  }, [activeGalleries, completedGalleries]);
 
   const getButtonConfig = (status: string, slug: string, galleryId: string, name: string) => {
     switch (status) {
@@ -146,7 +119,7 @@ export function ClientDashboard() {
         return {
           label: 'Herunterladen',
           icon: ExternalLink,
-          disabled: true, // We'd need final_delivery_link from full gallery data
+          disabled: true,
           action: () => {},
         };
       default:
@@ -168,160 +141,156 @@ export function ClientDashboard() {
   }
 
   const hasNoGalleries = !stats || stats.length === 0;
-  const hasNoResults = filteredGalleries.length === 0 && !hasNoGalleries;
 
   return (
-    <div className="container mx-auto px-4 lg:px-6 py-8">
-      <div className="space-y-6 pb-8">
-        {/* Header & Controls */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Galerie suchen..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 shadow-neu-pressed"
-                aria-label="Galerie nach Name suchen"
-              />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-              <SelectTrigger className="w-full sm:w-[180px] shadow-neu-pressed">
-                <SelectValue placeholder="Status filtern" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle Status</SelectItem>
-                <SelectItem value="Planning">Planung</SelectItem>
-                <SelectItem value="Open">Offen</SelectItem>
-                <SelectItem value="Closed">Geschlossen</SelectItem>
-                <SelectItem value="Processing">Bearbeitung</SelectItem>
-                <SelectItem value="Delivered">Geliefert</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-full sm:w-[180px] shadow-neu-pressed">
-                <SelectValue placeholder="Sortierung" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created_desc">Neueste</SelectItem>
-                <SelectItem value="created_asc">Älteste</SelectItem>
-                <SelectItem value="name_asc">Name A→Z</SelectItem>
-                <SelectItem value="selected_desc">Meiste Auswahl</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch()}
-              className="shadow-neu-flat-sm hover:shadow-neu-pressed rounded-full"
-              title="Aktualisieren"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+    <div className="container mx-auto px-4 lg:px-6 py-8 max-w-[1920px]">
+      <div className="space-y-8 pb-8">
+        {/* Header with simple controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {completedGalleries.length > 0 && (
+              <Button
+                variant={showArchived ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowArchived(!showArchived)}
+                className="rounded-full shadow-neu-flat-sm"
+              >
+                {showArchived ? 'Aktive anzeigen' : 'Archiv anzeigen'}
+              </Button>
+            )}
           </div>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            className="shadow-neu-flat-sm hover:shadow-neu-pressed rounded-full"
+            title="Aktualisieren"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard
-            icon={FolderOpen}
-            label="Galerien"
-            value={kpis.galleries}
-            description={statusFilter !== 'all' ? getStatusLabel(statusFilter) : 'Gesamt'}
+        {/* Action Center / Next Steps Hero */}
+        {nextStepsGallery && !showArchived && (
+          <NextStepsWizard
+            gallery={nextStepsGallery.gallery}
+            type={nextStepsGallery.type}
+            onAction={() => {
+              const { gallery } = nextStepsGallery;
+              if (nextStepsGallery.type === 'select' || nextStepsGallery.type === 'continue') {
+                navigate(`/gallery/${gallery.slug}`);
+              }
+            }}
           />
-          <KpiCard
-            icon={Camera}
-            label="Fotos"
-            value={kpis.photos}
-            description="Insgesamt"
-          />
-          <KpiCard
-            icon={Heart}
-            label="Ausgewählt"
-            value={kpis.selected}
-            description="Ihre Auswahl"
-          />
-          <KpiCard
-            icon={Home}
-            label="Staging"
-            value={kpis.staging}
-            description="Angefordert"
-          />
-        </div>
-
-        {/* Next Steps Wizard - Show for galleries that are Open with 0 selections */}
-        {nextStepsGalleries.length > 0 && (
-          <div className="space-y-4">
-            {nextStepsGalleries.slice(0, 1).map((gallery) => (
-              <NextStepsWizard
-                key={gallery.gallery_id}
-                galleryName={gallery.name || ''}
-                galleryAddress={gallery.name}
-                onStartSelection={() => navigate(`/gallery/${gallery.slug}`)}
-              />
-            ))}
-          </div>
         )}
 
-        {/* Gallery Cards Grid */}
         {hasNoGalleries ? (
           <EmptyState
             icon={FolderOpen}
             title="Keine Galerien zugewiesen"
             description="Ihnen wurden noch keine Galerien zugewiesen. Bitte kontaktieren Sie Ihren Administrator."
           />
-        ) : hasNoResults ? (
-          <EmptyState
-            icon={Search}
-            title="Keine Ergebnisse gefunden"
-            description="Keine Galerien entsprechen Ihren Suchkriterien. Versuchen Sie es mit anderen Filtern."
-            action={
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchQuery('');
-                  setStatusFilter('all');
-                }}
-                className="rounded-full shadow-neu-flat-sm"
-              >
-                Filter zurücksetzen
-              </Button>
-            }
-          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGalleries.map((gallery) => {
-              const buttonConfig = getButtonConfig(
-                gallery.status || 'Planning', 
-                gallery.slug || '',
-                gallery.gallery_id || '',
-                gallery.name || ''
-              );
+          <>
+            {/* Active Projects Section */}
+            {!showArchived && activeGalleries.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Aktive Projekte ({activeGalleries.length})
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {activeGalleries.map((gallery) => {
+                    const buttonConfig = getButtonConfig(
+                      gallery.status || 'Planning',
+                      gallery.slug || '',
+                      gallery.gallery_id || '',
+                      gallery.name || ''
+                    );
 
-              const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
+                    const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
 
-              return (
-                <GalleryHeroCard
-                  key={gallery.gallery_id}
-                  name={gallery.name || ''}
-                  status={gallery.status || 'Planning'}
-                  photosCount={gallery.photos_count || 0}
-                  selectedCount={gallery.selected_count || 0}
-                  stagingCount={gallery.staging_count || 0}
-                  coverImageUrl={coverImageUrl}
-                  buttonLabel={buttonConfig.label}
-                  buttonIcon={buttonConfig.icon}
-                  buttonAction={buttonConfig.action}
-                  buttonDisabled={buttonConfig.disabled}
-                  buttonVariant={buttonConfig.variant}
-                />
-              );
-            })}
-          </div>
+                    return (
+                      <GalleryHeroCard
+                        key={gallery.gallery_id}
+                        name={gallery.name || ''}
+                        status={gallery.status || 'Planning'}
+                        photosCount={gallery.photos_count || 0}
+                        selectedCount={gallery.selected_count || 0}
+                        stagingCount={gallery.staging_count || 0}
+                        coverImageUrl={coverImageUrl}
+                        buttonLabel={buttonConfig.label}
+                        buttonIcon={buttonConfig.icon}
+                        buttonAction={buttonConfig.action}
+                        buttonDisabled={buttonConfig.disabled}
+                        buttonVariant={buttonConfig.variant}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Completed/Archived Section */}
+            {showArchived && completedGalleries.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Abgeschlossen ({completedGalleries.length})
+                  </h2>
+                </div>
+                
+                <div className="space-y-2">
+                  {completedGalleries.map((gallery) => {
+                    const buttonConfig = getButtonConfig(
+                      gallery.status || 'Planning',
+                      gallery.slug || '',
+                      gallery.gallery_id || '',
+                      gallery.name || ''
+                    );
+
+                    return (
+                      <GalleryCompactCard
+                        key={gallery.gallery_id}
+                        name={gallery.name || ''}
+                        status={gallery.status || 'Delivered'}
+                        photosCount={gallery.photos_count || 0}
+                        selectedCount={gallery.selected_count || 0}
+                        buttonLabel={buttonConfig.label}
+                        buttonIcon={buttonConfig.icon}
+                        buttonAction={buttonConfig.action}
+                        buttonDisabled={buttonConfig.disabled}
+                        buttonVariant={buttonConfig.variant}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state for active galleries */}
+            {!showArchived && activeGalleries.length === 0 && (
+              <EmptyState
+                icon={FolderOpen}
+                title="Keine aktiven Projekte"
+                description="Alle Ihre Galerien sind abgeschlossen."
+                action={
+                  completedGalleries.length > 0 ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowArchived(true)}
+                      className="rounded-full shadow-neu-flat-sm"
+                    >
+                      Archiv anzeigen
+                    </Button>
+                  ) : undefined
+                }
+              />
+            )}
+          </>
         )}
       </div>
 
