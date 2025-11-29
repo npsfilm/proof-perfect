@@ -1,17 +1,26 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientHeader } from '@/components/client/ClientHeader';
 import { ClientDashboard } from '@/components/client/ClientDashboard';
+import { ClientNavTabs } from '@/components/client/ClientNavTabs';
+import { ClientSettingsTab } from '@/components/client/ClientSettingsTab';
+import { StagingRequestTab } from '@/components/client/StagingRequestTab';
 import { useClientProfile } from '@/hooks/useClientProfile';
 
 export default function Dashboard() {
   const { user, role, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
+  const activeTab = searchParams.get('tab') || 'galleries';
   const { data: clientProfile } = useClientProfile(user?.email);
+
+  const handleTabChange = (tab: string) => {
+    setSearchParams({ tab });
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -55,8 +64,17 @@ export default function Dashboard() {
         </div>
       )}
       
+      <ClientNavTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      
       <main>
-        <ClientDashboard />
+        {activeTab === 'galleries' && <ClientDashboard />}
+        {activeTab === 'staging' && <StagingRequestTab />}
+        {activeTab === 'settings' && (
+          <ClientSettingsTab 
+            client={clientProfile || null} 
+            userEmail={user?.email || ''} 
+          />
+        )}
       </main>
     </div>
   );
