@@ -17,6 +17,7 @@ import UsersList from "./pages/admin/UsersList";
 import WebhookLogs from "./pages/admin/WebhookLogs";
 import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
+import StagingRequests from "./pages/admin/StagingRequests";
 import ClientGallery from "./pages/client/ClientGallery";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="webhook-logs" element={<WebhookLogs />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="staging-requests" element={<StagingRequests />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
