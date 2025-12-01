@@ -142,6 +142,68 @@ export type Database = {
           },
         ]
       }
+      delivery_files: {
+        Row: {
+          created_at: string
+          file_size: number | null
+          filename: string
+          folder_type: string
+          gallery_id: string
+          id: string
+          storage_url: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_size?: number | null
+          filename: string
+          folder_type: string
+          gallery_id: string
+          id?: string
+          storage_url: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_size?: number | null
+          filename?: string
+          folder_type?: string
+          gallery_id?: string
+          id?: string
+          storage_url?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_files_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_files_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+          {
+            foreignKeyName: "delivery_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       galleries: {
         Row: {
           address: string | null

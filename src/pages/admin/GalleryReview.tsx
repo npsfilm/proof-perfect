@@ -6,9 +6,6 @@ import { Gallery, Photo, GalleryFeedback, StagingReference } from '@/types/datab
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Copy, Send, Loader2, MessageSquare, Wand2, Check, MapPin, Clock, Home, Sunrise } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -16,14 +13,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { TimeElapsed } from '@/components/admin/TimeElapsed';
+import { DeliveryUploadSection } from '@/components/admin/delivery/DeliveryUploadSection';
+import { useDeliveryFiles } from '@/hooks/useDeliveryFiles';
 
 export default function GalleryReview() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [deliveryLink, setDeliveryLink] = useState('');
-  const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
   const [delivering, setDelivering] = useState(false);
 
   const { data: gallery, isLoading: galleryLoading } = useQuery({
@@ -113,6 +110,9 @@ export default function GalleryReview() {
     enabled: !!id,
   });
 
+  // Fetch delivery files to check if any are uploaded
+  const { data: deliveryFiles } = useDeliveryFiles(id);
+
   // Fetch all annotations for selected photos
   const { data: allAnnotations } = useQuery({
     queryKey: ['all-annotations', id],
@@ -169,10 +169,10 @@ export default function GalleryReview() {
   };
 
   const handleDeliverFinalFiles = async () => {
-    if (!deliveryLink.trim()) {
+    if (!deliveryFiles || deliveryFiles.length === 0) {
       toast({
-        title: 'Link fehlt',
-        description: 'Bitte geben Sie einen Download-Link ein.',
+        title: 'Keine Dateien',
+        description: 'Bitte laden Sie mindestens eine Datei hoch, bevor Sie ausliefern.',
         variant: 'destructive',
       });
       return;
@@ -194,7 +194,6 @@ export default function GalleryReview() {
         .from('galleries')
         .update({
           status: 'Delivered',
-          final_delivery_link: deliveryLink,
           delivered_at: new Date().toISOString(),
         })
         .eq('id', id!);
@@ -206,7 +205,6 @@ export default function GalleryReview() {
         body: {
           gallery_id: id,
           client_emails: clientEmails,
-          download_link: deliveryLink,
         },
       });
 
@@ -221,9 +219,6 @@ export default function GalleryReview() {
         title: 'Lieferung gesendet!',
         description: `Benachrichtigung über die Auslieferung der finalen Dateien an ${clientEmails.length} Kunde(n) gesendet.`,
       });
-
-      setShowDeliveryDialog(false);
-      setDeliveryLink('');
     } catch (error: any) {
       console.error('Delivery error:', error);
       toast({
@@ -446,6 +441,11 @@ export default function GalleryReview() {
         </Card>
       )}
 
+      {/* Delivery Upload Section */}
+      {gallery && (
+        <DeliveryUploadSection galleryId={gallery.id} gallerySlug={gallery.slug} />
+      )}
+
       {/* Actions */}
       {selectedPhotos && selectedPhotos.length > 0 && (
         <div className="flex gap-3">
@@ -455,17 +455,29 @@ export default function GalleryReview() {
           </Button>
           
           {gallery.status !== 'Delivered' && (
-            <Button onClick={() => setShowDeliveryDialog(true)}>
-              <Send className="h-4 w-4 mr-2" />
-              Finale Dateien ausliefern
+            <Button 
+              onClick={handleDeliverFinalFiles}
+              disabled={!deliveryFiles || deliveryFiles.length === 0 || delivering}
+            >
+              {delivering ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Wird gesendet...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  An Kunde senden
+                </>
+              )}
             </Button>
           )}
 
-          {gallery.status === 'Delivered' && gallery.final_delivery_link && (
-            <Button variant="outline" onClick={() => window.open(gallery.final_delivery_link!, '_blank')}>
+          {gallery.status === 'Delivered' && (
+            <Badge variant="default" className="px-4 py-2">
               <Check className="h-4 w-4 mr-2" />
-              Lieferlink ansehen
-            </Button>
+              Geliefert am {new Date(gallery.delivered_at!).toLocaleDateString('de-DE')}
+            </Badge>
           )}
         </div>
       )}
@@ -585,55 +597,6 @@ export default function GalleryReview() {
         </Card>
       )}
 
-      {/* Delivery Dialog */}
-      <Dialog open={showDeliveryDialog} onOpenChange={setShowDeliveryDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Finale Dateien ausliefern</DialogTitle>
-            <DialogDescription>
-              Geben Sie den Download-Link für die finalen bearbeiteten Fotos ein (z.B. Google Drive, TransferNow)
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="delivery-link">Download-Link</Label>
-              <Input
-                id="delivery-link"
-                type="url"
-                placeholder="https://drive.google.com/..."
-                value={deliveryLink}
-                onChange={(e) => setDeliveryLink(e.target.value)}
-              />
-            </div>
-            
-            <Alert>
-              <AlertDescription>
-                Dies sendet eine Benachrichtigung an {clientEmails?.length || 0} Kunde(n) mit dem Download-Link.
-              </AlertDescription>
-            </Alert>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeliveryDialog(false)}>
-              Abbrechen
-            </Button>
-            <Button onClick={handleDeliverFinalFiles} disabled={delivering}>
-              {delivering ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Wird gesendet...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Auslieferung senden
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       </div>
     </PageContainer>
   );

@@ -201,3 +201,14 @@ export interface GallerySelectionStats {
   selected_count: number;
   staging_count: number;
 }
+
+export interface DeliveryFile {
+  id: string;
+  gallery_id: string;
+  folder_type: 'full_resolution' | 'web_version' | 'virtual_staging' | 'blue_hour';
+  filename: string;
+  storage_url: string;
+  file_size?: number;
+  uploaded_by: string;
+  created_at: string;
+}
