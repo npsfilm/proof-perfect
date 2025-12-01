@@ -7,22 +7,24 @@ interface WelcomeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   galleryName: string;
-  targetCount: number;
   onComplete: () => void;
 }
 
 const TUTORIAL_STEPS = [
   {
     title: 'Willkommen zu Ihrer Galerie!',
-    description: 'Sehen Sie sich Ihre Fotos an und wählen Sie Ihre Favoriten aus.',
+    description: 'Schön, dass Sie da sind. Lassen Sie uns beginnen.',
     icon: Heart,
-    content: (targetCount: number) => (
+    content: () => (
       <div className="space-y-3">
         <p className="text-muted-foreground">
-          Sie haben <span className="font-semibold text-foreground">{targetCount} Fotos</span> in Ihrem Paket.
+          Hier finden Sie Ihre Fotos zur Durchsicht. Nehmen Sie sich Zeit und wählen Sie Ihre Favoriten aus.
         </p>
         <p className="text-muted-foreground">
-          Dies sind unbearbeitete Proofs. Farben und Belichtung werden in der finalen Version korrigiert.
+          <span className="font-semibold text-foreground">Wichtig:</span> Dies sind unbearbeitete Proofs. Farben und Belichtung werden in der finalen Version professionell korrigiert.
+        </p>
+        <p className="text-sm text-muted-foreground/80">
+          Konzentrieren Sie sich auf Perspektiven, Bildausschnitte und Motive.
         </p>
       </div>
     ),
@@ -55,18 +57,18 @@ const TUTORIAL_STEPS = [
   },
   {
     title: 'Fotos auswählen',
-    description: 'Markieren Sie Ihre Favoriten mit einem Klick.',
-    icon: Heart,
+    description: 'Markieren Sie Ihre Favoriten ganz einfach.',
+    icon: CheckCircle,
     content: () => (
       <div className="space-y-3">
         <p className="text-muted-foreground">
-          Klicken Sie auf das <Heart className="inline h-4 w-4 text-primary fill-primary" /> Symbol, um ein Foto auszuwählen.
+          Klicken Sie auf das <span className="font-semibold text-foreground">Häkchen-Symbol</span> unter einem Foto, um es auszuwählen.
         </p>
         <p className="text-muted-foreground">
-          Sie können auch die <kbd className="px-2 py-1 bg-background border rounded text-xs">Leertaste</kbd> drücken, während Sie ein Foto betrachten.
+          Sie können auch die <kbd className="px-2 py-1 bg-background border rounded text-xs">Leertaste</kbd> drücken, während Sie ein Foto im Vollbild betrachten.
         </p>
         <p className="text-muted-foreground">
-          Ihre Auswahl wird automatisch gespeichert.
+          Ihre Auswahl wird <span className="font-semibold text-foreground">automatisch gespeichert</span> – kein manuelles Speichern nötig.
         </p>
       </div>
     ),
@@ -93,17 +95,20 @@ const TUTORIAL_STEPS = [
     content: () => (
       <div className="space-y-3">
         <p className="text-muted-foreground">
-          Wenn Sie fertig sind, klicken Sie auf <span className="font-semibold text-foreground">"Auswahl abschließen"</span> am unteren Rand.
+          Nehmen Sie sich Zeit für Ihre Auswahl. Sie können jederzeit zurückkehren und Änderungen vornehmen.
         </p>
-        <p className="text-sm text-muted-foreground">
-          Tipp: Drücken Sie <kbd className="px-2 py-1 bg-background border rounded text-xs">?</kbd> jederzeit, um Tastaturkürzel anzuzeigen.
+        <p className="text-muted-foreground">
+          Wenn Sie fertig sind, klicken Sie auf <span className="font-semibold text-foreground">"Auswahl abschließen"</span> am unteren Bildschirmrand.
+        </p>
+        <p className="text-sm text-muted-foreground/80">
+          Tipp: Drücken Sie <kbd className="px-2 py-1 bg-background border rounded text-xs">?</kbd> jederzeit für Tastaturkürzel.
         </p>
       </div>
     ),
   },
 ];
 
-export function WelcomeModal({ open, onOpenChange, galleryName, targetCount, onComplete }: WelcomeModalProps) {
+export function WelcomeModal({ open, onOpenChange, galleryName, onComplete }: WelcomeModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const step = TUTORIAL_STEPS[currentStep];
   const Icon = step.icon;
@@ -150,7 +155,7 @@ export function WelcomeModal({ open, onOpenChange, galleryName, targetCount, onC
         </DialogHeader>
 
         <div className="py-6">
-          {step.content(targetCount)}
+          {step.content()}
         </div>
 
         {/* Step indicators */}

@@ -87,21 +87,19 @@ export default function ClientGallery() {
     }
   }, [user, authLoading, navigate]);
 
-  // Check if welcome modal should be shown
+  // Check if welcome modal should be shown (only first time ever)
   useEffect(() => {
-    if (gallery && slug) {
-      const storageKey = `proofing_welcome_shown_${slug}`;
+    if (gallery) {
+      const storageKey = 'proofing_welcome_shown';
       const hasSeenWelcome = localStorage.getItem(storageKey);
       if (!hasSeenWelcome) {
         setShowWelcome(true);
       }
     }
-  }, [gallery, slug]);
+  }, [gallery]);
 
   const handleWelcomeComplete = () => {
-    if (slug) {
-      localStorage.setItem(`proofing_welcome_shown_${slug}`, 'true');
-    }
+    localStorage.setItem('proofing_welcome_shown', 'true');
   };
 
   const handleShowHelp = () => {
@@ -343,7 +341,6 @@ export default function ClientGallery() {
         open={showWelcome}
         onOpenChange={setShowWelcome}
         galleryName={gallery.name}
-        targetCount={gallery.package_target_count}
         onComplete={handleWelcomeComplete}
       />
 
