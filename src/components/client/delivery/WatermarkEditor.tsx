@@ -166,6 +166,30 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
 
             {/* Controls */}
             <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Position X: {Math.round(position.x)}%</Label>
+                  <Slider
+                    value={[position.x]}
+                    onValueChange={([value]) => setPosition(prev => ({ ...prev, x: value }))}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Position Y: {Math.round(position.y)}%</Label>
+                  <Slider
+                    value={[position.y]}
+                    onValueChange={([value]) => setPosition(prev => ({ ...prev, y: value }))}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>Größe: {size}%</Label>
                 <Slider
