@@ -228,11 +228,17 @@ export default function GalleryReview() {
 
       if (updateError) throw updateError;
 
-      // 2. Send delivery webhook
+      // 2. Construct download link
+      const downloadLink = useExternalLink 
+        ? externalLink 
+        : `${window.location.origin}/gallery/${gallery.slug}`;
+
+      // 3. Send delivery webhook
       const { error: webhookError } = await supabase.functions.invoke('webhook-deliver', {
         body: {
           gallery_id: id,
           client_emails: clientEmails,
+          download_link: downloadLink,
         },
       });
 
