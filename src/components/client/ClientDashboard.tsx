@@ -162,8 +162,8 @@ export function ClientDashboard() {
         return {
           label: 'Herunterladen',
           icon: ExternalLink,
-          disabled: true,
-          action: () => {},
+          disabled: false,
+          action: () => navigate(`/gallery/${slug}`),
         };
       default:
         return {
@@ -298,6 +298,42 @@ export function ClientDashboard() {
                         key={gallery.gallery_id}
                         name={gallery.name || ''}
                         status={gallery.status || 'Closed'}
+                        photosCount={gallery.photos_count || 0}
+                        selectedCount={gallery.selected_count || 0}
+                        buttonLabel={buttonConfig.label}
+                        buttonIcon={buttonConfig.icon}
+                        buttonAction={buttonConfig.action}
+                        buttonDisabled={buttonConfig.disabled}
+                        buttonVariant={buttonConfig.variant}
+                        isNew={isNewGallery(gallery.created_at)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Delivered Projects Section */}
+            {!showArchived && completedGalleries.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-muted-foreground">
+                  Geliefert ({completedGalleries.length})
+                </h2>
+                
+                <div className="space-y-2">
+                  {completedGalleries.map((gallery) => {
+                    const buttonConfig = getButtonConfig(
+                      gallery.status || 'Delivered',
+                      gallery.slug || '',
+                      gallery.gallery_id || '',
+                      gallery.name || ''
+                    );
+
+                    return (
+                      <GalleryCompactCard
+                        key={gallery.gallery_id}
+                        name={gallery.name || ''}
+                        status={gallery.status || 'Delivered'}
                         photosCount={gallery.photos_count || 0}
                         selectedCount={gallery.selected_count || 0}
                         buttonLabel={buttonConfig.label}
