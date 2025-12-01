@@ -5,7 +5,6 @@ import { Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientHeader } from '@/components/client/ClientHeader';
 import { ClientDashboard } from '@/components/client/ClientDashboard';
-import { ClientNavTabs } from '@/components/client/ClientNavTabs';
 import { ClientSettingsTab } from '@/components/client/ClientSettingsTab';
 import { StagingRequestTab } from '@/components/client/StagingRequestTab';
 import { useClientProfile } from '@/hooks/useClientProfile';
@@ -45,6 +44,8 @@ export default function Dashboard() {
       <ClientHeader 
         client={clientProfile || null}
         onSignOut={signOut}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
       
       {role === 'admin' && (
@@ -63,8 +64,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      
-      <ClientNavTabs activeTab={activeTab} onTabChange={handleTabChange} />
       
       <main>
         {activeTab === 'galleries' && <ClientDashboard />}
