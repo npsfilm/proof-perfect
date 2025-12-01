@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Size threshold for async processing (50MB)
-const ASYNC_THRESHOLD_BYTES = 50 * 1024 * 1024;
+// Size threshold for async processing (2GB)
+const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024;
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests

@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { useLogDownload } from '@/hooks/useDownloadLogs';
 import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
 
-const ASYNC_THRESHOLD_BYTES = 50 * 1024 * 1024; // 50MB
+const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 
 interface DeliveryFolderDownloadProps {
   folderType: DeliveryFolderType;

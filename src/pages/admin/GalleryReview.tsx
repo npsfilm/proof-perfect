@@ -23,6 +23,8 @@ export default function GalleryReview() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [delivering, setDelivering] = useState(false);
+  const [useExternalLink, setUseExternalLink] = useState(false);
+  const [externalLink, setExternalLink] = useState('');
 
   const { data: gallery, isLoading: galleryLoading } = useQuery({
     queryKey: ['gallery', id],
@@ -170,13 +172,37 @@ export default function GalleryReview() {
   };
 
   const handleDeliverFinalFiles = async () => {
-    if (!deliveryFiles || deliveryFiles.length === 0) {
-      toast({
-        title: 'Keine Dateien',
-        description: 'Bitte laden Sie mindestens eine Datei hoch, bevor Sie ausliefern.',
-        variant: 'destructive',
-      });
-      return;
+    // Validate based on delivery method
+    if (useExternalLink) {
+      if (!externalLink.trim()) {
+        toast({
+          title: 'Externer Link fehlt',
+          description: 'Bitte geben Sie einen externen Download-Link ein.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      // Validate URL format
+      try {
+        new URL(externalLink);
+      } catch {
+        toast({
+          title: 'Ungültiger Link',
+          description: 'Bitte geben Sie einen gültigen URL ein.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else {
+      // For in-app downloads, require uploaded files
+      if (!deliveryFiles || deliveryFiles.length === 0) {
+        toast({
+          title: 'Keine Dateien',
+          description: 'Bitte laden Sie mindestens eine Datei hoch, bevor Sie ausliefern.',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     if (!clientEmails || clientEmails.length === 0) {
@@ -196,6 +222,7 @@ export default function GalleryReview() {
         .update({
           status: 'Delivered',
           delivered_at: new Date().toISOString(),
+          final_delivery_link: useExternalLink ? externalLink : null,
         })
         .eq('id', id!);
 
@@ -450,6 +477,60 @@ export default function GalleryReview() {
         <DeliveryUploadSection galleryId={gallery.id} gallerySlug={gallery.slug} />
       )}
 
+      {/* Download Method Selection */}
+      {gallery.status !== 'Delivered' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Download-Methode</CardTitle>
+            <CardDescription>Wählen Sie, wie Kunden ihre Fotos herunterladen sollen</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="delivery-method"
+                  checked={!useExternalLink}
+                  onChange={() => setUseExternalLink(false)}
+                  className="mt-1"
+                />
+                <div>
+                  <div className="font-medium">In-App Downloads (empfohlen)</div>
+                  <p className="text-sm text-muted-foreground">
+                    Kunden laden direkt von der Website herunter
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="delivery-method"
+                  checked={useExternalLink}
+                  onChange={() => setUseExternalLink(true)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium">Externen Link verwenden</div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Weiterleitung zu TransferNow, Google Drive, etc.
+                  </p>
+                  {useExternalLink && (
+                    <input
+                      type="url"
+                      placeholder="https://www.transfernow.net/dl/..."
+                      value={externalLink}
+                      onChange={(e) => setExternalLink(e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-input bg-background shadow-neu-pressed focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  )}
+                </div>
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
       {selectedPhotos && selectedPhotos.length > 0 && (
         <div className="flex gap-3">
@@ -461,7 +542,7 @@ export default function GalleryReview() {
           {gallery.status !== 'Delivered' && (
             <Button 
               onClick={handleDeliverFinalFiles}
-              disabled={!deliveryFiles || deliveryFiles.length === 0 || delivering}
+              disabled={delivering || (!useExternalLink && (!deliveryFiles || deliveryFiles.length === 0))}
             >
               {delivering ? (
                 <>
