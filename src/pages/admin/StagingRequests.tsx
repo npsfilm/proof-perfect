@@ -260,6 +260,27 @@ export default function StagingRequests() {
                 </div>
               )}
 
+              {selectedRequest.reference_image_urls && selectedRequest.reference_image_urls.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-3">Referenzbilder ({selectedRequest.reference_image_urls.length}):</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {selectedRequest.reference_image_urls.map((url, index) => (
+                      <div
+                        key={url}
+                        className="relative rounded-xl overflow-hidden shadow-neu-flat aspect-[4/3] bg-muted/30"
+                      >
+                        <img
+                          src={url}
+                          alt={`Referenzbild ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          draggable={false}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {photos.map((photo, index) => {
                   const signedUrl = signedUrls[photo.id];

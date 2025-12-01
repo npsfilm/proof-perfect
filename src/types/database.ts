@@ -156,6 +156,7 @@ export interface StagingRequest {
   status: 'pending' | 'processing' | 'delivered';
   staging_style: string;
   notes?: string;
+  reference_image_urls?: string[];
   created_at: string;
   updated_at: string;
 }

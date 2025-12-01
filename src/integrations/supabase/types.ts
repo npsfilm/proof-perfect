@@ -666,6 +666,7 @@ export type Database = {
           gallery_id: string
           id: string
           notes: string | null
+          reference_image_urls: string[] | null
           staging_style: string
           status: string
           updated_at: string
@@ -676,6 +677,7 @@ export type Database = {
           gallery_id: string
           id?: string
           notes?: string | null
+          reference_image_urls?: string[] | null
           staging_style: string
           status?: string
           updated_at?: string
@@ -686,6 +688,7 @@ export type Database = {
           gallery_id?: string
           id?: string
           notes?: string | null
+          reference_image_urls?: string[] | null
           staging_style?: string
           status?: string
           updated_at?: string
