@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ClientPicker } from '@/components/admin/ClientPicker';
 import { FormSection } from '@/components/admin/FormSection';
@@ -15,7 +16,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { MapPin, Package, MessageSquare, Building2 } from 'lucide-react';
+import { MapPin, Package, MessageSquare, Building2, GraduationCap } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function GalleryCreate() {
     package_target_count: 20,
     salutation_type: 'Du' as 'Du' | 'Sie',
     company_id: '',
+    show_onboarding: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +49,7 @@ export default function GalleryCreate() {
         package_target_count: formData.package_target_count,
         salutation_type: formData.salutation_type,
         company_id: formData.company_id || null,
+        show_onboarding: formData.show_onboarding,
       };
       
       const result = await createGalleryMutation.mutateAsync(submitData);
@@ -177,6 +180,32 @@ export default function GalleryCreate() {
                     </div>
                   </RadioGroup>
                 </div>
+              </div>
+            </FormSection>
+
+            {/* Onboarding */}
+            <FormSection
+              icon={<GraduationCap className="h-5 w-5" />}
+              title="Onboarding"
+              description="Optionales Tutorial beim ersten Galeriebesuch"
+            >
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="onboarding" className="text-base">
+                    Tutorial anzeigen
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Zeigt beim ersten Besuch ein Tutorial-Popup für Kunden
+                  </p>
+                </div>
+                <Switch
+                  id="onboarding"
+                  checked={formData.show_onboarding}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, show_onboarding: checked })
+                  }
+                  disabled={createGalleryMutation.isPending}
+                />
               </div>
             </FormSection>
           </div>

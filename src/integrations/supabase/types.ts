@@ -157,6 +157,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           salutation_type: Database["public"]["Enums"]["salutation_t"]
+          show_onboarding: boolean
           slug: string
           status: Database["public"]["Enums"]["gallery_status_t"]
           updated_at: string
@@ -175,6 +176,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           salutation_type: Database["public"]["Enums"]["salutation_t"]
+          show_onboarding?: boolean
           slug: string
           status?: Database["public"]["Enums"]["gallery_status_t"]
           updated_at?: string
@@ -193,6 +195,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           salutation_type?: Database["public"]["Enums"]["salutation_t"]
+          show_onboarding?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["gallery_status_t"]
           updated_at?: string
