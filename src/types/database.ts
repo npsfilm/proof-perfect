@@ -212,3 +212,30 @@ export interface DeliveryFile {
   uploaded_by: string;
   created_at: string;
 }
+
+export interface DownloadLog {
+  id: string;
+  gallery_id: string;
+  user_id: string;
+  download_type: 'single_file' | 'folder_zip' | 'gallery_zip';
+  folder_type?: string;
+  file_id?: string;
+  file_count: number;
+  total_size_bytes?: number;
+  created_at: string;
+}
+
+export interface ZipJob {
+  id: string;
+  gallery_id: string;
+  user_id: string;
+  folder_type?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  file_count?: number;
+  total_size_bytes?: number;
+  storage_path?: string;
+  error_message?: string;
+  created_at: string;
+  completed_at?: string;
+  expires_at?: string;
+}

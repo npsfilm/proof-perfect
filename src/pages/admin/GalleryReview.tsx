@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { TimeElapsed } from '@/components/admin/TimeElapsed';
 import { DeliveryUploadSection } from '@/components/admin/delivery/DeliveryUploadSection';
+import { DownloadHistoryCard } from '@/components/admin/delivery/DownloadHistoryCard';
 import { useDeliveryFiles } from '@/hooks/useDeliveryFiles';
 
 export default function GalleryReview() {
@@ -440,6 +441,9 @@ export default function GalleryReview() {
           </CardContent>
         </Card>
       )}
+
+      {/* Download History */}
+      <DownloadHistoryCard galleryId={gallery.id} />
 
       {/* Delivery Upload Section */}
       {gallery && (

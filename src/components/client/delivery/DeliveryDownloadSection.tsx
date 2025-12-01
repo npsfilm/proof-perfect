@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Download, Loader2, Package, Archive } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Download, Loader2, Package, Archive, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeliveryFolderDownload } from './DeliveryFolderDownload';
@@ -9,6 +9,10 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Gallery } from '@/types/database';
+import { useLogDownload } from '@/hooks/useDownloadLogs';
+import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
+
+const ASYNC_THRESHOLD_BYTES = 50 * 1024 * 1024; // 50MB
 
 interface DeliveryDownloadSectionProps {
   gallery: Gallery;
@@ -17,7 +21,41 @@ interface DeliveryDownloadSectionProps {
 export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProps) {
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  
   const { data: files, isLoading } = useDeliveryFiles(gallery.id);
+  const logDownload = useLogDownload();
+  const createZipJob = useCreateZipJob();
+  const downloadZipJob = useDownloadZipJob();
+  const { data: zipJob } = useZipJob(activeJobId || undefined);
+
+  const totalSize = files?.reduce((sum, file) => sum + (file.file_size || 0), 0) || 0;
+  const isLargeDownload = totalSize > ASYNC_THRESHOLD_BYTES;
+
+  // When job completes, auto-download
+  useEffect(() => {
+    if (zipJob?.status === 'completed' && zipJob.storage_path) {
+      downloadZipJob.mutate(zipJob);
+      setActiveJobId(null);
+      setDownloadingZip(false);
+      
+      // Log the download
+      logDownload.mutate({
+        gallery_id: gallery.id,
+        download_type: 'gallery_zip',
+        file_count: files?.length || 0,
+        total_size_bytes: totalSize,
+      });
+    } else if (zipJob?.status === 'failed') {
+      setDownloadingZip(false);
+      setActiveJobId(null);
+      toast({
+        title: 'ZIP-Generierung fehlgeschlagen',
+        description: zipJob.error_message || 'Ein Fehler ist aufgetreten',
+        variant: 'destructive',
+      });
+    }
+  }, [zipJob?.status]);
 
   if (isLoading) {
     return (
@@ -47,7 +85,6 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
     'blue_hour',
   ];
 
-  const totalSize = files.reduce((sum, file) => sum + (file.file_size || 0), 0);
   const formatSize = (bytes: number) => {
     const mb = bytes / (1024 * 1024);
     return `${mb.toFixed(1)} MB`;
@@ -96,6 +133,16 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
+      // For large files, create async job
+      if (isLargeDownload) {
+        const job = await createZipJob.mutateAsync({
+          galleryId: gallery.id,
+        });
+        setActiveJobId(job.id);
+        return; // Job will be downloaded when completed via useEffect
+      }
+
+      // For small files, download directly
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-zip`,
         {
@@ -128,6 +175,14 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
+      // Log the download
+      logDownload.mutate({
+        gallery_id: gallery.id,
+        download_type: 'gallery_zip',
+        file_count: files?.length || 0,
+        total_size_bytes: totalSize,
+      });
+
       toast({
         title: 'ZIP-Download gestartet',
         description: `Alle Dateien werden als ZIP heruntergeladen...`,
@@ -139,7 +194,9 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
         variant: 'destructive',
       });
     } finally {
-      setDownloadingZip(false);
+      if (!isLargeDownload) {
+        setDownloadingZip(false);
+      }
     }
   };
 
@@ -162,24 +219,36 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
             </div>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="default"
-              onClick={handleDownloadAllZip}
-              disabled={downloadingZip || downloadingAll}
-              className="shadow-neu-flat-sm"
-            >
-              {downloadingZip ? (
+          <Button
+            variant="default"
+            onClick={handleDownloadAllZip}
+            disabled={downloadingZip || downloadingAll}
+            className="shadow-neu-flat-sm"
+          >
+            {downloadingZip ? (
+              zipJob?.status === 'processing' ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ZIP wird erstellt...
                 </>
+              ) : zipJob?.status === 'pending' ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  In Warteschlange...
+                </>
               ) : (
                 <>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Alles als ZIP
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Lädt...
                 </>
-              )}
-            </Button>
+              )
+            ) : (
+              <>
+                <Archive className="h-4 w-4 mr-2" />
+                Alles als ZIP {isLargeDownload && '(groß)'}
+              </>
+            )}
+          </Button>
             <Button
               variant="outline"
               onClick={handleDownloadAll}
@@ -201,6 +270,23 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Async job status indicator */}
+        {zipJob && (zipJob.status === 'pending' || zipJob.status === 'processing') && (
+          <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  {zipJob.status === 'pending' ? 'ZIP-Datei wird vorbereitet...' : 'ZIP wird generiert...'}
+                </p>
+                <p className="text-xs text-blue-700">
+                  {zipJob.file_count} Dateien • {formatSize(zipJob.total_size_bytes || 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {folderTypes.map((folderType) => {
           const folderFiles = files.filter((f) => f.folder_type === folderType);
           return (

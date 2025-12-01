@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Download, FileImage, Loader2 } from 'lucide-react';
+import { Download, Loader2, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { DeliveryFile } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
+import { useLogDownload } from '@/hooks/useDownloadLogs';
 
 interface DeliveryFileItemProps {
   file: DeliveryFile;
@@ -11,6 +12,7 @@ interface DeliveryFileItemProps {
 
 export function DeliveryFileItem({ file }: DeliveryFileItemProps) {
   const [downloading, setDownloading] = useState(false);
+  const logDownload = useLogDownload();
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return 'N/A';
@@ -34,6 +36,15 @@ export function DeliveryFileItem({ file }: DeliveryFileItemProps) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Log the download
+      logDownload.mutate({
+        gallery_id: file.gallery_id,
+        download_type: 'single_file',
+        file_id: file.id,
+        file_count: 1,
+        total_size_bytes: file.file_size,
+      });
 
       toast({
         title: 'Download gestartet',
