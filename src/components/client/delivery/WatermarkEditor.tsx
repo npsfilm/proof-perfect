@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Upload, Save, Trash2 } from 'lucide-react';
@@ -85,34 +85,98 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
 
   return (
     <>
-      <Card className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Wasserzeichen-Editor</h3>
-            <p className="text-sm text-muted-foreground">
-              Positionieren Sie Ihr Logo und passen Sie die Größe an
-            </p>
-          </div>
-          {!watermark ? (
-            <Button onClick={() => setUploaderOpen(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Logo hochladen
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setUploaderOpen(true)}>
+      <Card className="space-y-6">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <CardTitle>Wasserzeichen-Editor</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Positionieren Sie Ihr Logo und passen Sie die Größe an
+              </p>
+            </div>
+            {!watermark ? (
+              <Button onClick={() => setUploaderOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" />
-                Ändern
+                Logo hochladen
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4" />
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setUploaderOpen(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Ändern
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Controls in Header */}
+          {watermark && (
+            <div className="space-y-4 mt-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Position X: {Math.round(position.x)}%</Label>
+                  <Slider
+                    value={[position.x]}
+                    onValueChange={([value]) => setPosition(prev => ({ ...prev, x: value }))}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Position Y: {Math.round(position.y)}%</Label>
+                  <Slider
+                    value={[position.y]}
+                    onValueChange={([value]) => setPosition(prev => ({ ...prev, y: value }))}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Größe: {size}%</Label>
+                  <Slider
+                    value={[size]}
+                    onValueChange={([value]) => setSize(value)}
+                    min={5}
+                    max={50}
+                    step={1}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Transparenz: {opacity}%</Label>
+                  <Slider
+                    value={[opacity]}
+                    onValueChange={([value]) => setOpacity(value)}
+                    min={10}
+                    max={100}
+                    step={5}
+                  />
+                </div>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={handleSave}
+                disabled={updateSettings.isPending}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {updateSettings.isPending ? 'Speichert...' : 'Einstellungen speichern'}
               </Button>
             </div>
           )}
-        </div>
+        </CardHeader>
 
         {watermark && (
-          <>
+          <CardContent>
             {/* Preview Area */}
             <div
               ref={containerRef}
@@ -163,73 +227,17 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
                 </div>
               )}
             </div>
-
-            {/* Controls */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Position X: {Math.round(position.x)}%</Label>
-                  <Slider
-                    value={[position.x]}
-                    onValueChange={([value]) => setPosition(prev => ({ ...prev, x: value }))}
-                    min={0}
-                    max={100}
-                    step={1}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Position Y: {Math.round(position.y)}%</Label>
-                  <Slider
-                    value={[position.y]}
-                    onValueChange={([value]) => setPosition(prev => ({ ...prev, y: value }))}
-                    min={0}
-                    max={100}
-                    step={1}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Größe: {size}%</Label>
-                <Slider
-                  value={[size]}
-                  onValueChange={([value]) => setSize(value)}
-                  min={5}
-                  max={50}
-                  step={1}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Transparenz: {opacity}%</Label>
-                <Slider
-                  value={[opacity]}
-                  onValueChange={([value]) => setOpacity(value)}
-                  min={10}
-                  max={100}
-                  step={5}
-                />
-              </div>
-
-              <Button
-                className="w-full"
-                onClick={handleSave}
-                disabled={updateSettings.isPending}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {updateSettings.isPending ? 'Speichert...' : 'Einstellungen speichern'}
-              </Button>
-            </div>
-          </>
+          </CardContent>
         )}
 
         {!watermark && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">
-              Laden Sie zuerst ein Logo hoch, um es zu positionieren
-            </p>
-          </div>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="text-sm">
+                Laden Sie zuerst ein Logo hoch, um es zu positionieren
+              </p>
+            </div>
+          </CardContent>
         )}
       </Card>
 
