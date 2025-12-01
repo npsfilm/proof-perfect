@@ -13,6 +13,7 @@ interface GalleryCompactCardProps {
   buttonAction: () => void;
   buttonDisabled?: boolean;
   buttonVariant?: 'default' | 'outline' | 'secondary';
+  isNew?: boolean;
 }
 
 export function GalleryCompactCard({
@@ -25,6 +26,7 @@ export function GalleryCompactCard({
   buttonAction,
   buttonDisabled,
   buttonVariant = 'outline',
+  isNew = false,
 }: GalleryCompactCardProps) {
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -46,7 +48,10 @@ export function GalleryCompactCard({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-card rounded-2xl shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200 border-0">
+    <div className={cn(
+      "flex items-center justify-between p-4 bg-card rounded-2xl shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200 border-0",
+      isNew && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+    )}>
       {/* Gallery Info */}
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-foreground truncate mb-2">
