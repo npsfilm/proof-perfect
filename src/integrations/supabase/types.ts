@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_watermarks: {
+        Row: {
+          created_at: string
+          id: string
+          opacity: number
+          position_x: number
+          position_y: number
+          size_percent: number
+          storage_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opacity?: number
+          position_x?: number
+          position_y?: number
+          size_percent?: number
+          storage_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opacity?: number
+          position_x?: number
+          position_y?: number
+          size_percent?: number
+          storage_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           anrede: string | null
