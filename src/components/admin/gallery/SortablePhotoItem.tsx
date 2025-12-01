@@ -8,11 +8,12 @@ import { cn } from '@/lib/utils';
 
 interface SortablePhotoItemProps {
   photo: Photo;
+  signedUrl?: string;
   isSelected: boolean;
   onToggle: (photoId: string) => void;
 }
 
-export function SortablePhotoItem({ photo, isSelected, onToggle }: SortablePhotoItemProps) {
+export function SortablePhotoItem({ photo, signedUrl, isSelected, onToggle }: SortablePhotoItemProps) {
   const {
     attributes,
     listeners,
@@ -62,7 +63,7 @@ export function SortablePhotoItem({ photo, isSelected, onToggle }: SortablePhoto
 
       {/* Photo Image */}
       <img
-        src={photo.storage_url}
+        src={signedUrl || photo.storage_url}
         alt={photo.filename}
         className="w-full h-full object-cover select-none"
         loading="lazy"
