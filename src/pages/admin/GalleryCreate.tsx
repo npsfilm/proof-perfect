@@ -16,7 +16,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { MapPin, Package, MessageSquare, Building2, GraduationCap } from 'lucide-react';
+import { MapPin, MessageSquare, Building2, GraduationCap } from 'lucide-react';
 
 export default function GalleryCreate() {
   const navigate = useNavigate();
@@ -126,60 +126,35 @@ export default function GalleryCreate() {
 
             {/* Paket-Einstellungen */}
             <FormSection
-              icon={<Package className="h-5 w-5" />}
-              title="Paket-Einstellungen"
-              description="Foto-Anzahl und Kommunikationsform"
+              icon={<MessageSquare className="h-5 w-5" />}
+              title="Kommunikationsform"
+              description="Anredeform für E-Mails und Benachrichtigungen"
             >
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="target" className="flex items-center gap-2">
-                    Ziel-Paketanzahl
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="target"
-                    type="number"
-                    min={1}
-                    value={formData.package_target_count}
-                    onChange={(e) =>
-                      setFormData({ ...formData, package_target_count: parseInt(e.target.value) })
-                    }
-                    required
-                    disabled={createGalleryMutation.isPending}
-                    className="text-base"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Anzahl der Fotos im Kundenpaket
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    Anredeform
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <RadioGroup
-                    value={formData.salutation_type}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
-                    }
-                    disabled={createGalleryMutation.isPending}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Du" id="du" />
-                      <Label htmlFor="du" className="font-normal cursor-pointer">
-                        Du (informell)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Sie" id="sie" />
-                      <Label htmlFor="sie" className="font-normal cursor-pointer">
-                        Sie (formell)
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  Anredeform
+                  <span className="text-destructive">*</span>
+                </Label>
+                <RadioGroup
+                  value={formData.salutation_type}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
+                  }
+                  disabled={createGalleryMutation.isPending}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Du" id="du" />
+                    <Label htmlFor="du" className="font-normal cursor-pointer">
+                      Du (informell)
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Sie" id="sie" />
+                    <Label htmlFor="sie" className="font-normal cursor-pointer">
+                      Sie (formell)
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
             </FormSection>
 
