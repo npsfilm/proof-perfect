@@ -12,7 +12,7 @@ import { Gallery } from '@/types/database';
 import { useLogDownload } from '@/hooks/useDownloadLogs';
 import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
 
-const ASYNC_THRESHOLD_BYTES = 50 * 1024 * 1024; // 50MB
+const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 
 interface DeliveryDownloadSectionProps {
   gallery: Gallery;
@@ -199,6 +199,48 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
       }
     }
   };
+
+  // If external link is set, show external download link
+  if (gallery.final_delivery_link) {
+    return (
+      <Card className="shadow-neu-flat border-primary/20">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Ihre Fotos sind bereit!</CardTitle>
+                <CardDescription>
+                  {gallery.address || gallery.name} • Geliefert am{' '}
+                  {gallery.delivered_at
+                    ? new Date(gallery.delivered_at).toLocaleDateString('de-DE')
+                    : new Date().toLocaleDateString('de-DE')}
+                </CardDescription>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="text-center py-8">
+          <p className="text-muted-foreground mb-4">
+            Ihre Fotos wurden auf einem externen Service bereitgestellt
+          </p>
+          <Button
+            size="lg"
+            onClick={() => window.open(gallery.final_delivery_link!, '_blank')}
+            className="shadow-neu-flat-sm"
+          >
+            <Download className="h-5 w-5 mr-2" />
+            Zum Download
+          </Button>
+          <p className="text-xs text-muted-foreground mt-4">
+            Link: {gallery.final_delivery_link}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-neu-flat border-primary/20">
