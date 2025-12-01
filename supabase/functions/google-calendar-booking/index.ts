@@ -16,11 +16,12 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const path = url.pathname.split('/').pop();
+    const pathParts = url.pathname.split('/');
+    const endpoint = pathParts[pathParts.length - 1];
     const supabase = createSupabaseClient();
 
     // Public: Get Google Client ID for OAuth flow
-    if (path === 'config' && req.method === 'GET') {
+    if (endpoint === 'config' && req.method === 'GET') {
       return new Response(
         JSON.stringify({ clientId: GOOGLE_CLIENT_ID }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -28,7 +29,7 @@ serve(async (req) => {
     }
 
     // Admin: Exchange authorization code and save tokens
-    if (path === 'connect' && req.method === 'POST') {
+    if (endpoint === 'connect' && req.method === 'POST') {
       const authHeader = req.headers.get('Authorization');
       if (!authHeader) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -130,7 +131,7 @@ serve(async (req) => {
     }
 
     // Public: Get availability for booking
-    if (path === 'availability' && req.method === 'POST') {
+    if (endpoint === 'availability' && req.method === 'POST') {
       const { startDate, endDate } = await req.json();
 
       const { data, error } = await supabase
@@ -219,7 +220,7 @@ serve(async (req) => {
     }
 
     // Public: Create booking
-    if (path === 'book' && req.method === 'POST') {
+    if (endpoint === 'book' && req.method === 'POST') {
       const { name, email, phone, message, bookingDate, bookingTime } = await req.json();
 
       // Validate inputs
