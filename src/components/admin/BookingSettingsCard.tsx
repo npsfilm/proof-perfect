@@ -26,9 +26,15 @@ export function BookingSettingsCard() {
 
   const fetchGoogleClientId = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('google-calendar-booking/config');
-      if (error) throw error;
-      setGoogleClientId(data.clientId);
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-calendar-booking/config`, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        }
+      });
+      const data = await response.json();
+      if (data.clientId) {
+        setGoogleClientId(data.clientId);
+      }
     } catch (error) {
       console.error('Error fetching Google Client ID:', error);
     }
