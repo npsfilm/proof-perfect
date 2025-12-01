@@ -14,6 +14,7 @@ import { WelcomeModal } from '@/components/client/WelcomeModal';
 import { SelectionSummary } from '@/components/client/SelectionSummary';
 import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
 import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
+import { DeliveryDownloadSection } from '@/components/client/delivery/DeliveryDownloadSection';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { usePhotoOrientations } from '@/hooks/usePhotoOrientations';
 import { useComparisonMode } from '@/hooks/useComparisonMode';
@@ -186,6 +187,39 @@ export default function ClientGallery() {
           </Alert>
           <Button className="mt-4" onClick={() => navigate('/')}>Zum Dashboard</Button>
         </div>
+      </div>
+    );
+  }
+
+  // If gallery is delivered, show download section
+  if (gallery.status === 'Delivered') {
+    const selectedCount = photos?.filter(p => p.is_selected).length || 0;
+    const totalCount = photos?.length || 0;
+    
+    return (
+      <div className="min-h-screen bg-background">
+        <ClientGalleryHeader 
+          galleryName={gallery.name} 
+          onSignOut={signOut}
+          onShowHelp={handleShowHelp}
+        />
+
+        <main className="max-w-6xl mx-auto px-4 lg:px-6 xl:px-8 py-12">
+          <DeliveryDownloadSection gallery={gallery} />
+          <div className="mt-6 text-center">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              Zurück zum Dashboard
+            </Button>
+          </div>
+        </main>
+
+        {role === 'admin' && (
+          <AdminPreviewOverlay 
+            gallery={gallery} 
+            selectedCount={selectedCount}
+            totalCount={totalCount}
+          />
+        )}
       </div>
     );
   }
