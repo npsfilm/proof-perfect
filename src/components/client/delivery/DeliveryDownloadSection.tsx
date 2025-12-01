@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Loader2, Package } from 'lucide-react';
+import { Download, Loader2, Package, Archive } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeliveryFolderDownload } from './DeliveryFolderDownload';
@@ -16,6 +16,7 @@ interface DeliveryDownloadSectionProps {
 
 export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProps) {
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
   const { data: files, isLoading } = useDeliveryFiles(gallery.id);
 
   if (isLoading) {
@@ -89,6 +90,59 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
     }
   };
 
+  const handleDownloadAllZip = async () => {
+    setDownloadingZip(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-zip`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            gallery_id: gallery.id,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Download failed');
+      }
+
+      // Get the blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${gallery.slug}_alle_dateien.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: 'ZIP-Download gestartet',
+        description: `Alle Dateien werden als ZIP heruntergeladen...`,
+      });
+    } catch (error) {
+      toast({
+        title: 'ZIP-Download fehlgeschlagen',
+        description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
+        variant: 'destructive',
+      });
+    } finally {
+      setDownloadingZip(false);
+    }
+  };
+
   return (
     <Card className="shadow-neu-flat border-primary/20">
       <CardHeader>
@@ -107,24 +161,43 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
               </CardDescription>
             </div>
           </div>
-          <Button
-            variant="default"
-            onClick={handleDownloadAll}
-            disabled={downloadingAll}
-            className="shadow-neu-flat-sm"
-          >
-            {downloadingAll ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Wird heruntergeladen...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Alle herunterladen
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="default"
+              onClick={handleDownloadAllZip}
+              disabled={downloadingZip || downloadingAll}
+              className="shadow-neu-flat-sm"
+            >
+              {downloadingZip ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ZIP wird erstellt...
+                </>
+              ) : (
+                <>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Alles als ZIP
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDownloadAll}
+              disabled={downloadingAll || downloadingZip}
+            >
+              {downloadingAll ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Lädt einzeln...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Alle einzeln
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -135,6 +208,7 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
               key={folderType}
               folderType={folderType}
               files={folderFiles}
+              galleryId={gallery.id}
             />
           );
         })}
