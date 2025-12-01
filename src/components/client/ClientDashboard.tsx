@@ -40,21 +40,32 @@ export function ClientDashboard() {
   const galleryIds = useMemo(() => stats?.map(g => g.gallery_id || '').filter(Boolean) || [], [stats]);
   const { data: coverPhotos } = useGalleryCoverPhotos(galleryIds);
 
-  // Section galleries into Active and Completed
-  const { activeGalleries, completedGalleries } = useMemo(() => {
+  // Section galleries into Active, Closed, and Completed
+  const { activeGalleries, closedGalleries, completedGalleries } = useMemo(() => {
     const active: GallerySelectionStats[] = [];
+    const closed: GallerySelectionStats[] = [];
     const completed: GallerySelectionStats[] = [];
     
     (stats || []).forEach(gallery => {
       if (gallery.status === 'Planning' || gallery.status === 'Open' || gallery.status === 'Processing') {
         active.push(gallery);
+      } else if (gallery.status === 'Closed') {
+        closed.push(gallery);
       } else {
-        completed.push(gallery);
+        completed.push(gallery); // Delivered
       }
     });
     
-    return { activeGalleries: active, completedGalleries: completed };
+    return { activeGalleries: active, closedGalleries: closed, completedGalleries: completed };
   }, [stats]);
+
+  // Helper to check if gallery is new (< 2 days old)
+  const isNewGallery = (createdAt: string | null) => {
+    if (!createdAt) return false;
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    return new Date(createdAt) > twoDaysAgo;
+  };
 
   // Filter and sort archived galleries
   const filteredArchivedGalleries = useMemo(() => {
@@ -259,6 +270,42 @@ export function ClientDashboard() {
                         buttonAction={buttonConfig.action}
                         buttonDisabled={buttonConfig.disabled}
                         buttonVariant={buttonConfig.variant}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Closed Projects Section */}
+            {!showArchived && closedGalleries.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-muted-foreground">
+                  Abgeschlossen ({closedGalleries.length})
+                </h2>
+                
+                <div className="space-y-2">
+                  {closedGalleries.map((gallery) => {
+                    const buttonConfig = getButtonConfig(
+                      gallery.status || 'Closed',
+                      gallery.slug || '',
+                      gallery.gallery_id || '',
+                      gallery.name || ''
+                    );
+
+                    return (
+                      <GalleryCompactCard
+                        key={gallery.gallery_id}
+                        name={gallery.name || ''}
+                        status={gallery.status || 'Closed'}
+                        photosCount={gallery.photos_count || 0}
+                        selectedCount={gallery.selected_count || 0}
+                        buttonLabel={buttonConfig.label}
+                        buttonIcon={buttonConfig.icon}
+                        buttonAction={buttonConfig.action}
+                        buttonDisabled={buttonConfig.disabled}
+                        buttonVariant={buttonConfig.variant}
+                        isNew={isNewGallery(gallery.created_at)}
                       />
                     );
                   })}
