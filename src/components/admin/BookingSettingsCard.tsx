@@ -5,7 +5,6 @@ import { Calendar, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const GOOGLE_CLIENT_ID = "609689183520-fuiuj6rl261f6b2gqigaq0pq28kp31.apps.googleusercontent.com";
 const SCOPES = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events';
 
 interface BookingSettings {
@@ -18,10 +17,22 @@ export function BookingSettingsCard() {
   const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState<BookingSettings | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [googleClientId, setGoogleClientId] = useState<string>('');
 
   useEffect(() => {
     fetchSettings();
+    fetchGoogleClientId();
   }, []);
+
+  const fetchGoogleClientId = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('google-calendar-booking/config');
+      if (error) throw error;
+      setGoogleClientId(data.clientId);
+    } catch (error) {
+      console.error('Error fetching Google Client ID:', error);
+    }
+  };
 
   useEffect(() => {
     // Check for OAuth callback
@@ -52,9 +63,14 @@ export function BookingSettingsCard() {
   };
 
   const handleConnect = () => {
+    if (!googleClientId) {
+      toast.error('Google Client ID nicht konfiguriert');
+      return;
+    }
+    
     const redirectUri = `${window.location.origin}/admin/settings`;
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${GOOGLE_CLIENT_ID}&` +
+      `client_id=${googleClientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=${encodeURIComponent(SCOPES)}&` +

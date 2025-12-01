@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GOOGLE_CLIENT_ID = "609689183520-fuiuj6rl261f6b2gqigaq0pq28kp31.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') ?? '';
 const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '';
 
 serve(async (req) => {
@@ -18,6 +18,14 @@ serve(async (req) => {
     const url = new URL(req.url);
     const path = url.pathname.split('/').pop();
     const supabase = createSupabaseClient();
+
+    // Public: Get Google Client ID for OAuth flow
+    if (path === 'config' && req.method === 'GET') {
+      return new Response(
+        JSON.stringify({ clientId: GOOGLE_CLIENT_ID }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Admin: Exchange authorization code and save tokens
     if (path === 'connect' && req.method === 'POST') {
