@@ -17,6 +17,7 @@ interface GalleryHeroCardProps {
   buttonAction: () => void;
   buttonDisabled?: boolean;
   buttonVariant?: 'default' | 'outline' | 'secondary';
+  size?: 'default' | 'small';
 }
 
 export function GalleryHeroCard({
@@ -31,8 +32,10 @@ export function GalleryHeroCard({
   buttonAction,
   buttonDisabled,
   buttonVariant = 'default',
+  size = 'default',
 }: GalleryHeroCardProps) {
   const progress = photosCount > 0 ? Math.round((selectedCount / photosCount) * 100) : 0;
+  const isSmall = size === 'small';
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -48,7 +51,7 @@ export function GalleryHeroCard({
   return (
     <Card className="group overflow-hidden shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-300 border-0">
       {/* Hero Image Background */}
-      <div className="relative h-64 overflow-hidden">
+      <div className={cn("relative overflow-hidden", isSmall ? "h-52" : "h-64")}>
         {coverImageUrl ? (
           <>
             <img
@@ -75,13 +78,13 @@ export function GalleryHeroCard({
           </div>
 
           {/* Gallery Name */}
-          <h3 className="text-2xl font-bold text-white mb-3 leading-tight">
+          <h3 className={cn("font-bold text-white mb-3 leading-tight", isSmall ? "text-xl" : "text-2xl")}>
             {name}
           </h3>
 
           {/* Selection Progress - Text Based */}
           <div className="flex items-center gap-2 mb-1">
-            <div className="text-lg font-bold text-white">
+            <div className={cn("font-bold text-white", isSmall ? "text-base" : "text-lg")}>
               Auswahl: {selectedCount} / {photosCount} Fotos
             </div>
           </div>
@@ -103,11 +106,12 @@ export function GalleryHeroCard({
           disabled={buttonDisabled}
           variant={buttonVariant}
           className={cn(
-            "w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed hover:scale-105 transition-all duration-200 gap-2 h-12 text-base font-semibold",
+            "w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed hover:scale-105 transition-all duration-200 gap-2 font-semibold",
+            isSmall ? "h-10 text-sm" : "h-12 text-base",
             buttonVariant === 'default' && "bg-primary text-primary-foreground"
           )}
         >
-          <ButtonIcon className="h-5 w-5" />
+          <ButtonIcon className={cn(isSmall ? "h-4 w-4" : "h-5 w-5")} />
           {buttonLabel}
         </Button>
       </CardContent>
