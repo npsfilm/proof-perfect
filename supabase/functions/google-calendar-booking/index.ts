@@ -125,18 +125,27 @@ serve(async (req) => {
     if (path === 'availability' && req.method === 'POST') {
       const { startDate, endDate } = await req.json();
 
-      // Get booking settings from database
-      const { data: settings, error: settingsError } = await supabase
+      const { data, error } = await supabase
         .from('booking_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (settingsError || !settings) {
+      if (error) {
+        console.error('Booking settings fetch error:', error);
         return new Response(
           JSON.stringify({ error: 'Booking system not configured' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      if (!data) {
+        return new Response(
+          JSON.stringify({ error: 'Booking system not configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const settings = data;
 
       // Check if token is expired and refresh if needed
       let accessToken = settings.access_token;
@@ -214,17 +223,27 @@ serve(async (req) => {
       }
 
       // Get booking settings
-      const { data: settings, error: settingsError } = await supabase
+      const { data, error } = await supabase
         .from('booking_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (settingsError || !settings) {
+      if (error) {
+        console.error('Booking settings fetch error:', error);
         return new Response(
           JSON.stringify({ error: 'Booking system not configured' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      if (!data) {
+        return new Response(
+          JSON.stringify({ error: 'Booking system not configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const settings = data;
 
       // Refresh token if needed (same logic as above)
       let accessToken = settings.access_token;

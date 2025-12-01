@@ -11,6 +11,7 @@ import { EmailTemplates } from '@/types/email-templates';
 import { Save } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
+import { BookingSettingsCard } from '@/components/admin/BookingSettingsCard';
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -129,6 +130,8 @@ export default function AdminSettings() {
           description="System-Konfiguration und E-Mail-Templates"
           breadcrumbs={[{ label: 'Einstellungen' }]}
         />
+
+        <BookingSettingsCard />
 
       <Card>
         <CardHeader>
