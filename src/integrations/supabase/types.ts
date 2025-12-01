@@ -204,6 +204,78 @@ export type Database = {
           },
         ]
       }
+      download_logs: {
+        Row: {
+          created_at: string
+          download_type: string
+          file_count: number
+          file_id: string | null
+          folder_type: string | null
+          gallery_id: string
+          id: string
+          total_size_bytes: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_type: string
+          file_count?: number
+          file_id?: string | null
+          folder_type?: string | null
+          gallery_id: string
+          id?: string
+          total_size_bytes?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_type?: string
+          file_count?: number
+          file_id?: string | null
+          folder_type?: string | null
+          gallery_id?: string
+          id?: string
+          total_size_bytes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "download_logs_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_logs_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_logs_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+          {
+            foreignKeyName: "download_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       galleries: {
         Row: {
           address: string | null
@@ -908,6 +980,80 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gallery_selection_stats"
             referencedColumns: ["gallery_id"]
+          },
+        ]
+      }
+      zip_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          expires_at: string | null
+          file_count: number | null
+          folder_type: string | null
+          gallery_id: string
+          id: string
+          status: string
+          storage_path: string | null
+          total_size_bytes: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string | null
+          file_count?: number | null
+          folder_type?: string | null
+          gallery_id: string
+          id?: string
+          status?: string
+          storage_path?: string | null
+          total_size_bytes?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string | null
+          file_count?: number | null
+          folder_type?: string | null
+          gallery_id?: string
+          id?: string
+          status?: string
+          storage_path?: string | null
+          total_size_bytes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zip_jobs_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zip_jobs_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+          {
+            foreignKeyName: "zip_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zip_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
