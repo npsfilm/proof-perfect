@@ -175,22 +175,6 @@ export default function ClientGallery() {
     );
   }
 
-  if (gallery.is_locked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Diese Galerie wurde finalisiert und ist nun gesperrt. Sie können keine Änderungen mehr an Ihrer Auswahl vornehmen.
-            </AlertDescription>
-          </Alert>
-          <Button className="mt-4" onClick={() => navigate('/')}>Zum Dashboard</Button>
-        </div>
-      </div>
-    );
-  }
-
   // If gallery is delivered, show download section
   if (gallery.status === 'Delivered') {
     const selectedCount = photos?.filter(p => p.is_selected).length || 0;
@@ -220,6 +204,22 @@ export default function ClientGallery() {
             totalCount={totalCount}
           />
         )}
+      </div>
+    );
+  }
+
+  if (gallery.is_locked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Diese Galerie wurde finalisiert und ist nun gesperrt. Sie können keine Änderungen mehr an Ihrer Auswahl vornehmen.
+            </AlertDescription>
+          </Alert>
+          <Button className="mt-4" onClick={() => navigate('/')}>Zum Dashboard</Button>
+        </div>
       </div>
     );
   }
