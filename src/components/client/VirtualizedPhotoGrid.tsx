@@ -37,12 +37,12 @@ export function VirtualizedPhotoGrid({
 
   // Calculate responsive column count
   const columnCount = useMemo(() => {
-    if (containerWidth === 0) return 1; // Default before measurement
-    if (containerWidth < 640) return 1;      // mobile
-    if (containerWidth < 768) return 2;      // sm
-    if (containerWidth < 1024) return 3;     // md
-    if (containerWidth < 1280) return 4;     // lg
-    return 5;                                 // xl+
+    const width = containerWidth || window.innerWidth; // Fallback to window width
+    if (width < 640) return 1;      // mobile
+    if (width < 768) return 2;      // sm
+    if (width < 1024) return 3;     // md
+    if (width < 1280) return 4;     // lg
+    return 5;                        // xl+
   }, [containerWidth]);
 
   // Calculate item dimensions
@@ -73,6 +73,9 @@ export function VirtualizedPhotoGrid({
   // ResizeObserver for responsive behavior
   useEffect(() => {
     if (!parentRef.current) return;
+    
+    // Immediate initial measurement
+    setContainerWidth(parentRef.current.getBoundingClientRect().width);
     
     const observer = new ResizeObserver((entries) => {
       if (entries[0]) {
