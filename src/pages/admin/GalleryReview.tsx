@@ -23,6 +23,7 @@ export default function GalleryReview() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [delivering, setDelivering] = useState(false);
+  const [resending, setResending] = useState(false);
   const [useExternalLink, setUseExternalLink] = useState(false);
   const [externalLink, setExternalLink] = useState('');
 
@@ -265,6 +266,52 @@ export default function GalleryReview() {
     }
   };
 
+  const handleResendDelivery = async () => {
+    if (!gallery || !clientEmails || clientEmails.length === 0) {
+      toast({
+        title: 'Fehler',
+        description: 'Keine Kunden-E-Mails gefunden.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setResending(true);
+    try {
+      // Construct download link
+      const downloadLink = gallery.final_delivery_link 
+        ? gallery.final_delivery_link 
+        : `${window.location.origin}/gallery/${gallery.slug}`;
+
+      // Send delivery webhook
+      const { error: webhookError } = await supabase.functions.invoke('webhook-deliver', {
+        body: {
+          gallery_id: id,
+          client_emails: clientEmails,
+          download_link: downloadLink,
+        },
+      });
+
+      if (webhookError) {
+        throw new Error(webhookError.message || 'Fehler beim Senden der Benachrichtigung');
+      }
+
+      toast({
+        title: 'Benachrichtigung erneut gesendet',
+        description: `Benachrichtigung wurde an ${clientEmails.length} Kunde(n) erneut gesendet.`,
+      });
+    } catch (error: any) {
+      console.error('Resend error:', error);
+      toast({
+        title: 'Fehler beim Senden',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setResending(false);
+    }
+  };
+
   if (galleryLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -324,6 +371,26 @@ export default function GalleryReview() {
               <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
                 {statusLabels[gallery.status] || gallery.status}
               </Badge>
+              {gallery.status === 'Delivered' && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleResendDelivery}
+                  disabled={resending}
+                >
+                  {resending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sende...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Erneut senden
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           }
         />
