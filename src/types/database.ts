@@ -149,6 +149,24 @@ export interface ReopenRequest {
   resolved_by?: string;
 }
 
+export interface StagingRequest {
+  id: string;
+  gallery_id: string;
+  user_id: string;
+  status: 'pending' | 'processing' | 'delivered';
+  staging_style: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StagingRequestPhoto {
+  id: string;
+  staging_request_id: string;
+  photo_id: string;
+  created_at: string;
+}
+
 export interface CompanyGalleryStats {
   company_id: string;
   company_name: string;
