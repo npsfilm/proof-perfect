@@ -4,6 +4,13 @@ import { DeliveryFile } from '@/types/database';
 import { DeliveryFolderType } from '@/constants/delivery-folders';
 import { toast } from '@/hooks/use-toast';
 
+function transformFilenameForFolder(filename: string, folderType: DeliveryFolderType): string {
+  if (folderType === 'web_version') {
+    return filename.replace(/_HD_/g, '_Web_');
+  }
+  return filename;
+}
+
 export function useDeliveryFiles(galleryId: string | undefined) {
   return useQuery({
     queryKey: ['delivery-files', galleryId],
@@ -71,7 +78,9 @@ export function useUploadDeliveryFile() {
       
       // Sanitize filename
       const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const storagePath = `${gallerySlug}/${folderType}/${sanitizedFilename}`;
+      // Transform filename based on folder type
+      const transformedFilename = transformFilenameForFolder(sanitizedFilename, folderType);
+      const storagePath = `${gallerySlug}/${folderType}/${transformedFilename}`;
       
       // Upload to storage
       const { error: uploadError } = await supabase.storage
@@ -89,7 +98,7 @@ export function useUploadDeliveryFile() {
         .insert({
           gallery_id: galleryId,
           folder_type: folderType,
-          filename: sanitizedFilename,
+          filename: transformedFilename,
           storage_url: storagePath,
           file_size: file.size,
           uploaded_by: user.id,
