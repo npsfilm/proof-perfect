@@ -34,11 +34,13 @@ export function useCreateStagingRequest() {
       staging_style,
       photo_ids,
       notes,
+      reference_image_urls,
     }: {
       gallery_id: string;
       staging_style: string;
       photo_ids: string[];
       notes?: string;
+      reference_image_urls?: string[];
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -51,6 +53,7 @@ export function useCreateStagingRequest() {
           user_id: user.id,
           staging_style,
           notes,
+          reference_image_urls: reference_image_urls || [],
         })
         .select()
         .single();

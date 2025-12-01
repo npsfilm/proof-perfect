@@ -8,6 +8,7 @@ import { DeliveredGallerySelector } from './DeliveredGallerySelector';
 import { StagingPhotoGrid } from './StagingPhotoGrid';
 import { StagingStyleSelector } from './StagingStyleSelector';
 import { StagingPricingSummary } from './StagingPricingSummary';
+import { ReferenceImageUploader } from './ReferenceImageUploader';
 import { useCreateStagingRequest } from '@/hooks/useStagingRequests';
 
 export function StagingRequestFlow() {
@@ -15,6 +16,7 @@ export function StagingRequestFlow() {
   const [selectedGalleryId, setSelectedGalleryId] = useState<string>('');
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [stagingStyle, setStagingStyle] = useState<string>('');
+  const [referenceImageUrls, setReferenceImageUrls] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
 
   const createRequest = useCreateStagingRequest();
@@ -36,6 +38,7 @@ export function StagingRequestFlow() {
       staging_style: stagingStyle,
       photo_ids: selectedPhotoIds,
       notes: notes || undefined,
+      reference_image_urls: referenceImageUrls.length > 0 ? referenceImageUrls : undefined,
     });
     
     // Reset form
@@ -43,6 +46,7 @@ export function StagingRequestFlow() {
     setSelectedGalleryId('');
     setSelectedPhotoIds([]);
     setStagingStyle('');
+    setReferenceImageUrls([]);
     setNotes('');
   };
 
@@ -57,7 +61,7 @@ export function StagingRequestFlow() {
       <CardHeader>
         <CardTitle>Nachträgliches Staging anfordern</CardTitle>
         <CardDescription>
-          Schritt {step} von 4
+          Schritt {step} von 5
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -113,6 +117,24 @@ export function StagingRequestFlow() {
         {step === 4 && (
           <div className="space-y-4">
             <div>
+              <Label className="text-base font-semibold">
+                Referenzbilder (optional)
+              </Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                Laden Sie bis zu 5 Bilder hoch, um Ihren gewünschten Möbelstil zu zeigen
+              </p>
+              <ReferenceImageUploader
+                requestId="temp-upload"
+                onUploadComplete={setReferenceImageUrls}
+                existingUrls={referenceImageUrls}
+              />
+            </div>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="space-y-4">
+            <div>
               <Label htmlFor="notes" className="text-base font-semibold">
                 Anmerkungen (optional)
               </Label>
@@ -147,7 +169,7 @@ export function StagingRequestFlow() {
             Zurück
           </Button>
 
-          {step < 4 ? (
+          {step < 5 ? (
             <Button
               onClick={handleNext}
               disabled={
