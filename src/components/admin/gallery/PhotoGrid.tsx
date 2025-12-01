@@ -24,6 +24,7 @@ import { useState } from 'react';
 
 interface PhotoGridProps {
   photos: Photo[];
+  signedUrls: Record<string, string>;
   selectedPhotos: Set<string>;
   onPhotoToggle: (photoId: string) => void;
   onSelectAll: () => void;
@@ -33,6 +34,7 @@ interface PhotoGridProps {
 
 export function PhotoGrid({
   photos,
+  signedUrls,
   selectedPhotos,
   onPhotoToggle,
   onSelectAll,
@@ -133,6 +135,7 @@ export function PhotoGrid({
               <SortablePhotoItem
                 key={photo.id}
                 photo={photo}
+                signedUrl={signedUrls[photo.id]}
                 isSelected={selectedPhotos.has(photo.id)}
                 onToggle={onPhotoToggle}
               />
@@ -145,7 +148,7 @@ export function PhotoGrid({
           {activePhoto ? (
             <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary shadow-2xl opacity-90 rotate-3 scale-105">
               <img
-                src={activePhoto.storage_url}
+                src={signedUrls[activePhoto.id] || activePhoto.storage_url}
                 alt={activePhoto.filename}
                 className="w-full h-full object-cover"
               />

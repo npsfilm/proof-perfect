@@ -4,6 +4,7 @@ import { PhotoUploader } from '@/components/admin/PhotoUploader';
 import { PhotoGrid } from '@/components/admin/gallery/PhotoGrid';
 import { PhotoBatchActions } from '@/components/admin/gallery/PhotoBatchActions';
 import { useBatchPhotoOperations } from '@/hooks/useBatchPhotoOperations';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { Photo } from '@/types/database';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +18,7 @@ interface GalleryPhotosSectionProps {
 export function GalleryPhotosSection({ galleryId, gallerySlug, photos, onUploadComplete }: GalleryPhotosSectionProps) {
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const { deletePhotos, reorderPhotos } = useBatchPhotoOperations(galleryId);
+  const { signedUrls } = useSignedPhotoUrls(photos);
   const { toast } = useToast();
 
   const handlePhotoToggle = (photoId: string) => {
@@ -101,6 +103,7 @@ export function GalleryPhotosSection({ galleryId, gallerySlug, photos, onUploadC
           <CardContent>
             <PhotoGrid
               photos={photos}
+              signedUrls={signedUrls}
               selectedPhotos={selectedPhotos}
               onPhotoToggle={handlePhotoToggle}
               onSelectAll={handleSelectAll}
