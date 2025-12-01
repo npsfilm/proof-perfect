@@ -15,7 +15,7 @@ export interface ClientWatermark {
 }
 
 /**
- * Fetch current user's watermark settings
+ * Fetch current user's watermark settings with signed URL
  */
 export function useClientWatermark() {
   return useQuery({
@@ -31,8 +31,27 @@ export function useClientWatermark() {
         .maybeSingle();
 
       if (error) throw error;
-      return data as ClientWatermark | null;
+      if (!data) return null;
+
+      // Generate signed URL for the watermark
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('watermarks')
+        .createSignedUrl(data.storage_url, 3600); // 1 hour expiry
+
+      if (signedError) {
+        console.error('Failed to generate signed URL:', signedError);
+        return data as ClientWatermark;
+      }
+
+      // Return data with signed URL
+      return {
+        ...data,
+        storage_url: signedData.signedUrl,
+      } as ClientWatermark;
     },
+    staleTime: 45 * 60 * 1000, // 45 minutes
+    refetchInterval: 50 * 60 * 1000, // 50 minutes
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -63,17 +82,19 @@ export function useUploadWatermark() {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL (bucket is private)
+      const { data: signedData, error: signedError } = await supabase.storage
         .from('watermarks')
-        .getPublicUrl(uploadData.path);
+        .createSignedUrl(uploadData.path, 60 * 60 * 24 * 365); // 1 year expiry
+
+      if (signedError) throw signedError;
 
       // Create/update database entry with default settings
       const { data, error } = await supabase
         .from('client_watermarks')
         .upsert({
           user_id: user.id,
-          storage_url: publicUrl,
+          storage_url: uploadData.path, // Store the path, not the signed URL
           position_x: 50,
           position_y: 90,
           size_percent: 15,
@@ -153,12 +174,8 @@ export function useDeleteWatermark() {
         .single();
 
       if (watermark) {
-        // Extract path from URL
-        const url = new URL(watermark.storage_url);
-        const path = url.pathname.split('/').slice(-2).join('/');
-
-        // Delete from storage
-        await supabase.storage.from('watermarks').remove([path]);
+        // Delete from storage (storage_url contains the path)
+        await supabase.storage.from('watermarks').remove([watermark.storage_url]);
       }
 
       // Delete from database
