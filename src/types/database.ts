@@ -31,6 +31,7 @@ export interface Gallery {
   reviewed_by?: string;
   delivered_at?: string;
   express_delivery_requested: boolean;
+  show_onboarding: boolean;
   created_at: string;
   updated_at: string;
 }

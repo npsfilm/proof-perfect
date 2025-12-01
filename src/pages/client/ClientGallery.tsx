@@ -87,9 +87,9 @@ export default function ClientGallery() {
     }
   }, [user, authLoading, navigate]);
 
-  // Check if welcome modal should be shown (only first time ever)
+  // Check if welcome modal should be shown (only first time ever, and if enabled for gallery)
   useEffect(() => {
-    if (gallery) {
+    if (gallery && gallery.show_onboarding) {
       const storageKey = 'proofing_welcome_shown';
       const hasSeenWelcome = localStorage.getItem(storageKey);
       if (!hasSeenWelcome) {
