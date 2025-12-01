@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-const GOOGLE_CLIENT_ID = "609689183520-fuiuj6rl261f6b2gqigaq0pq28kp31.apps.googleusercontent.com";
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.freebusy';
 
 interface Calendar {
@@ -29,6 +28,22 @@ export function useGoogleCalendar() {
   const [freeSlots, setFreeSlots] = useState<Record<string, TimeSlot[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+
+  // Fetch Google Client ID from edge function
+  useEffect(() => {
+    const fetchClientId = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('google-calendar-booking/config');
+        if (!error && data?.clientId) {
+          setGoogleClientId(data.clientId);
+        }
+      } catch (err) {
+        console.error('Failed to fetch Google Client ID:', err);
+      }
+    };
+    fetchClientId();
+  }, []);
 
   // Check for existing token on mount
   useEffect(() => {
@@ -41,9 +56,13 @@ export function useGoogleCalendar() {
   }, []);
 
   const signIn = useCallback(() => {
+    if (!googleClientId) {
+      setError('Google Client ID nicht verfügbar');
+      return;
+    }
     const redirectUri = `${window.location.origin}/buchung`;
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${GOOGLE_CLIENT_ID}&` +
+      `client_id=${googleClientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=${encodeURIComponent(SCOPES)}&` +
@@ -51,7 +70,7 @@ export function useGoogleCalendar() {
       `prompt=consent`;
     
     window.location.href = authUrl;
-  }, []);
+  }, [googleClientId]);
 
   const signOut = useCallback(() => {
     localStorage.removeItem('google_access_token');
