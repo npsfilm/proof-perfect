@@ -2,10 +2,8 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart, Search, SortAsc } from 'lucide-react';
+import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
@@ -19,9 +17,6 @@ export function ClientDashboard() {
   const navigate = useNavigate();
   const [reopenGalleryId, setReopenGalleryId] = useState<string | null>(null);
   const [reopenGalleryName, setReopenGalleryName] = useState('');
-  const [showArchived, setShowArchived] = useState(false);
-  const [archiveSearch, setArchiveSearch] = useState('');
-  const [archiveSort, setArchiveSort] = useState<'newest' | 'oldest' | 'name'>('newest');
 
   const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ['client-gallery-stats'],
@@ -66,34 +61,6 @@ export function ClientDashboard() {
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
     return new Date(createdAt) > twoDaysAgo;
   };
-
-  // Filter and sort archived galleries
-  const filteredArchivedGalleries = useMemo(() => {
-    let result = [...completedGalleries];
-    
-    // Apply search filter
-    if (archiveSearch) {
-      const query = archiveSearch.toLowerCase();
-      result = result.filter(g => 
-        g.name?.toLowerCase().includes(query)
-      );
-    }
-    
-    // Apply sorting
-    switch (archiveSort) {
-      case 'newest':
-        result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-        break;
-      case 'oldest':
-        result.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-        break;
-      case 'name':
-        result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        break;
-    }
-    
-    return result;
-  }, [completedGalleries, archiveSearch, archiveSort]);
 
   // Find galleries that need immediate attention
   const nextStepsGallery = useMemo(() => {
@@ -189,20 +156,7 @@ export function ClientDashboard() {
     <div className="container mx-auto px-4 lg:px-6 py-8 max-w-[1920px]">
       <div className="space-y-8 pb-8">
         {/* Header with simple controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {completedGalleries.length > 0 && (
-              <Button
-                variant={showArchived ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowArchived(!showArchived)}
-                className="rounded-full shadow-neu-flat-sm"
-              >
-                {showArchived ? 'Aktive anzeigen' : 'Archiv anzeigen'}
-              </Button>
-            )}
-          </div>
-          
+        <div className="flex items-center justify-end">
           <Button
             variant="outline"
             size="icon"
@@ -215,7 +169,7 @@ export function ClientDashboard() {
         </div>
 
         {/* Action Center / Next Steps Hero */}
-        {nextStepsGallery && !showArchived && (
+        {nextStepsGallery && (
           <NextStepsWizard
             gallery={nextStepsGallery.gallery}
             type={nextStepsGallery.type}
@@ -237,7 +191,7 @@ export function ClientDashboard() {
         ) : (
           <>
             {/* Active Projects Section */}
-            {!showArchived && activeGalleries.length > 0 && (
+            {activeGalleries.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-foreground">
@@ -278,7 +232,7 @@ export function ClientDashboard() {
             )}
 
             {/* Closed Projects Section */}
-            {!showArchived && closedGalleries.length > 0 && (
+            {closedGalleries.length > 0 && (
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-muted-foreground">
                   Abgeschlossen ({closedGalleries.length})
@@ -313,14 +267,14 @@ export function ClientDashboard() {
               </div>
             )}
 
-            {/* Delivered Projects Section */}
-            {!showArchived && completedGalleries.length > 0 && (
-              <div className="space-y-3">
+            {/* Delivered Projects Section - Hero Cards (20% smaller) */}
+            {completedGalleries.length > 0 && (
+              <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-muted-foreground">
                   Geliefert ({completedGalleries.length})
                 </h2>
                 
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {completedGalleries.map((gallery) => {
                     const buttonConfig = getButtonConfig(
                       gallery.status || 'Delivered',
@@ -329,19 +283,23 @@ export function ClientDashboard() {
                       gallery.name || ''
                     );
 
+                    const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
+
                     return (
-                      <GalleryCompactCard
+                      <GalleryHeroCard
                         key={gallery.gallery_id}
                         name={gallery.name || ''}
                         status={gallery.status || 'Delivered'}
                         photosCount={gallery.photos_count || 0}
                         selectedCount={gallery.selected_count || 0}
+                        stagingCount={gallery.staging_count || 0}
+                        coverImageUrl={coverImageUrl}
                         buttonLabel={buttonConfig.label}
                         buttonIcon={buttonConfig.icon}
                         buttonAction={buttonConfig.action}
                         buttonDisabled={buttonConfig.disabled}
                         buttonVariant={buttonConfig.variant}
-                        isNew={isNewGallery(gallery.created_at)}
+                        size="small"
                       />
                     );
                   })}
@@ -349,102 +307,12 @@ export function ClientDashboard() {
               </div>
             )}
 
-            {/* Completed/Archived Section */}
-            {showArchived && completedGalleries.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Abgeschlossen ({completedGalleries.length})
-                  </h2>
-                  
-                  {/* Search and Sort Controls */}
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:w-64">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Archiv durchsuchen..."
-                        value={archiveSearch}
-                        onChange={(e) => setArchiveSearch(e.target.value)}
-                        className="pl-9 shadow-neu-pressed"
-                      />
-                    </div>
-                    
-                    <Select value={archiveSort} onValueChange={(v) => setArchiveSort(v as 'newest' | 'oldest' | 'name')}>
-                      <SelectTrigger className="w-full sm:w-40 shadow-neu-pressed">
-                        <SortAsc className="h-4 w-4 mr-2" />
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Neueste</SelectItem>
-                        <SelectItem value="oldest">Älteste</SelectItem>
-                        <SelectItem value="name">Name A→Z</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  {filteredArchivedGalleries.length === 0 ? (
-                    <EmptyState
-                      icon={Search}
-                      title="Keine Ergebnisse"
-                      description="Keine Galerien entsprechen Ihrer Suche."
-                      action={
-                        <Button
-                          variant="outline"
-                          onClick={() => setArchiveSearch('')}
-                          className="rounded-full shadow-neu-flat-sm"
-                        >
-                          Suche zurücksetzen
-                        </Button>
-                      }
-                    />
-                  ) : (
-                    filteredArchivedGalleries.map((gallery) => {
-                    const buttonConfig = getButtonConfig(
-                      gallery.status || 'Planning',
-                      gallery.slug || '',
-                      gallery.gallery_id || '',
-                      gallery.name || ''
-                    );
-
-                    return (
-                      <GalleryCompactCard
-                        key={gallery.gallery_id}
-                        name={gallery.name || ''}
-                        status={gallery.status || 'Delivered'}
-                        photosCount={gallery.photos_count || 0}
-                        selectedCount={gallery.selected_count || 0}
-                        buttonLabel={buttonConfig.label}
-                        buttonIcon={buttonConfig.icon}
-                        buttonAction={buttonConfig.action}
-                        buttonDisabled={buttonConfig.disabled}
-                        buttonVariant={buttonConfig.variant}
-                      />
-                    );
-                  })
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Empty state for active galleries */}
-            {!showArchived && activeGalleries.length === 0 && (
+            {activeGalleries.length === 0 && (
               <EmptyState
                 icon={FolderOpen}
                 title="Keine aktiven Projekte"
                 description="Alle Ihre Galerien sind abgeschlossen."
-                action={
-                  completedGalleries.length > 0 ? (
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowArchived(true)}
-                      className="rounded-full shadow-neu-flat-sm"
-                    >
-                      Archiv anzeigen
-                    </Button>
-                  ) : undefined
-                }
               />
             )}
           </>
