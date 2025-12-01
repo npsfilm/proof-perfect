@@ -624,6 +624,90 @@ export type Database = {
           },
         ]
       }
+      staging_request_photos: {
+        Row: {
+          created_at: string
+          id: string
+          photo_id: string
+          staging_request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_id: string
+          staging_request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_id?: string
+          staging_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staging_request_photos_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staging_request_photos_staging_request_id_fkey"
+            columns: ["staging_request_id"]
+            isOneToOne: false
+            referencedRelation: "staging_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staging_requests: {
+        Row: {
+          created_at: string
+          gallery_id: string
+          id: string
+          notes: string | null
+          staging_style: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gallery_id: string
+          id?: string
+          notes?: string | null
+          staging_style: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gallery_id?: string
+          id?: string
+          notes?: string | null
+          staging_style?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staging_requests_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staging_requests_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           created_at: string
