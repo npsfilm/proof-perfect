@@ -11,6 +11,9 @@ import { toast } from '@/hooks/use-toast';
 import { Gallery } from '@/types/database';
 import { useLogDownload } from '@/hooks/useDownloadLogs';
 import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
+import { WatermarkEditor } from './WatermarkEditor';
+import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
+import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 
 const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -24,6 +27,10 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   
   const { data: files, isLoading } = useDeliveryFiles(gallery.id);
+  const { data: photos } = useGalleryPhotos(gallery.id);
+  const firstPhoto = photos?.[0];
+  const { signedUrl: previewUrl } = useSignedPhotoUrl(firstPhoto);
+  
   const logDownload = useLogDownload();
   const createZipJob = useCreateZipJob();
   const downloadZipJob = useDownloadZipJob();
@@ -311,8 +318,10 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Async job status indicator */}
+      <CardContent>
+        {/* Watermark Editor */}
+        <WatermarkEditor previewImageUrl={previewUrl} />
+
         {zipJob && (zipJob.status === 'pending' || zipJob.status === 'processing') && (
           <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
             <div className="flex items-center gap-3">

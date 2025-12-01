@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Download, Loader2, Archive, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Download, Loader2, Archive, Clock, Droplet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DELIVERY_FOLDERS, DeliveryFolderType } from '@/constants/delivery-folders';
 import { DeliveryFileItem } from './DeliveryFileItem';
 import { DeliveryFile } from '@/types/database';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useLogDownload } from '@/hooks/useDownloadLogs';
 import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
+import { useWatermarkedDownload } from '@/hooks/useWatermarkedDownload';
 
 const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -24,8 +24,6 @@ export function DeliveryFolderDownload({
   files,
   galleryId,
 }: DeliveryFolderDownloadProps) {
-  const [downloadingAll, setDownloadingAll] = useState(false);
-  const [downloadingZip, setDownloadingZip] = useState(false);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   
   const folder = DELIVERY_FOLDERS[folderType];
@@ -34,6 +32,7 @@ export function DeliveryFolderDownload({
   const createZipJob = useCreateZipJob();
   const downloadZipJob = useDownloadZipJob();
   const { data: zipJob } = useZipJob(activeJobId || undefined);
+  const { downloadMultipleFiles, downloadAsZip, isProcessing, progress, hasWatermark } = useWatermarkedDownload();
 
   const totalSize = files.reduce((sum, file) => sum + (file.file_size || 0), 0);
   const isLargeDownload = totalSize > ASYNC_THRESHOLD_BYTES;
@@ -43,7 +42,6 @@ export function DeliveryFolderDownload({
     if (zipJob?.status === 'completed' && zipJob.storage_path) {
       downloadZipJob.mutate(zipJob);
       setActiveJobId(null);
-      setDownloadingZip(false);
       
       // Log the download
       logDownload.mutate({
@@ -54,7 +52,6 @@ export function DeliveryFolderDownload({
         total_size_bytes: totalSize,
       });
     } else if (zipJob?.status === 'failed') {
-      setDownloadingZip(false);
       setActiveJobId(null);
       toast({
         title: 'ZIP-Generierung fehlgeschlagen',
@@ -69,93 +66,15 @@ export function DeliveryFolderDownload({
     return `${mb.toFixed(1)} MB`;
   };
 
-  const handleDownloadAll = async () => {
-    setDownloadingAll(true);
-    try {
-      // Download all files sequentially
-      for (const file of files) {
-        const { data, error } = await supabase.storage
-          .from('deliveries')
-          .createSignedUrl(file.storage_url, 3600);
-
-        if (error) throw error;
-
-        const link = document.createElement('a');
-        link.href = data.signedUrl;
-        link.download = file.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Small delay between downloads
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      toast({
-        title: 'Downloads gestartet',
-        description: `${files.length} Dateien werden heruntergeladen...`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Download fehlgeschlagen',
-        description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
-        variant: 'destructive',
-      });
-    } finally {
-      setDownloadingAll(false);
-    }
+  const handleDownloadAll = async (withWatermark: boolean = false) => {
+    await downloadMultipleFiles(files, withWatermark);
   };
 
-  const handleDownloadZip = async () => {
-    setDownloadingZip(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
-      // For large files, create async job
-      if (isLargeDownload) {
-        const job = await createZipJob.mutateAsync({
-          galleryId,
-          folderType,
-        });
-        setActiveJobId(job.id);
-        return; // Job will be downloaded when completed via useEffect
-      }
-
-      // For small files, download directly
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-zip`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            gallery_id: galleryId,
-            folder_type: folderType,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Download failed');
-      }
-
-      // Get the blob
-      const blob = await response.blob();
+  const handleDownloadZip = async (withWatermark: boolean = false) => {
+    // For large downloads (>2GB) or watermarked, use client-side processing
+    if (withWatermark || !isLargeDownload) {
+      await downloadAsZip(files, `${folderType}.zip`, withWatermark);
       
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${folderType}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
       // Log the download
       logDownload.mutate({
         gallery_id: galleryId,
@@ -164,21 +83,13 @@ export function DeliveryFolderDownload({
         file_count: files.length,
         total_size_bytes: totalSize,
       });
-
-      toast({
-        title: 'ZIP-Download gestartet',
-        description: `Ordner "${folder.label}" wird als ZIP heruntergeladen...`,
+    } else {
+      // For large non-watermarked downloads, use server-side async job
+      const job = await createZipJob.mutateAsync({
+        galleryId,
+        folderType,
       });
-    } catch (error) {
-      toast({
-        title: 'ZIP-Download fehlgeschlagen',
-        description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
-        variant: 'destructive',
-      });
-    } finally {
-      if (!isLargeDownload) {
-        setDownloadingZip(false);
-      }
+      setActiveJobId(job.id);
     }
   };
 
@@ -200,54 +111,122 @@ export function DeliveryFolderDownload({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleDownloadZip}
-              disabled={downloadingZip || downloadingAll}
-            >
-              {downloadingZip ? (
-                zipJob?.status === 'processing' ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ZIP wird erstellt...
-                  </>
-                ) : zipJob?.status === 'pending' ? (
-                  <>
-                    <Clock className="h-4 w-4 mr-2" />
-                    In Warteschlange...
-                  </>
-                ) : (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Lädt...
-                  </>
-                )
-              ) : (
-                <>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Als ZIP {isLargeDownload && '(groß)'}
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadAll}
-              disabled={downloadingAll || downloadingZip}
-            >
-              {downloadingAll ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Lädt...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Einzeln
-                </>
-              )}
-            </Button>
+            {hasWatermark ? (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      disabled={isProcessing || !!activeJobId}
+                    >
+                      {isProcessing || zipJob?.status === 'processing' ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {isProcessing ? `${progress.current}/${progress.total}` : 'ZIP wird erstellt...'}
+                        </>
+                      ) : zipJob?.status === 'pending' ? (
+                        <>
+                          <Clock className="h-4 w-4 mr-2" />
+                          In Warteschlange...
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="h-4 w-4 mr-2" />
+                          Als ZIP
+                        </>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleDownloadZip(false)}>
+                      <Archive className="h-4 w-4 mr-2" />
+                      Original ZIP
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownloadZip(true)}>
+                      <Droplet className="h-4 w-4 mr-2" />
+                      Mit Wasserzeichen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isProcessing || !!activeJobId}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {progress.current}/{progress.total}
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-2" />
+                          Einzeln
+                        </>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleDownloadAll(false)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Original
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownloadAll(true)}>
+                      <Droplet className="h-4 w-4 mr-2" />
+                      Mit Wasserzeichen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleDownloadZip(false)}
+                  disabled={isProcessing || !!activeJobId}
+                >
+                  {isProcessing || zipJob?.status === 'processing' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {isProcessing ? `${progress.current}/${progress.total}` : 'ZIP wird erstellt...'}
+                    </>
+                  ) : zipJob?.status === 'pending' ? (
+                    <>
+                      <Clock className="h-4 w-4 mr-2" />
+                      In Warteschlange...
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="h-4 w-4 mr-2" />
+                      Als ZIP {isLargeDownload && '(groß)'}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownloadAll(false)}
+                  disabled={isProcessing || !!activeJobId}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {progress.current}/{progress.total}
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Einzeln
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </CardHeader>

@@ -239,3 +239,15 @@ export interface ZipJob {
   completed_at?: string;
   expires_at?: string;
 }
+
+export interface ClientWatermark {
+  id: string;
+  user_id: string;
+  storage_url: string;
+  position_x: number;
+  position_y: number;
+  size_percent: number;
+  opacity: number;
+  created_at: string;
+  updated_at: string;
+}
