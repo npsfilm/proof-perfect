@@ -55,7 +55,7 @@ export function BookingSettingsCard() {
     try {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-calendar-booking/config`, {
         headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         }
       });
       const data = await response.json();

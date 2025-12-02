@@ -1,5 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback } from 'react';
 
 interface TimeSlot {
   start: Date;
@@ -25,21 +24,36 @@ export function usePublicBooking() {
       const timeMin = startDate.toISOString();
       const timeMax = endDate.toISOString();
 
-      const { data, error: functionError } = await supabase.functions.invoke(
-        'google-calendar-booking/availability',
+      // Use direct fetch for better control and error handling
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-calendar-booking/availability`,
         {
-          body: { startDate: timeMin, endDate: timeMax }
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ startDate: timeMin, endDate: timeMax }),
         }
       );
 
-      if (functionError) throw functionError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Verfügbarkeit konnte nicht geladen werden');
+      }
+
+      // Null-check for calendars
+      if (!data.calendars) {
+        throw new Error('Keine Kalenderdaten erhalten');
+      }
 
       // Compute free slots from busy periods
       const slots = computeFreeSlots(startDate, endDate, data.calendars);
       setFreeSlots(slots);
     } catch (err) {
       console.error('Fetch availability error:', err);
-      setError('Verfügbare Zeiten konnten nicht geladen werden');
+      setError(err instanceof Error ? err.message : 'Verfügbare Zeiten konnten nicht geladen werden');
     } finally {
       setIsLoading(false);
     }
@@ -57,26 +71,36 @@ export function usePublicBooking() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error: functionError } = await supabase.functions.invoke(
-        'google-calendar-booking/book',
+      // Use direct fetch for better control
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-calendar-booking/book`,
         {
-          body: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
             name,
             email,
             phone,
             message,
             bookingDate,
             bookingTime,
-          }
+          }),
         }
       );
 
-      if (functionError) throw functionError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Buchung konnte nicht erstellt werden');
+      }
 
       return { success: true, data };
     } catch (err) {
       console.error('Create booking error:', err);
-      setError('Buchung konnte nicht erstellt werden');
+      setError(err instanceof Error ? err.message : 'Buchung konnte nicht erstellt werden');
       return { success: false, error: err };
     } finally {
       setIsLoading(false);
@@ -92,7 +116,7 @@ export function usePublicBooking() {
     
     // Merge busy periods from calendar
     const allBusyPeriods: BusyPeriod[] = [];
-    Object.values(calendars).forEach(cal => {
+    Object.values(calendars || {}).forEach(cal => {
       if (cal?.busy) {
         allBusyPeriods.push(...cal.busy);
       }
