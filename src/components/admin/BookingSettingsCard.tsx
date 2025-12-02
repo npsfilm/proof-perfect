@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Session } from '@supabase/supabase-js';
 
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.freebusy';
 
@@ -18,6 +19,32 @@ export function BookingSettingsCard() {
   const [settings, setSettings] = useState<BookingSettings | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string>('');
+  
+  // Auth state tracking
+  const [authReady, setAuthReady] = useState(false);
+  const [authSession, setAuthSession] = useState<Session | null>(null);
+  const callbackProcessed = useRef(false);
+
+  // Monitor auth state - this ensures we wait for session restoration
+  useEffect(() => {
+    // First get the current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[BookingSettings] Initial session check:', session ? 'Session found' : 'No session');
+      setAuthSession(session);
+      setAuthReady(true);
+    });
+
+    // Then listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('[BookingSettings] Auth state changed:', event, session ? 'Has session' : 'No session');
+        setAuthSession(session);
+        setAuthReady(true);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     fetchSettings();
@@ -40,16 +67,36 @@ export function BookingSettingsCard() {
     }
   };
 
+  // OAuth callback - ONLY runs when auth is ready
   useEffect(() => {
-    // Check for OAuth callback
+    // Wait until auth state is determined
+    if (!authReady) {
+      console.log('[BookingSettings] Waiting for auth to be ready...');
+      return;
+    }
+
+    // Prevent double processing
+    if (callbackProcessed.current) {
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     
     if (code && state === 'booking_settings') {
-      handleOAuthCallback(code);
+      console.log('[BookingSettings] OAuth code detected, authSession:', authSession ? 'exists' : 'null');
+      
+      if (authSession) {
+        callbackProcessed.current = true;
+        handleOAuthCallback(code, authSession);
+      } else {
+        console.error('[BookingSettings] No auth session available for OAuth callback');
+        toast.error('Bitte melden Sie sich zuerst an');
+        window.history.replaceState({}, document.title, '/admin/settings');
+      }
     }
-  }, []);
+  }, [authReady, authSession]);
 
   const fetchSettings = async () => {
     try {
@@ -87,25 +134,29 @@ export function BookingSettingsCard() {
     window.location.href = authUrl;
   };
 
-  const handleOAuthCallback = async (code: string) => {
+  const handleOAuthCallback = async (code: string, session: Session) => {
     try {
       setIsConnecting(true);
       const redirectUri = `${window.location.origin}/admin/settings`;
 
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        toast.error('Nicht authentifiziert');
-        return;
-      }
+      console.log('[BookingSettings] Starting token exchange...');
+      console.log('[BookingSettings] Code (first 20 chars):', code.substring(0, 20) + '...');
+      console.log('[BookingSettings] Redirect URI:', redirectUri);
+      console.log('[BookingSettings] User ID:', session.user.id);
 
       const { data, error } = await supabase.functions.invoke('google-calendar-booking/connect', {
         body: { code, redirectUri },
         headers: {
-          Authorization: `Bearer ${session.session.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
-      if (error) throw error;
+      console.log('[BookingSettings] Token exchange response:', { data, error });
+
+      if (error) {
+        console.error('[BookingSettings] Token exchange error:', error);
+        throw error;
+      }
 
       toast.success('Google-Kalender erfolgreich verbunden!');
       
@@ -117,6 +168,8 @@ export function BookingSettingsCard() {
     } catch (error) {
       console.error('OAuth callback error:', error);
       toast.error('Verbindung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+      // Clean up URL even on error
+      window.history.replaceState({}, document.title, '/admin/settings');
     } finally {
       setIsConnecting(false);
     }
