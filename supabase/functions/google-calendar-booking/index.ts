@@ -132,27 +132,36 @@ serve(async (req) => {
 
     // Public: Get availability for booking
     if (endpoint === 'availability' && req.method === 'POST') {
+      console.log('Availability endpoint called');
       const { startDate, endDate } = await req.json();
+      console.log('Date range:', startDate, 'to', endDate);
 
+      // Use .limit(1).single() instead of maybeSingle() for more predictable behavior
       const { data, error } = await supabase
         .from('booking_settings')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
+
+      console.log('Booking settings query result:', { data: data ? 'found' : 'null', error });
 
       if (error) {
         console.error('Booking settings fetch error:', error);
         return new Response(
-          JSON.stringify({ error: 'Booking system not configured' }),
+          JSON.stringify({ error: 'Booking system not configured', details: error.message }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       if (!data) {
+        console.error('No booking settings found');
         return new Response(
           JSON.stringify({ error: 'Booking system not configured' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      
+      console.log('Using calendar:', data.calendar_id);
 
       const settings = data;
 
