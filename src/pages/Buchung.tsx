@@ -279,6 +279,18 @@ export default function Buchung() {
                   </div>
                 </CardContent>
               </Card>
+            ) : error ? (
+              <Card className="border-destructive">
+                <CardContent className="py-8">
+                  <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                    <Calendar className="h-8 w-8 text-destructive" />
+                    <div>
+                      <p className="font-medium text-destructive">Buchungssystem nicht verfügbar</p>
+                      <p className="text-sm text-muted-foreground mt-1">{error}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {weekDates.map(date => {
