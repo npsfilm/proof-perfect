@@ -134,27 +134,35 @@ export function usePublicBooking() {
         continue;
       }
 
-      const dateKey = currentDate.toISOString().split('T')[0];
+      // Format date key in LOCAL timezone for display
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+      
       const daySlots: TimeSlot[] = [];
 
-      // Generate 30-min slots from 09:00 to 17:00
+      // Generate 30-min slots from 09:00 to 17:00 LOCAL TIME
       for (let hour = 9; hour < 17; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {
+          // Create slot times in LOCAL timezone
           const slotStart = new Date(currentDate);
           slotStart.setHours(hour, minute, 0, 0);
           
           const slotEnd = new Date(slotStart);
           slotEnd.setMinutes(slotEnd.getMinutes() + 30);
 
+          // Compare using UTC timestamps (getTime() returns UTC milliseconds)
+          const slotStartMs = slotStart.getTime();
+          const slotEndMs = slotEnd.getTime();
+
           // Check if slot overlaps with any busy period
           const isBusy = allBusyPeriods.some(busy => {
-            const busyStart = new Date(busy.start);
-            const busyEnd = new Date(busy.end);
-            return (
-              (slotStart >= busyStart && slotStart < busyEnd) ||
-              (slotEnd > busyStart && slotEnd <= busyEnd) ||
-              (slotStart <= busyStart && slotEnd >= busyEnd)
-            );
+            const busyStartMs = new Date(busy.start).getTime();
+            const busyEndMs = new Date(busy.end).getTime();
+            
+            // Slot overlaps if: slot starts before busy ends AND slot ends after busy starts
+            return slotStartMs < busyEndMs && slotEndMs > busyStartMs;
           });
 
           if (!isBusy) {

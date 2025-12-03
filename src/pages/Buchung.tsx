@@ -93,6 +93,13 @@ export default function Buchung() {
     return freeSlots[dateKey] || [];
   };
 
+  // Get dates that have available slots
+  const getAvailableDates = () => {
+    return Object.entries(freeSlots)
+      .filter(([_, slots]) => slots.length > 0)
+      .map(([dateKey]) => dateKey);
+  };
+
   // Loading state
   if (isLoading && Object.keys(freeSlots).length === 0) {
     return (
@@ -178,6 +185,7 @@ export default function Buchung() {
                       <BookingCalendar
                         selectedDate={selectedDate}
                         onDateSelect={handleDateSelect}
+                        availableDates={getAvailableDates()}
                       />
                     </div>
 
