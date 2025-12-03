@@ -1,45 +1,36 @@
-import { useEffect, useState } from 'react';
-import { usePublicBooking } from '@/hooks/usePublicBooking';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, addDays, startOfWeek, addWeeks } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { z } from 'zod';
+import { useState, useEffect } from "react";
+import { usePublicBooking } from "@/hooks/usePublicBooking";
+import { toast } from "sonner";
+import { BookingProfileSection } from "@/components/booking/BookingProfileSection";
+import { BookingCalendar } from "@/components/booking/BookingCalendar";
+import { BookingTimeSlots } from "@/components/booking/BookingTimeSlots";
+import { BookingContactForm } from "@/components/booking/BookingContactForm";
+import { BookingConfirmation } from "@/components/booking/BookingConfirmation";
+import { addDays, startOfDay, format } from "date-fns";
+import { Loader2, AlertCircle } from "lucide-react";
 
-const contactSchema = z.object({
-  name: z.string().trim().min(1, 'Name ist erforderlich').max(100),
-  email: z.string().trim().email('Ungültige E-Mail-Adresse').max(255),
-  phone: z.string().trim().max(50).optional(),
-  message: z.string().trim().max(1000).optional(),
-});
+type BookingStep = "select" | "contact" | "confirmed";
+
+interface SelectedSlot {
+  date: string;
+  time: string;
+}
 
 export default function Buchung() {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
+  const [step, setStep] = useState<BookingStep>("select");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmedEmail, setConfirmedEmail] = useState("");
+
   const { freeSlots, isLoading, error, fetchAvailability, createBooking } = usePublicBooking();
 
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [selectedSlot, setSelectedSlot] = useState<{ date: string; time: string } | null>(null);
-  const [showContactForm, setShowContactForm] = useState(false);
-  const [contactData, setContactData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
-
-  // Fetch free slots on mount and when week changes
+  // Fetch availability for the next 14 days
   useEffect(() => {
-    const startDate = currentWeekStart;
-    const endDate = addDays(addWeeks(currentWeekStart, 2), -1); // 2 weeks from start
-    fetchAvailability(startDate, endDate);
-  }, [currentWeekStart, fetchAvailability]);
+    const today = startOfDay(new Date());
+    const endDate = addDays(today, 14);
+    fetchAvailability(today, endDate);
+  }, [fetchAvailability]);
 
   useEffect(() => {
     if (error) {
@@ -47,287 +38,170 @@ export default function Buchung() {
     }
   }, [error]);
 
-  const handleSlotSelect = (date: string, time: string) => {
-    setSelectedSlot({ date, time });
-    setShowContactForm(true);
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setSelectedSlot(null);
   };
 
-  const validateForm = () => {
-    try {
-      contactSchema.parse(contactData);
-      setFormErrors({});
-      return true;
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors: Record<string, string> = {};
-        err.errors.forEach((error) => {
-          if (error.path[0]) {
-            errors[error.path[0].toString()] = error.message;
-          }
-        });
-        setFormErrors(errors);
-      }
-      return false;
-    }
+  const handleSlotSelect = (slot: SelectedSlot) => {
+    setSelectedSlot(slot);
+    setStep("contact");
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm() || !selectedSlot) return;
+  const handleBack = () => {
+    setStep("select");
+  };
+
+  const handleSubmit = async (data: { name: string; email: string; phone: string; message: string }) => {
+    if (!selectedSlot) return;
 
     setIsSubmitting(true);
-    const result = await createBooking(
-      contactData.name,
-      contactData.email,
-      contactData.phone || '',
-      contactData.message || '',
-      selectedSlot.date,
-      selectedSlot.time
-    );
-
-    setIsSubmitting(false);
-
-    if (result.success) {
-      setIsBooked(true);
-      toast.success('Termin erfolgreich gebucht!', {
-        description: 'Sie erhalten in Kürze eine Bestätigungs-E-Mail.',
+    try {
+      const result = await createBooking(
+        data.name,
+        data.email,
+        data.phone,
+        data.message,
+        selectedSlot.date,
+        selectedSlot.time
+      );
+      
+      if (result.success) {
+        setConfirmedEmail(data.email);
+        setStep("confirmed");
+        toast.success("Termin gebucht", {
+          description: "Sie erhalten in Kürze eine Bestätigung per E-Mail.",
+        });
+      } else {
+        toast.error("Fehler", {
+          description: "Die Buchung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+        });
+      }
+    } catch (err) {
+      toast.error("Fehler", {
+        description: "Die Buchung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
       });
-    } else {
-      toast.error('Buchung fehlgeschlagen', {
-        description: 'Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.',
-      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const goToPreviousWeek = () => {
-    setCurrentWeekStart(prev => addWeeks(prev, -1));
+  // Get slots for selected date
+  const getSlotsForDate = () => {
+    if (!selectedDate) return [];
+    const dateKey = format(selectedDate, "yyyy-MM-dd");
+    return freeSlots[dateKey] || [];
   };
 
-  const goToNextWeek = () => {
-    setCurrentWeekStart(prev => addWeeks(prev, 1));
-  };
+  // Loading state
+  if (isLoading && Object.keys(freeSlots).length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Lade Verfügbarkeit...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Generate array of dates for current 2-week period
-  const weekDates = Array.from({ length: 14 }, (_, i) => addDays(currentWeekStart, i)).filter(
-    date => date.getDay() !== 0 && date.getDay() !== 6 // Exclude weekends
-  );
+  // Error state when booking is not configured
+  if (error && Object.keys(freeSlots).length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold">Buchung nicht verfügbar</h2>
+          <p className="text-muted-foreground text-sm">
+            Das Buchungssystem ist derzeit nicht konfiguriert. 
+            Bitte kontaktieren Sie uns direkt unter{" "}
+            <a href="mailto:hello@immoonpoint.de" className="text-primary hover:underline">
+              hello@immoonpoint.de
+            </a>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border shadow-neu-flat">
-        <div className="container mx-auto px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">immoonpoint</h1>
-              <p className="text-sm text-muted-foreground mt-1">Termin buchen</p>
+      <header className="border-b border-border bg-card">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">IP</span>
             </div>
+            <span className="font-semibold text-foreground">immoonpoint</span>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 lg:px-6 py-8 max-w-4xl">
-        {isBooked ? (
-          <Card className="border-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center text-primary">
-                <CheckCircle2 className="h-6 w-6 mr-2" />
-                Termin erfolgreich gebucht!
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-foreground">
-                Vielen Dank für Ihre Buchung! Sie haben folgende Zeit reserviert:
-              </p>
-              {selectedSlot && (
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="font-semibold text-lg">
-                    {format(new Date(selectedSlot.date), 'EEEE, dd. MMMM yyyy', { locale: de })}
-                  </p>
-                  <p className="text-xl font-bold text-primary">
-                    {selectedSlot.time} Uhr
-                  </p>
-                </div>
-              )}
-              <p className="text-sm text-muted-foreground">
-                Sie erhalten in Kürze eine Bestätigungs-E-Mail mit allen Details. Wir freuen uns auf Ihren Termin!
-              </p>
-              <Button onClick={() => window.location.reload()} className="w-full">
-                Weiteren Termin buchen
-              </Button>
-            </CardContent>
-          </Card>
-        ) : showContactForm && selectedSlot ? (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ihre Kontaktdaten</CardTitle>
-                <CardDescription>
-                  Gewählter Termin: {format(new Date(selectedSlot.date), 'EEEE, dd. MMMM yyyy', { locale: de })} um {selectedSlot.time} Uhr
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={contactData.name}
-                    onChange={(e) => setContactData({ ...contactData, name: e.target.value })}
-                    placeholder="Max Mustermann"
-                  />
-                  {formErrors.name && <p className="text-sm text-destructive">{formErrors.name}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-Mail *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={contactData.email}
-                    onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
-                    placeholder="max@beispiel.de"
-                  />
-                  {formErrors.email && <p className="text-sm text-destructive">{formErrors.email}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefon (optional)</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={contactData.phone}
-                    onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
-                    placeholder="+49 123 456789"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Nachricht (optional)</Label>
-                  <Textarea
-                    id="message"
-                    value={contactData.message}
-                    onChange={(e) => setContactData({ ...contactData, message: e.target.value })}
-                    placeholder="Teilen Sie uns mit, worum es bei Ihrem Termin geht..."
-                    rows={4}
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowContactForm(false);
-                      setSelectedSlot(null);
-                    }}
-                    className="flex-1"
-                  >
-                    Zurück
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="flex-1"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Wird gebucht...
-                      </>
-                    ) : (
-                      'Termin verbindlich buchen'
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        {step === "confirmed" && selectedSlot ? (
+          <div className="max-w-lg mx-auto">
+            <div className="bg-card rounded-3xl shadow-neu-flat p-8">
+              <BookingConfirmation
+                date={selectedSlot.date}
+                time={selectedSlot.time}
+                email={confirmedEmail}
+              />
+            </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Verfügbare Termine</CardTitle>
-                <CardDescription>
-                  Wählen Sie einen passenden Termin für Ihr Anliegen. Die Buchung ist für 30 Minuten vorgesehen.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Week Navigation */}
-            <div className="flex items-center justify-between">
-              <Button variant="outline" onClick={goToPreviousWeek} disabled={isLoading}>
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Vorherige Woche
-              </Button>
-              <div className="text-center">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {format(currentWeekStart, 'dd.MM.yyyy', { locale: de })} -{' '}
-                  {format(addDays(addWeeks(currentWeekStart, 2), -1), 'dd.MM.yyyy', { locale: de })}
-                </p>
-              </div>
-              <Button variant="outline" onClick={goToNextWeek} disabled={isLoading}>
-                Nächste Woche
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
+          <div className="grid lg:grid-cols-[320px_1fr] gap-8">
+            {/* Left Column - Profile Section */}
+            <div className="bg-card rounded-3xl shadow-neu-flat p-6 h-fit lg:sticky lg:top-8">
+              <BookingProfileSection />
             </div>
 
-            {/* Time Slots Grid */}
-            {isLoading ? (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="flex flex-col items-center justify-center space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Verfügbare Zeiten werden geladen...</p>
+            {/* Right Column - Calendar & Time Slots or Contact Form */}
+            <div className="bg-card rounded-3xl shadow-neu-flat p-6">
+              {step === "select" ? (
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground mb-1">
+                      Wählen Sie Datum und Uhrzeit
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Verfügbare Termine in den nächsten 14 Tagen
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ) : error ? (
-              <Card className="border-destructive">
-                <CardContent className="py-8">
-                  <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                    <Calendar className="h-8 w-8 text-destructive" />
+
+                  <div className="grid md:grid-cols-[1fr_1fr] gap-8">
+                    {/* Calendar */}
                     <div>
-                      <p className="font-medium text-destructive">Buchungssystem nicht verfügbar</p>
-                      <p className="text-sm text-muted-foreground mt-1">{error}</p>
+                      <BookingCalendar
+                        selectedDate={selectedDate}
+                        onDateSelect={handleDateSelect}
+                      />
+                    </div>
+
+                    {/* Time Slots */}
+                    <div className="border-t md:border-t-0 md:border-l border-border pt-6 md:pt-0 md:pl-8">
+                      <BookingTimeSlots
+                        selectedDate={selectedDate}
+                        slots={getSlotsForDate()}
+                        selectedSlot={selectedSlot}
+                        onSlotSelect={handleSlotSelect}
+                        isLoading={isLoading}
+                      />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {weekDates.map(date => {
-                  const dateKey = format(date, 'yyyy-MM-dd');
-                  const slots = freeSlots[dateKey] || [];
-                  
-                  return (
-                    <Card key={dateKey}>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base">
-                          {format(date, 'EEE dd.MM', { locale: de })}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        {slots.length === 0 ? (
-                          <p className="text-xs text-muted-foreground text-center py-4">
-                            Keine freien Zeiten
-                          </p>
-                        ) : (
-                          slots.map(slot => (
-                            <Button
-                              key={slot.displayTime}
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start"
-                              onClick={() => handleSlotSelect(dateKey, slot.displayTime)}
-                            >
-                              {slot.displayTime} Uhr
-                            </Button>
-                          ))
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
+                </div>
+              ) : step === "contact" && selectedSlot ? (
+                <BookingContactForm
+                  selectedSlot={selectedSlot}
+                  onBack={handleBack}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                />
+              ) : null}
+            </div>
           </div>
         )}
       </main>
