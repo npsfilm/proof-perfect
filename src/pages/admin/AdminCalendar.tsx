@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
@@ -9,6 +9,8 @@ import { CalendarListView } from '@/components/calendar/CalendarListView';
 import { EventModal } from '@/components/calendar/EventModal';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { useEvents, CalendarEvent, CreateEventData } from '@/hooks/useEvents';
+import { useGoogleCalendarAuth } from '@/hooks/useGoogleCalendarAuth';
+import { useGoogleCalendarSync } from '@/hooks/useGoogleCalendarSync';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCalendar() {
@@ -23,8 +25,37 @@ export default function AdminCalendar() {
   } = useCalendarNavigation();
 
   const { events, isLoading, createEvent, updateEvent, deleteEvent } = useEvents(currentDate);
+  const { saveTokensFromCallback, isConnected } = useGoogleCalendarAuth();
+  const { sync } = useGoogleCalendarSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handle OAuth callback - save tokens from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('google_auth') === 'success') {
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const expiresAt = params.get('expires_at');
+      
+      if (accessToken && refreshToken && expiresAt) {
+        saveTokensFromCallback.mutate(
+          { accessToken, refreshToken, expiresAt },
+          {
+            onSuccess: () => {
+              // Clean URL and trigger sync
+              window.history.replaceState({}, '', '/admin/calendar');
+              sync();
+            },
+          }
+        );
+      } else {
+        // Clean URL even if tokens are missing
+        window.history.replaceState({}, '', '/admin/calendar');
+      }
+    }
+  }, []);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>();
 

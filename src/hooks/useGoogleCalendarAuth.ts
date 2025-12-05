@@ -46,6 +46,35 @@ export function useGoogleCalendarAuth() {
     window.location.href = authUrl;
   };
 
+  const saveTokensFromCallback = useMutation({
+    mutationFn: async ({ accessToken, refreshToken, expiresAt }: {
+      accessToken: string;
+      refreshToken: string;
+      expiresAt: string;
+    }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      const { error } = await supabase
+        .from('google_calendar_tokens')
+        .upsert({
+          user_id: user.id,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresAt,
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['google-calendar-token'] });
+      toast.success('Google Kalender verbunden!');
+    },
+    onError: (error) => {
+      console.error('Error saving tokens:', error);
+      toast.error('Fehler beim Speichern der Verbindung');
+    },
+  });
+
   const disconnectCalendar = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Not authenticated');
@@ -73,6 +102,7 @@ export function useGoogleCalendarAuth() {
     isTokenExpired,
     tokenData,
     initiateOAuth,
+    saveTokensFromCallback,
     disconnectCalendar,
   };
 }
