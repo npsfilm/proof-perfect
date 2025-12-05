@@ -19,6 +19,7 @@ import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
 import StagingRequests from "./pages/admin/StagingRequests";
 import ClientGallery from "./pages/client/ClientGallery";
+import VirtualEditing from "./pages/client/VirtualEditing";
 import Buchung from "./pages/Buchung";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/gallery/:slug" element={<ClientGallery />} />
+            <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
             <Route path="/buchung" element={<Buchung />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
