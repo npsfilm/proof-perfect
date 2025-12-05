@@ -77,6 +77,45 @@ function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
   );
 }
 
+// Mobile navigation content (no sidebar context dependencies)
+function MobileNavContent({ onItemClick }: { onItemClick?: () => void }) {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const currentPath = location.pathname;
+  const currentTab = searchParams.get('tab') || 'galleries';
+
+  const isActive = (item: typeof navItems[0]) => {
+    if (item.tab && currentPath === '/') {
+      return currentTab === item.tab;
+    }
+    if (!item.tab) {
+      return currentPath === item.url;
+    }
+    return false;
+  };
+
+  return (
+    <nav className="flex flex-col gap-1">
+      {navItems.map((item) => (
+        <NavLink
+          key={item.title}
+          to={item.url}
+          onClick={onItemClick}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+            isActive(item) 
+              ? 'bg-primary/10 text-primary font-medium' 
+              : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+          }`}
+          activeClassName=""
+        >
+          <item.icon className="h-5 w-5" />
+          <span>{item.title}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+}
+
 // Mobile Sheet/Drawer Navigation
 export function MobileClientNav() {
   const [open, setOpen] = useState(false);
@@ -103,7 +142,7 @@ export function MobileClientNav() {
         </SheetHeader>
         <div className="p-4">
           <p className="text-xs text-muted-foreground mb-3 px-2">Navigation</p>
-          <SidebarNavContent onItemClick={() => setOpen(false)} />
+          <MobileNavContent onItemClick={() => setOpen(false)} />
         </div>
         <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 px-4 py-3">
           <p className="text-xs text-muted-foreground">© 2025 immoonpoint</p>
