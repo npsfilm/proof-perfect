@@ -97,6 +97,7 @@ export function useGoogleCalendarAuth() {
   });
 
   return {
+    user,
     isConnected,
     isLoadingToken,
     isTokenExpired,
