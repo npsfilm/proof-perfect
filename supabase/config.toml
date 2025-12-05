@@ -17,3 +17,9 @@ verify_jwt = true
 
 [functions.calendly-api]
 verify_jwt = false
+
+[functions.mapbox-geocoding]
+verify_jwt = false
+
+[functions.get-smart-availability]
+verify_jwt = false
