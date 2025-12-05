@@ -64,11 +64,6 @@ export default {
         medium: "0 4px 16px -4px hsl(var(--foreground) / 0.12)",
         strong: "0 8px 32px -8px hsl(var(--foreground) / 0.16)",
         glow: "0 0 30px 5px hsl(var(--primary) / 0.3)",
-        // Neumorphic shadows
-        "neu-flat": "9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255,0.5)",
-        "neu-flat-sm": "5px 5px 10px rgb(163,177,198,0.6), -5px -5px 10px rgba(255,255,255,0.5)",
-        "neu-pressed": "inset 6px 6px 10px rgb(163,177,198,0.6), inset -6px -6px 10px rgba(255,255,255,0.5)",
-        "neu-float": "14px 14px 24px rgb(163,177,198,0.6), -14px -14px 24px rgba(255,255,255,0.5)",
       },
       borderRadius: {
         lg: "var(--radius)",

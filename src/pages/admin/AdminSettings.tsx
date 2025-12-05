@@ -5,12 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { EmailTemplateEditor } from '@/components/admin/EmailTemplateEditor';
-import { AvailabilitySettings } from '@/components/admin/AvailabilitySettings';
 import { EmailTemplates } from '@/types/email-templates';
-import { Save, Webhook, Mail, CalendarClock } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 
@@ -124,92 +122,61 @@ export default function AdminSettings() {
   });
 
   return (
-    <PageContainer size="lg">
+    <PageContainer size="md">
       <div className="space-y-6">
         <PageHeader
           title="Einstellungen"
-          description="System-Konfiguration, Verfügbarkeit und E-Mail-Templates"
+          description="System-Konfiguration und E-Mail-Templates"
           breadcrumbs={[{ label: 'Einstellungen' }]}
         />
 
-        <Tabs defaultValue="availability" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="availability" className="flex items-center gap-2">
-              <CalendarClock className="h-4 w-4" />
-              <span className="hidden sm:inline">Verfügbarkeit</span>
-            </TabsTrigger>
-            <TabsTrigger value="webhooks" className="flex items-center gap-2">
-              <Webhook className="h-4 w-4" />
-              <span className="hidden sm:inline">Webhooks</span>
-            </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <span className="hidden sm:inline">E-Mail-Templates</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="availability">
-            <AvailabilitySettings />
-          </TabsContent>
-
-          <TabsContent value="webhooks">
-            <Card>
-              <CardHeader>
-                <CardTitle>Zapier Webhooks</CardTitle>
-                <CardDescription>
-                  Zapier-Webhook-URLs für Benachrichtigungen konfigurieren
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-send">An Kunde senden Webhook</Label>
-                  <Input
-                    id="webhook-send"
-                    type="url"
-                    placeholder="https://hooks.zapier.com/hooks/catch/..."
-                    value={webhookSend}
-                    onChange={(e) => setWebhookSend(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Wird ausgelöst, wenn Galerie mit Zugangsdaten an Kunden gesendet wird
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-deliver">Lieferungs-Webhook</Label>
-                  <Input
-                    id="webhook-deliver"
-                    type="url"
-                    placeholder="https://hooks.zapier.com/hooks/catch/..."
-                    value={webhookDeliver}
-                    onChange={(e) => setWebhookDeliver(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Wird ausgelöst, wenn finale Dateien an Kunden geliefert werden
-                  </p>
-                </div>
-
-                <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="emails">
-            <EmailTemplateEditor
-              templates={templates}
-              onTemplatesChange={setTemplates}
-            />
-            <div className="flex justify-end mt-6">
-              <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
-                <Save className="h-4 w-4 mr-2" />
-                {updateSettings.isPending ? 'Wird gespeichert...' : 'E-Mail-Templates speichern'}
-              </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Zapier Webhooks</CardTitle>
+            <CardDescription>
+              Zapier-Webhook-URLs für Benachrichtigungen konfigurieren
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="webhook-send">An Kunde senden Webhook</Label>
+              <Input
+                id="webhook-send"
+                type="url"
+                placeholder="https://hooks.zapier.com/hooks/catch/..."
+                value={webhookSend}
+                onChange={(e) => setWebhookSend(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Wird ausgelöst, wenn Galerie mit Zugangsdaten an Kunden gesendet wird
+              </p>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="space-y-2">
+              <Label htmlFor="webhook-deliver">Lieferungs-Webhook</Label>
+              <Input
+                id="webhook-deliver"
+                type="url"
+                placeholder="https://hooks.zapier.com/hooks/catch/..."
+                value={webhookDeliver}
+                onChange={(e) => setWebhookDeliver(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Wird ausgelöst, wenn finale Dateien an Kunden geliefert werden
+              </p>
+            </div>
+
+            <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <EmailTemplateEditor
+          templates={templates}
+          onTemplatesChange={setTemplates}
+        />
       </div>
     </PageContainer>
   );
