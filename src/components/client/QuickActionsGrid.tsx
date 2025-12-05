@@ -5,14 +5,12 @@ import { QuickActionCard } from './QuickActionCard';
 interface QuickActionsGridProps {
   deliveredCount?: number;
   stagingRequestsCount?: number;
-  onOpenCalculator: () => void;
   onOpenDownloads: () => void;
 }
 
 export function QuickActionsGrid({
   deliveredCount = 0,
   stagingRequestsCount = 0,
-  onOpenCalculator,
   onOpenDownloads,
 }: QuickActionsGridProps) {
   const navigate = useNavigate();
@@ -31,7 +29,7 @@ export function QuickActionsGrid({
         icon={Sparkles}
         title="Virtuelle Bearbeitung"
         description="Blaue Stunde, Sommer-Winter"
-        onClick={onOpenCalculator}
+        onClick={() => navigate('/virtuelle-bearbeitung')}
         gradient="from-secondary/5 to-secondary/10"
       />
 

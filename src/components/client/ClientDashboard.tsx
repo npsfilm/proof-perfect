@@ -155,7 +155,6 @@ export function ClientDashboard() {
         <QuickActionsGrid
           deliveredCount={completedGalleries.length}
           stagingRequestsCount={openStagingCount}
-          onOpenCalculator={() => setCalculatorOpen(true)}
           onOpenDownloads={() => setDownloadsOpen(true)}
         />
 
