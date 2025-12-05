@@ -41,7 +41,7 @@ export function GalleryCompactCard({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Delivered': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Delivered': return 'bg-secondary/20 text-secondary-foreground';
       case 'Closed': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -49,7 +49,7 @@ export function GalleryCompactCard({
 
   return (
     <div className={cn(
-      "flex items-center justify-between p-4 bg-card rounded-2xl shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200 border-0",
+      "flex items-center justify-between p-4 bg-card rounded-lg border shadow-sm hover:shadow-md transition-all duration-200",
       isNew && "ring-2 ring-primary ring-offset-2 ring-offset-background"
     )}>
       {/* Gallery Info */}
@@ -76,7 +76,7 @@ export function GalleryCompactCard({
         disabled={buttonDisabled}
         variant={buttonVariant}
         size="sm"
-        className="ml-4 rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed gap-2 flex-shrink-0"
+        className="ml-4 gap-2 flex-shrink-0"
       >
         <ButtonIcon className="h-4 w-4" />
         <span className="hidden sm:inline">{buttonLabel}</span>

@@ -37,12 +37,12 @@ export function PhotoCard({
   return (
     <div
       style={width ? { width: `${width}px`, flexShrink: 0 } : undefined}
-      className={`bg-card rounded-lg overflow-hidden shadow-neu-flat transition-all ${
+      className={`bg-card rounded-lg overflow-hidden border shadow-sm transition-all duration-300 ${
         photo.is_selected 
-          ? 'ring-4 ring-primary shadow-lg bg-primary/5' 
+          ? 'ring-2 ring-primary shadow-md border-primary animate-glow-border' 
           : isInComparison
-          ? 'ring-4 ring-blue-500 shadow-lg bg-blue-500/5'
-          : 'hover:shadow-neu-float'
+          ? 'ring-2 ring-blue-500 shadow-md border-blue-500'
+          : 'hover:shadow-lg hover:border-primary/50'
       } ${isDisabled ? 'opacity-40 pointer-events-none' : ''}`}
     >
       {/* Image Container */}
@@ -127,7 +127,7 @@ export function PhotoCard({
           variant={photo.is_selected ? 'default' : 'outline'}
           onClick={(e) => onCheckClick(e, photo)}
           className={`h-8 w-8 p-0 rounded-full transition-all ${
-            photo.is_selected ? 'scale-110' : ''
+            photo.is_selected ? 'animate-check-in' : ''
           }`}
           aria-label={photo.is_selected ? 'Deselektieren' : 'Auswählen'}
         >
@@ -137,4 +137,3 @@ export function PhotoCard({
     </div>
   );
 }
-

@@ -31,7 +31,7 @@ export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: Clie
   };
 
   return (
-    <header className="bg-card border-b border-border sticky top-0 z-30 shadow-neu-flat">
+    <header className="bg-card border-b border-border sticky top-0 z-30 shadow-sm">
       <div className="container mx-auto px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-shrink-0">
@@ -78,7 +78,6 @@ export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: Clie
               variant="outline" 
               size="sm" 
               asChild
-              className="rounded-full"
             >
               <Link to="/buchung">
                 <Calendar className="h-4 w-4 md:mr-2" />
@@ -89,7 +88,6 @@ export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: Clie
               variant="ghost" 
               size="sm" 
               onClick={onSignOut}
-              className="rounded-full"
             >
               <LogOut className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Abmelden</span>

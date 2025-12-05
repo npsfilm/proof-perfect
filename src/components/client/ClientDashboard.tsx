@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart, Search } from 'lucide-react';
+import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -161,7 +161,6 @@ export function ClientDashboard() {
             variant="outline"
             size="icon"
             onClick={() => refetch()}
-            className="shadow-neu-flat-sm hover:shadow-neu-pressed rounded-full"
             title="Aktualisieren"
           >
             <RefreshCw className="h-4 w-4" />

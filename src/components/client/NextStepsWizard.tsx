@@ -29,7 +29,7 @@ export function NextStepsWizard({ gallery, type, onAction }: NextStepsWizardProp
           title: 'Bereit loszulegen?',
           description: `Starten Sie jetzt mit der Auswahl Ihrer Lieblingsfotos für ${gallery.name}`,
           statusText: 'Galerie ist bereit zur Auswahl',
-          statusColor: 'bg-green-500',
+          statusColor: 'bg-secondary',
           buttonText: 'Auswahl starten',
         };
       case 'continue':
@@ -59,13 +59,13 @@ export function NextStepsWizard({ gallery, type, onAction }: NextStepsWizardProp
       case 'delivered':
         return {
           icon: CheckCircle2,
-          iconColor: 'text-green-500',
-          bgGradient: 'from-green-500/5 to-green-500/10',
+          iconColor: 'text-secondary',
+          bgGradient: 'from-secondary/5 to-secondary/10',
           greeting: 'Fertig!',
           title: 'Ihre Fotos sind bereit',
           description: `Die bearbeiteten Fotos für ${gallery.name} stehen zum Download bereit`,
           statusText: 'Bereit zum Download',
-          statusColor: 'bg-green-500',
+          statusColor: 'bg-secondary',
           buttonText: 'Jetzt herunterladen',
         };
     }
@@ -76,7 +76,7 @@ export function NextStepsWizard({ gallery, type, onAction }: NextStepsWizardProp
 
   return (
     <Card className={cn(
-      "relative overflow-hidden border-2 shadow-neu-float",
+      "relative overflow-hidden border-2 shadow-lg",
       type === 'select' ? 'border-primary/30' : 'border-muted',
       `bg-gradient-to-br ${content.bgGradient}`
     )}>
@@ -91,7 +91,7 @@ export function NextStepsWizard({ gallery, type, onAction }: NextStepsWizardProp
           {/* Icon */}
           <div className="flex-shrink-0">
             <div className={cn(
-              "w-16 h-16 rounded-2xl flex items-center justify-center shadow-neu-flat",
+              "w-16 h-16 rounded-lg flex items-center justify-center shadow-md",
               type === 'select' ? 'bg-primary/10' : 'bg-muted/20'
             )}>
               <Icon className={cn("h-8 w-8", content.iconColor)} />
@@ -120,10 +120,7 @@ export function NextStepsWizard({ gallery, type, onAction }: NextStepsWizardProp
             <Button
               onClick={onAction}
               size="lg"
-              className={cn(
-                "flex-shrink-0 rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed",
-                "group transition-all duration-300 hover:scale-105"
-              )}
+              className="flex-shrink-0 group transition-all duration-300"
             >
               <span>{content.buttonText}</span>
               {type === 'delivered' ? (
