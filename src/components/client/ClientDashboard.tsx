@@ -10,13 +10,26 @@ import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
 import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
 import { GalleryCompactCard } from '@/components/client/GalleryCompactCard';
 import { NextStepsWizard } from '@/components/client/NextStepsWizard';
+import { DashboardHero } from '@/components/client/DashboardHero';
+import { QuickActionsGrid } from '@/components/client/QuickActionsGrid';
+import { CostCalculatorModal } from '@/components/client/CostCalculatorModal';
+import { QuickDownloadsModal } from '@/components/client/QuickDownloadsModal';
 import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
+import { useClientProfile } from '@/hooks/useClientProfile';
+import { useStagingRequests } from '@/hooks/useStagingRequests';
+import { useAuth } from '@/contexts/AuthContext';
 import { GallerySelectionStats } from '@/types/database';
 
 export function ClientDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [reopenGalleryId, setReopenGalleryId] = useState<string | null>(null);
   const [reopenGalleryName, setReopenGalleryName] = useState('');
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const [downloadsOpen, setDownloadsOpen] = useState(false);
+
+  const { data: clientProfile } = useClientProfile(user?.email);
+  const { data: stagingRequests } = useStagingRequests();
 
   const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ['client-gallery-stats'],
@@ -54,6 +67,11 @@ export function ClientDashboard() {
     return { activeGalleries: active, closedGalleries: closed, completedGalleries: completed };
   }, [stats]);
 
+  // Count open staging requests
+  const openStagingCount = useMemo(() => {
+    return stagingRequests?.filter(r => r.status === 'pending').length || 0;
+  }, [stagingRequests]);
+
   // Helper to check if gallery is new (< 2 days old)
   const isNewGallery = (createdAt: string | null) => {
     if (!createdAt) return false;
@@ -64,7 +82,6 @@ export function ClientDashboard() {
 
   // Find galleries that need immediate attention
   const nextStepsGallery = useMemo(() => {
-    // Priority 1: Open galleries with 0 selections
     const openWithZero = activeGalleries.find(g => 
       g.status === 'Open' && 
       (g.selected_count || 0) === 0 &&
@@ -72,7 +89,6 @@ export function ClientDashboard() {
     );
     if (openWithZero) return { gallery: openWithZero, type: 'select' as const };
     
-    // Priority 2: Open galleries with partial selections
     const openWithPartial = activeGalleries.find(g => 
       g.status === 'Open' && 
       (g.selected_count || 0) > 0 &&
@@ -80,11 +96,9 @@ export function ClientDashboard() {
     );
     if (openWithPartial) return { gallery: openWithPartial, type: 'continue' as const };
     
-    // Priority 3: Processing galleries
     const processing = activeGalleries.find(g => g.status === 'Processing');
     if (processing) return { gallery: processing, type: 'processing' as const };
     
-    // Priority 4: Delivered galleries
     const delivered = completedGalleries.find(g => g.status === 'Delivered');
     if (delivered) return { gallery: delivered, type: 'delivered' as const };
     
@@ -155,8 +169,23 @@ export function ClientDashboard() {
   return (
     <div className="container mx-auto px-4 lg:px-6 py-8 max-w-[1920px]">
       <div className="space-y-8 pb-8">
-        {/* Header with simple controls */}
-        <div className="flex items-center justify-end">
+        {/* Hero Welcome Section */}
+        <DashboardHero 
+          clientName={clientProfile?.nachname}
+          anrede={clientProfile?.anrede}
+        />
+
+        {/* Quick Actions Grid */}
+        <QuickActionsGrid
+          deliveredCount={completedGalleries.length}
+          stagingRequestsCount={openStagingCount}
+          onOpenCalculator={() => setCalculatorOpen(true)}
+          onOpenDownloads={() => setDownloadsOpen(true)}
+        />
+
+        {/* Refresh Button */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Meine Projekte</h2>
           <Button
             variant="outline"
             size="icon"
@@ -185,17 +214,17 @@ export function ClientDashboard() {
           <EmptyState
             icon={FolderOpen}
             title="Keine Galerien zugewiesen"
-            description="Ihnen wurden noch keine Galerien zugewiesen. Bitte kontaktieren Sie Ihren Administrator."
+            description="Ihnen wurden noch keine Galerien zugewiesen. Buchen Sie jetzt Ihr erstes Shooting!"
           />
         ) : (
           <>
             {/* Active Projects Section */}
             {activeGalleries.length > 0 && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-foreground">
+                  <h3 className="text-lg font-semibold text-foreground">
                     Aktive Projekte ({activeGalleries.length})
-                  </h2>
+                  </h3>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -232,10 +261,10 @@ export function ClientDashboard() {
 
             {/* Closed Projects Section */}
             {closedGalleries.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-muted-foreground">
+              <div className="space-y-3 animate-fade-in">
+                <h3 className="text-lg font-semibold text-muted-foreground">
                   Abgeschlossen ({closedGalleries.length})
-                </h2>
+                </h3>
                 
                 <div className="space-y-2">
                   {closedGalleries.map((gallery) => {
@@ -266,12 +295,12 @@ export function ClientDashboard() {
               </div>
             )}
 
-            {/* Delivered Projects Section - Hero Cards (20% smaller) */}
+            {/* Delivered Projects Section */}
             {completedGalleries.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-muted-foreground">
+              <div className="space-y-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-muted-foreground">
                   Geliefert ({completedGalleries.length})
-                </h2>
+                </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {completedGalleries.map((gallery) => {
@@ -318,7 +347,18 @@ export function ClientDashboard() {
         )}
       </div>
 
-      {/* Reopen Request Modal */}
+      {/* Modals */}
+      <CostCalculatorModal
+        open={calculatorOpen}
+        onOpenChange={setCalculatorOpen}
+      />
+
+      <QuickDownloadsModal
+        open={downloadsOpen}
+        onOpenChange={setDownloadsOpen}
+        deliveredGalleries={completedGalleries}
+      />
+
       <ReopenRequestModal
         open={!!reopenGalleryId}
         onOpenChange={(open) => {
