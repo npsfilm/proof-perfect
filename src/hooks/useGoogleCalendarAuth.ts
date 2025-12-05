@@ -23,13 +23,13 @@ export function useGoogleCalendarAuth() {
       if (!user) return null;
       
       const { data, error } = await supabase
-        .from('google_calendar_tokens')
+        .from('google_calendar_tokens' as any)
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      return data as GoogleCalendarToken | null;
+      return data as unknown as GoogleCalendarToken | null;
     },
     enabled: !!user,
   });
@@ -51,7 +51,7 @@ export function useGoogleCalendarAuth() {
       if (!user) throw new Error('Not authenticated');
       
       const { error } = await supabase
-        .from('google_calendar_tokens')
+        .from('google_calendar_tokens' as any)
         .delete()
         .eq('user_id', user.id);
 
