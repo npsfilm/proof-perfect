@@ -161,7 +161,7 @@ export function StagingRequestFlow() {
 
         <div className="flex items-center justify-between pt-4 border-t">
           <Button
-            variant="soft"
+            variant="outline"
             onClick={handleBack}
             disabled={step === 1}
           >

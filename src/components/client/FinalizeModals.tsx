@@ -466,7 +466,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
                   </p>
                   <div onClick={(e) => e.stopPropagation()}>
                     <Button
-                      variant="soft"
+                      variant="ghost"
                       className="flex items-center gap-2 w-full"
                       onClick={(e) => {
                         e.stopPropagation();

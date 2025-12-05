@@ -52,13 +52,6 @@ export default function GalleriesList() {
     filteredGalleries,
   } = useGalleryFilters(galleries);
 
-  const statusColors = {
-    Draft: 'bg-muted text-muted-foreground',
-    Sent: 'bg-blue-100 text-blue-800',
-    Reviewed: 'bg-yellow-100 text-yellow-800',
-    Delivered: 'bg-green-100 text-green-800',
-  };
-
   const toggleGallerySelection = (galleryId: string) => {
     const newSelection = new Set(selectedGalleries);
     if (newSelection.has(galleryId)) {
@@ -130,175 +123,175 @@ export default function GalleriesList() {
           }
         />
 
-      <GalleryFilters
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-        selectedStatuses={selectedStatuses}
-        onStatusToggle={onStatusToggle}
-        selectedCompanyId={selectedCompanyId}
-        onCompanyChange={onCompanyChange}
-        dateFrom={dateFrom}
-        onDateFromChange={onDateFromChange}
-        dateTo={dateTo}
-        onDateToChange={onDateToChange}
-        onClearAll={onClearAll}
-        activeFilterCount={activeFilterCount}
-      />
+        <GalleryFilters
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          selectedStatuses={selectedStatuses}
+          onStatusToggle={onStatusToggle}
+          selectedCompanyId={selectedCompanyId}
+          onCompanyChange={onCompanyChange}
+          dateFrom={dateFrom}
+          onDateFromChange={onDateFromChange}
+          dateTo={dateTo}
+          onDateToChange={onDateToChange}
+          onClearAll={onClearAll}
+          activeFilterCount={activeFilterCount}
+        />
 
-      {isLoading ? (
-        <GalleryCardSkeletonGrid count={6} />
-      ) : filteredGalleries.length > 0 ? (
-        <>
-          {activeFilterCount > 0 && (
-            <div className="text-sm text-muted-foreground">
-              {filteredGalleries.length} {filteredGalleries.length === 1 ? 'Galerie' : 'Galerien'} gefunden
-              {galleries && galleries.length > filteredGalleries.length && (
-                <span> von {galleries.length} gesamt</span>
-              )}
-            </div>
-          )}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredGalleries.map((gallery) => (
-            <Card
-              key={gallery.id}
-              className={`hover:shadow-md transition-shadow ${
-                selectedGalleries.has(gallery.id) ? 'ring-2 ring-primary' : ''
-              }`}
-            >
-              <CardHeader>
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id={`gallery-${gallery.id}`}
-                    checked={selectedGalleries.has(gallery.id)}
-                    onCheckedChange={() => toggleGallerySelection(gallery.id)}
-                    className="mt-1"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor={`gallery-${gallery.id}`}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <CardTitle className="text-lg">{gallery.name}</CardTitle>
-                        {gallery.express_delivery_requested && (
-                          <Badge className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
-                            24H
-                          </Badge>
-                        )}
-                        {gallery.status === 'Closed' && gallery.reviewed_at && (
-                          <TimeElapsed 
-                            startTime={gallery.reviewed_at}
-                            variant="secondary"
-                          />
-                        )}
+        {isLoading ? (
+          <GalleryCardSkeletonGrid count={6} />
+        ) : filteredGalleries.length > 0 ? (
+          <>
+            {activeFilterCount > 0 && (
+              <div className="text-sm text-muted-foreground">
+                {filteredGalleries.length} {filteredGalleries.length === 1 ? 'Galerie' : 'Galerien'} gefunden
+                {galleries && galleries.length > filteredGalleries.length && (
+                  <span> von {galleries.length} gesamt</span>
+                )}
+              </div>
+            )}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredGalleries.map((gallery) => (
+                <Card
+                  key={gallery.id}
+                  className={`cursor-pointer transition-all duration-300 hover:border-primary/50 ${
+                    selectedGalleries.has(gallery.id) ? 'ring-2 ring-primary' : ''
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id={`gallery-${gallery.id}`}
+                        checked={selectedGalleries.has(gallery.id)}
+                        onCheckedChange={() => toggleGallerySelection(gallery.id)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <label
+                          htmlFor={`gallery-${gallery.id}`}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <CardTitle>{gallery.name}</CardTitle>
+                            {gallery.express_delivery_requested && (
+                              <Badge className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                                24H
+                              </Badge>
+                            )}
+                            {gallery.status === 'Closed' && gallery.reviewed_at && (
+                              <TimeElapsed 
+                                startTime={gallery.reviewed_at}
+                                variant="secondary"
+                              />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1 truncate">
+                            {gallery.slug}
+                          </p>
+                        </label>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 truncate">
-                        {gallery.slug}
-                      </p>
-                    </label>
-                  </div>
-                  <div className="mt-3">
-                    <GalleryProgressBar currentStatus={gallery.status} compact />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Ziel: </span>
-                    <span className="font-medium">{gallery.package_target_count} Fotos</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Anrede: </span>
-                    <span className="font-medium">{gallery.salutation_type}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Ansehen
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`/gallery/${gallery.slug}`, '_blank');
-                      }}
-                      title="Kunden-Ansicht öffnen"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4" />
+                      <div className="mt-3">
+                        <GalleryProgressBar currentStatus={gallery.status} compact />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Ziel: </span>
+                        <span className="font-medium">{gallery.package_target_count} Fotos</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Anrede: </span>
+                        <span className="font-medium">{gallery.salutation_type}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Ansehen
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Galerie löschen?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Dies wird "{gallery.name}" und alle zugehörigen Fotos dauerhaft löschen.
-                            Diese Aktion kann nicht rückgängig gemacht werden.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => deleteGalleryMutation.mutate(gallery.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Löschen
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            ))}
-          </div>
-        </>
-      ) : galleries && galleries.length > 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                Keine Galerien entsprechen den Filterkriterien
-              </p>
-              <Button onClick={onClearAll} variant="outline">
-                Filter zurücksetzen
-              </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`/gallery/${gallery.slug}`, '_blank');
+                          }}
+                          title="Kunden-Ansicht öffnen"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Galerie löschen?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Dies wird "{gallery.name}" und alle zugehörigen Fotos dauerhaft löschen.
+                                Diese Aktion kann nicht rückgängig gemacht werden.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteGalleryMutation.mutate(gallery.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Löschen
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">Noch keine Galerien</p>
-              <Button onClick={() => navigate('/admin/galleries/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Erste Galerie erstellen
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          </>
+        ) : galleries && galleries.length > 0 ? (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">
+                  Keine Galerien entsprechen den Filterkriterien
+                </p>
+                <Button onClick={onClearAll} variant="outline">
+                  Filter zurücksetzen
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">Noch keine Galerien</p>
+                <Button onClick={() => navigate('/admin/galleries/new')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Erste Galerie erstellen
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      <BatchActionsBar
-        selectedCount={selectedGalleries.size}
-        onDuplicate={handleDuplicate}
-        onBulkStatusUpdate={handleBulkStatusUpdate}
-        onBulkDelete={handleBulkDelete}
-        onClearSelection={() => setSelectedGalleries(new Set())}
-      />
+        <BatchActionsBar
+          selectedCount={selectedGalleries.size}
+          onDuplicate={handleDuplicate}
+          onBulkStatusUpdate={handleBulkStatusUpdate}
+          onBulkDelete={handleBulkDelete}
+          onClearSelection={() => setSelectedGalleries(new Set())}
+        />
       </div>
     </PageContainer>
   );

@@ -72,7 +72,7 @@ function ActivityItemComponent({ activity }: { activity: ActivityItem }) {
 
   return (
     <div
-      className={`flex gap-3 p-3 rounded-xl transition-all cursor-pointer hover:bg-muted/50 ${
+      className={`flex gap-3 p-3 rounded-lg transition-all cursor-pointer hover:bg-muted/50 ${
         activity.status === 'failed' ? 'border-l-2 border-destructive' : ''
       }`}
       onClick={handleClick}
@@ -101,7 +101,7 @@ export function ActivityFeed() {
   const { data: activities, isLoading } = useRecentActivity();
 
   return (
-    <Card className="shadow-neu-flat">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />

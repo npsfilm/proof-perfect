@@ -51,10 +51,9 @@ export default function AdminLayout() {
               </Button>
               <span className="text-sm text-muted-foreground hidden sm:inline transition-colors duration-200 hover:text-foreground">{user.email}</span>
               <Button 
-                variant="soft" 
+                variant="ghost" 
                 size="sm" 
                 onClick={signOut}
-                className="transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 Abmelden
               </Button>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Package, Unlock, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Package, Unlock } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -35,7 +35,7 @@ export function ActionRequiredInbox() {
 
   if (isLoading) {
     return (
-      <Card className="shadow-neu-flat border-primary/20">
+      <Card className="border-primary/20">
         <CardContent className="py-6">
           <LoadingState message="Lädt ausstehende Aktionen..." />
         </CardContent>
@@ -49,9 +49,9 @@ export function ActionRequiredInbox() {
   }
 
   return (
-    <Card className="shadow-neu-flat border-primary/20">
+    <Card className="border-primary/20">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-primary" />
           Aktion erforderlich
         </CardTitle>
@@ -60,13 +60,12 @@ export function ActionRequiredInbox() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {(
         <div className="space-y-3">
           {items.map((item) => (
             <Alert 
               key={item.id} 
               variant={getVariant(item.priority)}
-              className="shadow-neu-flat-sm"
+              className="shadow-sm"
             >
               <div className="flex items-start gap-3">
                 {getIcon(item.type)}
@@ -90,7 +89,6 @@ export function ActionRequiredInbox() {
             </Alert>
           ))}
         </div>
-        )}
       </CardContent>
     </Card>
   );
