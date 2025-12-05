@@ -11,7 +11,6 @@ import { EmailTemplates } from '@/types/email-templates';
 import { Save } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
-import { BookingSettingsCard } from '@/components/admin/BookingSettingsCard';
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -131,55 +130,53 @@ export default function AdminSettings() {
           breadcrumbs={[{ label: 'Einstellungen' }]}
         />
 
-        <BookingSettingsCard />
+        <Card>
+          <CardHeader>
+            <CardTitle>Zapier Webhooks</CardTitle>
+            <CardDescription>
+              Zapier-Webhook-URLs für Benachrichtigungen konfigurieren
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="webhook-send">An Kunde senden Webhook</Label>
+              <Input
+                id="webhook-send"
+                type="url"
+                placeholder="https://hooks.zapier.com/hooks/catch/..."
+                value={webhookSend}
+                onChange={(e) => setWebhookSend(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Wird ausgelöst, wenn Galerie mit Zugangsdaten an Kunden gesendet wird
+              </p>
+            </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Zapier Webhooks</CardTitle>
-          <CardDescription>
-            Zapier-Webhook-URLs für Benachrichtigungen konfigurieren
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="webhook-send">An Kunde senden Webhook</Label>
-            <Input
-              id="webhook-send"
-              type="url"
-              placeholder="https://hooks.zapier.com/hooks/catch/..."
-              value={webhookSend}
-              onChange={(e) => setWebhookSend(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Wird ausgelöst, wenn Galerie mit Zugangsdaten an Kunden gesendet wird
-            </p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="webhook-deliver">Lieferungs-Webhook</Label>
+              <Input
+                id="webhook-deliver"
+                type="url"
+                placeholder="https://hooks.zapier.com/hooks/catch/..."
+                value={webhookDeliver}
+                onChange={(e) => setWebhookDeliver(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Wird ausgelöst, wenn finale Dateien an Kunden geliefert werden
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="webhook-deliver">Lieferungs-Webhook</Label>
-            <Input
-              id="webhook-deliver"
-              type="url"
-              placeholder="https://hooks.zapier.com/hooks/catch/..."
-              value={webhookDeliver}
-              onChange={(e) => setWebhookDeliver(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Wird ausgelöst, wenn finale Dateien an Kunden geliefert werden
-            </p>
-          </div>
+            <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
+            </Button>
+          </CardContent>
+        </Card>
 
-          <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
-            <Save className="h-4 w-4 mr-2" />
-            {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <EmailTemplateEditor
-        templates={templates}
-        onTemplatesChange={setTemplates}
-      />
+        <EmailTemplateEditor
+          templates={templates}
+          onTemplatesChange={setTemplates}
+        />
       </div>
     </PageContainer>
   );
