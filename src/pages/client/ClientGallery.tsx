@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGalleryBySlug } from '@/hooks/useGallery';
@@ -6,7 +6,6 @@ import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { useGalleryFinalization } from '@/hooks/useGalleryFinalization';
 import { PhotoLightbox } from '@/components/client/PhotoLightbox';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
-import { ClientGalleryHeader } from '@/components/client/ClientGalleryHeader';
 import { VirtualizedPhotoGrid } from '@/components/client/VirtualizedPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
 import { ComparisonMode } from '@/components/client/ComparisonMode';
@@ -23,11 +22,12 @@ import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function ClientGallery() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user, role, signOut, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [showFinalizeModals, setShowFinalizeModals] = useState(false);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilter>('all');
@@ -81,12 +81,6 @@ export default function ClientGallery() {
     selected: selectedPhotos.length,
     unselected: (photos?.length || 0) - selectedPhotos.length,
   }), [photos, selectedPhotos]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
 
   // Check if welcome modal should be shown (only first time ever, and if enabled for gallery)
   useEffect(() => {
@@ -158,7 +152,7 @@ export default function ClientGallery() {
 
   if (authLoading || galleryLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -166,7 +160,7 @@ export default function ClientGallery() {
 
   if (!gallery) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
           <p className="text-lg text-muted-foreground mb-4">Galerie nicht gefunden</p>
           <Button onClick={() => navigate('/')}>Zum Dashboard</Button>
@@ -181,20 +175,17 @@ export default function ClientGallery() {
     const totalCount = photos?.length || 0;
     
     return (
-      <div className="min-h-screen bg-background">
-        <ClientGalleryHeader 
-          galleryName={gallery.name} 
-          onSignOut={signOut}
-          onShowHelp={handleShowHelp}
-        />
+      <div className="pb-12">
+        <div className="flex items-center justify-between px-4 lg:px-6 xl:px-8 py-4 border-b border-border">
+          <div>
+            <h2 className="text-xl font-semibold">{gallery.name}</h2>
+            <p className="text-sm text-muted-foreground">{gallery.address}</p>
+          </div>
+          <SaveStatusIndicator isSaving={isSaving} lastSaved={lastSaved} />
+        </div>
 
         <main className="max-w-6xl mx-auto px-4 lg:px-6 xl:px-8 py-12">
           <DeliveryDownloadSection gallery={gallery} />
-          <div className="mt-6 text-center">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              Zurück zum Dashboard
-            </Button>
-          </div>
         </main>
 
         {role === 'admin' && (
@@ -210,7 +201,7 @@ export default function ClientGallery() {
 
   if (gallery.is_locked) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-[50vh] flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <Alert>
             <Info className="h-4 w-4" />
@@ -229,14 +220,15 @@ export default function ClientGallery() {
   const comparisonPhoto2 = comparisonPhotos[1] ? photos?.find(p => p.id === comparisonPhotos[1]) : null;
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <ClientGalleryHeader 
-        galleryName={gallery.name} 
-        onSignOut={signOut}
-        onShowHelp={handleShowHelp}
-      >
+    <div className="pb-32">
+      {/* Gallery Header */}
+      <div className="flex items-center justify-between px-4 lg:px-6 xl:px-8 py-4 border-b border-border">
+        <div>
+          <h2 className="text-xl font-semibold">{gallery.name}</h2>
+          <p className="text-sm text-muted-foreground">{gallery.address}</p>
+        </div>
         <SaveStatusIndicator isSaving={isSaving} lastSaved={lastSaved} />
-      </ClientGalleryHeader>
+      </div>
 
       {/* Banner */}
       <div className="bg-blue-50 border-b border-blue-200 py-3">
@@ -311,18 +303,18 @@ export default function ClientGallery() {
             </div>
           </div>
         )}
-      <VirtualizedPhotoGrid
-        photos={filteredPhotos}
-        isLoading={photosLoading || urlsLoading}
-        onPhotoClick={handlePhotoClick}
-        galleryId={gallery.id}
-        signedUrls={signedUrls}
-        comparisonPhotos={comparisonPhotos}
-        isComparisonMode={isComparisonMode}
-        photoOrientations={orientations}
-        allowedOrientation={firstComparisonOrientation}
-        onOrientationDetected={detectOrientation}
-      />
+        <VirtualizedPhotoGrid
+          photos={filteredPhotos}
+          isLoading={photosLoading || urlsLoading}
+          onPhotoClick={handlePhotoClick}
+          galleryId={gallery.id}
+          signedUrls={signedUrls}
+          comparisonPhotos={comparisonPhotos}
+          isComparisonMode={isComparisonMode}
+          photoOrientations={orientations}
+          allowedOrientation={firstComparisonOrientation}
+          onOrientationDetected={detectOrientation}
+        />
       </main>
 
       {/* Lightbox */}
