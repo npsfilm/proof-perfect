@@ -25,13 +25,18 @@ export default function AdminCalendar() {
   } = useCalendarNavigation();
 
   const { events, isLoading, createEvent, updateEvent, deleteEvent } = useEvents(currentDate);
-  const { saveTokensFromCallback, isConnected } = useGoogleCalendarAuth();
+  const { user, saveTokensFromCallback, isConnected } = useGoogleCalendarAuth();
   const { sync } = useGoogleCalendarSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [callbackProcessed, setCallbackProcessed] = useState(false);
 
   // Handle OAuth callback - save tokens from URL parameters
+  // Wait for user to be authenticated before processing
   useEffect(() => {
+    // Skip if already processed or no user yet
+    if (callbackProcessed || !user) return;
+
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('google_auth') === 'success') {
@@ -40,6 +45,7 @@ export default function AdminCalendar() {
       const expiresAt = params.get('expires_at');
       
       if (accessToken && refreshToken && expiresAt) {
+        setCallbackProcessed(true);
         saveTokensFromCallback.mutate(
           { accessToken, refreshToken, expiresAt },
           {
@@ -53,9 +59,10 @@ export default function AdminCalendar() {
       } else {
         // Clean URL even if tokens are missing
         window.history.replaceState({}, '', '/admin/calendar');
+        setCallbackProcessed(true);
       }
     }
-  }, []);
+  }, [user, callbackProcessed, saveTokensFromCallback, sync]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>();
 
