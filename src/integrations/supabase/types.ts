@@ -312,6 +312,51 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          end_time: string
+          google_event_id: string | null
+          id: string
+          last_synced_at: string | null
+          location: string | null
+          start_time: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          google_event_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          location?: string | null
+          start_time: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          google_event_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          location?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       galleries: {
         Row: {
           address: string | null
@@ -546,6 +591,36 @@ export type Database = {
             referencedColumns: ["gallery_id"]
           },
         ]
+      }
+      google_calendar_tokens: {
+        Row: {
+          access_token: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          refresh_token: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          refresh_token: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          refresh_token?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       photo_annotations: {
         Row: {
