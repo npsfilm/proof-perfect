@@ -1,6 +1,7 @@
-import { FolderOpen, Sofa, Sparkles, Calendar, Settings, Camera } from 'lucide-react';
+import { FolderOpen, Sofa, Sparkles, Calendar, Settings, Camera, Menu } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useSearchParams } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 const navItems = [
   { title: 'Meine Galerien', url: '/', icon: FolderOpen, tab: 'galleries' },
@@ -23,24 +33,95 @@ const navItems = [
   { title: 'Einstellungen', url: '/?tab=settings', icon: Settings, tab: 'settings' },
 ];
 
-export function ClientSidebar() {
-  const { open } = useSidebar();
+function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const currentPath = location.pathname;
   const currentTab = searchParams.get('tab') || 'galleries';
 
   const isActive = (item: typeof navItems[0]) => {
-    // Handle tab-based navigation for dashboard
     if (item.tab && currentPath === '/') {
       return currentTab === item.tab;
     }
-    // Handle regular path matching
     if (!item.tab) {
       return currentPath === item.url;
     }
     return false;
   };
+
+  return (
+    <SidebarMenu>
+      {navItems.map((item, index) => (
+        <SidebarMenuItem 
+          key={item.title}
+          style={{ animationDelay: `${index * 30}ms` }}
+          className="animate-fade-in"
+        >
+          <SidebarMenuButton asChild>
+            <NavLink
+              to={item.url}
+              end={item.url === '/' && !item.tab}
+              onClick={onItemClick}
+              className={`group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                isActive(item) ? 'bg-muted text-primary font-medium shadow-neu-pressed' : ''
+              }`}
+              activeClassName=""
+            >
+              <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-opacity duration-200">{item.title}</span>
+            </NavLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}
+
+// Mobile Sheet/Drawer Navigation
+export function MobileClientNav() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Menü öffnen</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0">
+        <SheetHeader className="border-b border-border/50 px-4 py-4">
+          <SheetTitle className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm">
+              <Camera className="h-5 w-5" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-sm text-foreground">immoonpoint</p>
+              <p className="text-xs text-muted-foreground font-normal">Kundenportal</p>
+            </div>
+          </SheetTitle>
+        </SheetHeader>
+        <div className="p-4">
+          <p className="text-xs text-muted-foreground mb-3 px-2">Navigation</p>
+          <SidebarNavContent onItemClick={() => setOpen(false)} />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 px-4 py-3">
+          <p className="text-xs text-muted-foreground">© 2025 immoonpoint</p>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// Desktop Sidebar
+export function ClientSidebar() {
+  const { open } = useSidebar();
+  const isMobile = useIsMobile();
+
+  // Don't render desktop sidebar on mobile
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <Sidebar 
@@ -67,31 +148,7 @@ export function ClientSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className={open ? 'animate-fade-in' : ''}>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item, index) => (
-                <SidebarMenuItem 
-                  key={item.title}
-                  style={{ animationDelay: `${index * 30}ms` }}
-                  className={open ? 'animate-fade-in' : ''}
-                >
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/' && !item.tab}
-                      className={`group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-                        isActive(item) ? 'bg-muted text-primary font-medium shadow-neu-pressed' : ''
-                      }`}
-                      activeClassName=""
-                    >
-                      <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                      {open && (
-                        <span className="transition-opacity duration-200">{item.title}</span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SidebarNavContent />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
