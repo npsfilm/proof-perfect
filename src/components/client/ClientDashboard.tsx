@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
 import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
 import { GalleryCompactCard } from '@/components/client/GalleryCompactCard';
-import { NextStepsWizard } from '@/components/client/NextStepsWizard';
+
 import { DashboardHero } from '@/components/client/DashboardHero';
 import { QuickActionsGrid } from '@/components/client/QuickActionsGrid';
 import { CostCalculatorModal } from '@/components/client/CostCalculatorModal';
@@ -80,30 +80,6 @@ export function ClientDashboard() {
     return new Date(createdAt) > twoDaysAgo;
   };
 
-  // Find galleries that need immediate attention
-  const nextStepsGallery = useMemo(() => {
-    const openWithZero = activeGalleries.find(g => 
-      g.status === 'Open' && 
-      (g.selected_count || 0) === 0 &&
-      (g.photos_count || 0) > 0
-    );
-    if (openWithZero) return { gallery: openWithZero, type: 'select' as const };
-    
-    const openWithPartial = activeGalleries.find(g => 
-      g.status === 'Open' && 
-      (g.selected_count || 0) > 0 &&
-      (g.photos_count || 0) > 0
-    );
-    if (openWithPartial) return { gallery: openWithPartial, type: 'continue' as const };
-    
-    const processing = activeGalleries.find(g => g.status === 'Processing');
-    if (processing) return { gallery: processing, type: 'processing' as const };
-    
-    const delivered = completedGalleries.find(g => g.status === 'Delivered');
-    if (delivered) return { gallery: delivered, type: 'delivered' as const };
-    
-    return null;
-  }, [activeGalleries, completedGalleries]);
 
   const getButtonConfig = (status: string, slug: string, galleryId: string, name: string) => {
     switch (status) {
@@ -195,20 +171,6 @@ export function ClientDashboard() {
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
-
-        {/* Action Center / Next Steps Hero */}
-        {nextStepsGallery && (
-          <NextStepsWizard
-            gallery={nextStepsGallery.gallery}
-            type={nextStepsGallery.type}
-            onAction={() => {
-              const { gallery } = nextStepsGallery;
-              if (nextStepsGallery.type === 'select' || nextStepsGallery.type === 'continue') {
-                navigate(`/gallery/${gallery.slug}`);
-              }
-            }}
-          />
-        )}
 
         {hasNoGalleries ? (
           <EmptyState
