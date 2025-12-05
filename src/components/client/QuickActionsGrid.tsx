@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Calculator, Download, Home } from 'lucide-react';
+import { Calendar, Sparkles, Download, Home } from 'lucide-react';
 import { QuickActionCard } from './QuickActionCard';
 
 interface QuickActionsGridProps {
@@ -28,9 +28,9 @@ export function QuickActionsGrid({
       />
 
       <QuickActionCard
-        icon={Calculator}
-        title="Kostenrechner"
-        description="Preise kalkulieren"
+        icon={Sparkles}
+        title="Virtuelle Bearbeitung"
+        description="Blaue Stunde, Sommer-Winter"
         onClick={onOpenCalculator}
         gradient="from-secondary/5 to-secondary/10"
       />
