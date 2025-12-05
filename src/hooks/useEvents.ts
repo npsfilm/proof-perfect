@@ -44,14 +44,14 @@ export function useEvents(currentDate: Date) {
     queryKey: ['events', rangeStart.toISOString(), rangeEnd.toISOString()],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('events' as any)
+        .from('events')
         .select('*')
         .gte('start_time', rangeStart.toISOString())
         .lte('end_time', rangeEnd.toISOString())
         .order('start_time', { ascending: true });
 
       if (error) throw error;
-      return (data || []) as unknown as CalendarEvent[];
+      return data as CalendarEvent[];
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -62,7 +62,7 @@ export function useEvents(currentDate: Date) {
       if (!user) throw new Error('Not authenticated');
       
       const { data, error } = await supabase
-        .from('events' as any)
+        .from('events')
         .insert({
           ...eventData,
           user_id: user.id,
@@ -87,7 +87,7 @@ export function useEvents(currentDate: Date) {
   const updateEvent = useMutation({
     mutationFn: async ({ id, ...eventData }: UpdateEventData) => {
       const { data, error } = await supabase
-        .from('events' as any)
+        .from('events')
         .update(eventData)
         .eq('id', id)
         .select()
@@ -109,7 +109,7 @@ export function useEvents(currentDate: Date) {
   const deleteEvent = useMutation({
     mutationFn: async (eventId: string) => {
       const { error } = await supabase
-        .from('events' as any)
+        .from('events')
         .delete()
         .eq('id', eventId);
 
