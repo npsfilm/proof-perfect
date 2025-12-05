@@ -56,14 +56,14 @@ export function StagingPhotoGrid({
     <div className="space-y-3">
       <div className="flex gap-2">
         <Button
-          variant="soft"
+          variant="outline"
           size="sm"
           onClick={handleSelectAll}
         >
           Alle auswählen
         </Button>
         <Button
-          variant="soft"
+          variant="outline"
           size="sm"
           onClick={handleSelectNone}
         >

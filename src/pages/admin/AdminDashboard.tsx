@@ -37,113 +37,113 @@ export default function AdminDashboard() {
 
         <ActionRequiredInbox />
 
-      {isLoading ? (
-        <StatCardSkeletonGrid count={4} />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <StatCardSkeletonGrid count={4} />
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
+                <FolderOpen className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entwurf</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.draft}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Entwurf</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.draft}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gesendet</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.sent}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Gesendet</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.sent}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Überprüft</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.reviewed}</div>
-          </CardContent>
-        </Card>
-      </div>
-      )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Überprüft</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.reviewed}</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="shadow-neu-flat">
-            <CardHeader>
-              <CardTitle>Neueste Galerien</CardTitle>
-              <CardDescription>Ihre zuletzt erstellten Galerien</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p className="text-sm text-muted-foreground">Lädt...</p>
-              ) : galleries && galleries.length > 0 ? (
-                <div className="space-y-2">
-                  {galleries.slice(0, 5).map((gallery) => (
-                    <div
-                      key={gallery.id}
-                      className="flex items-center justify-between p-3 border rounded-2xl hover:bg-muted/50 cursor-pointer transition-all duration-200 hover:shadow-neu-flat-sm group"
-                      onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium truncate">{gallery.name}</p>
-                          {gallery.status === 'Closed' && gallery.reviewed_at && (
-                            <TimeElapsed 
-                              startTime={gallery.reviewed_at}
-                              variant="secondary"
-                            />
-                          )}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Neueste Galerien</CardTitle>
+                <CardDescription>Ihre zuletzt erstellten Galerien</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">Lädt...</p>
+                ) : galleries && galleries.length > 0 ? (
+                  <div className="space-y-2">
+                    {galleries.slice(0, 5).map((gallery) => (
+                      <div
+                        key={gallery.id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all duration-200 hover:shadow-sm group"
+                        onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{gallery.name}</p>
+                            {gallery.status === 'Closed' && gallery.reviewed_at && (
+                              <TimeElapsed 
+                                startTime={gallery.reviewed_at}
+                                variant="secondary"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {gallery.slug} • {gallery.status}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {gallery.slug} • {gallery.status}
-                        </p>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`/gallery/${gallery.slug}`, '_blank');
+                            }}
+                            title="Kunden-Ansicht öffnen"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            Ansehen
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(`/gallery/${gallery.slug}`, '_blank');
-                          }}
-                          title="Kunden-Ansicht öffnen"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          Ansehen
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Noch keine Galerien. Erstellen Sie Ihre erste Galerie, um loszulegen.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Noch keine Galerien. Erstellen Sie Ihre erste Galerie, um loszulegen.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        <div className="lg:col-span-1">
-          <ActivityFeed />
+          <div className="lg:col-span-1">
+            <ActivityFeed />
+          </div>
         </div>
-      </div>
       </div>
     </PageContainer>
   );

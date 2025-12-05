@@ -207,7 +207,7 @@ export default function StagingRequests() {
                         </Select>
 
                         <Button
-                          variant="soft"
+                          variant="outline"
                           size="sm"
                           onClick={() => setSelectedRequestId(request.id)}
                         >

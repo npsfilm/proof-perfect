@@ -12,10 +12,10 @@ interface KpiCardProps {
 
 export function KpiCard({ icon: Icon, label, value, description, className }: KpiCardProps) {
   return (
-    <Card className={cn("shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-200", className)}>
+    <Card className={cn("transition-all duration-300", className)}>
       <CardContent className="pt-6">
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-xl bg-primary/10">
+          <div className="p-2 rounded-lg bg-primary/10">
             <Icon className="h-5 w-5 text-primary" />
           </div>
           <span className="text-sm font-medium text-muted-foreground">{label}</span>
