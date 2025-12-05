@@ -33,7 +33,7 @@ const navItems = [
   { title: 'Einstellungen', url: '/?tab=settings', icon: Settings, tab: 'settings' },
 ];
 
-function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
+function useNavState() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const currentPath = location.pathname;
@@ -49,6 +49,41 @@ function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
     return false;
   };
 
+  return { isActive };
+}
+
+// Mobile-specific nav content (doesn't use Sidebar components)
+function MobileNavContent({ onItemClick }: { onItemClick?: () => void }) {
+  const { isActive } = useNavState();
+
+  return (
+    <nav className="flex flex-col gap-1">
+      {navItems.map((item, index) => (
+        <NavLink
+          key={item.title}
+          to={item.url}
+          end={item.url === '/' && !item.tab}
+          onClick={onItemClick}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+            isActive(item) 
+              ? 'bg-muted text-primary font-medium' 
+              : 'text-foreground hover:bg-muted/50'
+          }`}
+          activeClassName=""
+          style={{ animationDelay: `${index * 30}ms` }}
+        >
+          <item.icon className="h-4 w-4" />
+          <span>{item.title}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+}
+
+// Desktop sidebar nav content (uses Sidebar components)
+function SidebarNavContent() {
+  const { isActive } = useNavState();
+
   return (
     <SidebarMenu>
       {navItems.map((item, index) => (
@@ -61,7 +96,6 @@ function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
             <NavLink
               to={item.url}
               end={item.url === '/' && !item.tab}
-              onClick={onItemClick}
               className={`group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
                 isActive(item) ? 'bg-muted text-primary font-medium shadow-neu-pressed' : ''
               }`}
@@ -103,7 +137,7 @@ export function MobileClientNav() {
         </SheetHeader>
         <div className="p-4">
           <p className="text-xs text-muted-foreground mb-3 px-2">Navigation</p>
-          <SidebarNavContent onItemClick={() => setOpen(false)} />
+          <MobileNavContent onItemClick={() => setOpen(false)} />
         </div>
         <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 px-4 py-3">
           <p className="text-xs text-muted-foreground">© 2025 immoonpoint</p>
