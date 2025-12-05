@@ -1,17 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ClientSidebar } from '@/components/client/ClientSidebar';
+import { ClientSidebar, MobileClientNav } from '@/components/client/ClientSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Shield, LogOut } from 'lucide-react';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ClientLayout() {
   const { user, role, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: clientProfile } = useClientProfile(user?.email);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -49,7 +51,6 @@ export default function ClientLayout() {
     return name;
   };
 
-  // Get current page title based on route
   const getPageTitle = () => {
     const path = location.pathname;
     const searchParams = new URLSearchParams(location.search);
@@ -64,15 +65,20 @@ export default function ClientLayout() {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-background">
         <ClientSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-16 border-b border-border bg-background shadow-sm flex items-center justify-between px-6 sticky top-0 z-10 backdrop-blur-sm bg-background/95">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="transition-transform duration-200 hover:scale-110 active:scale-95" />
+          <header className="h-16 border-b border-border bg-background shadow-sm flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 backdrop-blur-sm bg-background/95">
+            <div className="flex items-center gap-3 md:gap-4">
+              {/* Mobile: Sheet trigger, Desktop: Sidebar trigger */}
+              {isMobile ? (
+                <MobileClientNav />
+              ) : (
+                <SidebarTrigger className="transition-transform duration-200 hover:scale-110 active:scale-95" />
+              )}
               <div>
-                <h1 className="text-lg font-semibold text-foreground">{getPageTitle()}</h1>
+                <h1 className="text-base md:text-lg font-semibold text-foreground">{getPageTitle()}</h1>
                 {clientProfile && (
                   <p className="text-xs text-muted-foreground">
                     {getGreeting()}, {getClientName()}
@@ -80,7 +86,7 @@ export default function ClientLayout() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               {role === 'admin' && (
                 <Button
                   variant="outline"
@@ -90,10 +96,10 @@ export default function ClientLayout() {
                   title="Zur Admin-Ansicht wechseln"
                 >
                   <Shield className="h-4 w-4" />
-                  <span className="hidden sm:inline">Admin-Ansicht</span>
+                  <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
-              <span className="text-sm text-muted-foreground hidden sm:inline">{user.email}</span>
+              <span className="text-sm text-muted-foreground hidden md:inline">{user.email}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
