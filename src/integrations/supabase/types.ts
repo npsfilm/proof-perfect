@@ -14,6 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
+      availability_settings: {
+        Row: {
+          buffer_after: number
+          buffer_before: number
+          created_at: string
+          friday_enabled: boolean
+          friday_end: string
+          friday_start: string
+          id: string
+          monday_enabled: boolean
+          monday_end: string
+          monday_start: string
+          saturday_enabled: boolean
+          saturday_end: string
+          saturday_start: string
+          slot_interval: number
+          sunday_enabled: boolean
+          sunday_end: string
+          sunday_start: string
+          thursday_enabled: boolean
+          thursday_end: string
+          thursday_start: string
+          tuesday_enabled: boolean
+          tuesday_end: string
+          tuesday_start: string
+          updated_at: string
+          user_id: string
+          wednesday_enabled: boolean
+          wednesday_end: string
+          wednesday_start: string
+        }
+        Insert: {
+          buffer_after?: number
+          buffer_before?: number
+          created_at?: string
+          friday_enabled?: boolean
+          friday_end?: string
+          friday_start?: string
+          id?: string
+          monday_enabled?: boolean
+          monday_end?: string
+          monday_start?: string
+          saturday_enabled?: boolean
+          saturday_end?: string
+          saturday_start?: string
+          slot_interval?: number
+          sunday_enabled?: boolean
+          sunday_end?: string
+          sunday_start?: string
+          thursday_enabled?: boolean
+          thursday_end?: string
+          thursday_start?: string
+          tuesday_enabled?: boolean
+          tuesday_end?: string
+          tuesday_start?: string
+          updated_at?: string
+          user_id: string
+          wednesday_enabled?: boolean
+          wednesday_end?: string
+          wednesday_start?: string
+        }
+        Update: {
+          buffer_after?: number
+          buffer_before?: number
+          created_at?: string
+          friday_enabled?: boolean
+          friday_end?: string
+          friday_start?: string
+          id?: string
+          monday_enabled?: boolean
+          monday_end?: string
+          monday_start?: string
+          saturday_enabled?: boolean
+          saturday_end?: string
+          saturday_start?: string
+          slot_interval?: number
+          sunday_enabled?: boolean
+          sunday_end?: string
+          sunday_start?: string
+          thursday_enabled?: boolean
+          thursday_end?: string
+          thursday_start?: string
+          tuesday_enabled?: boolean
+          tuesday_end?: string
+          tuesday_start?: string
+          updated_at?: string
+          user_id?: string
+          wednesday_enabled?: boolean
+          wednesday_end?: string
+          wednesday_start?: string
+        }
+        Relationships: []
+      }
+      blocked_dates: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          reason: string | null
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_watermarks: {
         Row: {
           created_at: string
