@@ -12,13 +12,11 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get user from authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
@@ -26,7 +24,6 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     
-    // Verify the user's JWT
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
@@ -75,7 +72,6 @@ serve(async (req) => {
       accessToken = refreshData.access_token;
       const newExpiresAt = new Date(Date.now() + refreshData.expires_in * 1000).toISOString();
 
-      // Update stored token
       await supabase
         .from('google_calendar_tokens')
         .update({
@@ -120,6 +116,7 @@ serve(async (req) => {
 
     let pulled = 0;
     let pushed = 0;
+    let blockedSynced = 0;
 
     // Process each Google event
     for (const gEvent of googleEvents) {
@@ -132,7 +129,6 @@ serve(async (req) => {
         ? (gEvent.end.dateTime || `${gEvent.end.date}T23:59:59`)
         : startTime;
 
-      // Check if event exists locally
       const { data: existingEvent } = await supabase
         .from('events')
         .select('*')
@@ -141,7 +137,6 @@ serve(async (req) => {
         .single();
 
       if (existingEvent) {
-        // Update existing event
         const googleUpdated = new Date(gEvent.updated);
         const localUpdated = new Date(existingEvent.updated_at);
 
@@ -161,7 +156,6 @@ serve(async (req) => {
           pulled++;
         }
       } else {
-        // Create new event
         await supabase
           .from('events')
           .insert({
@@ -218,7 +212,6 @@ serve(async (req) => {
       if (createResponse.ok) {
         const createdEvent = await createResponse.json();
         
-        // Update local event with Google ID
         await supabase
           .from('events')
           .update({
@@ -233,10 +226,84 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Sync complete: ${pulled} pulled, ${pushed} pushed`);
+    // SYNC BLOCKED DATES: Push blocked dates to Google Calendar as "Out of Office" events
+    console.log('Syncing blocked dates to Google Calendar...');
+
+    const { data: blockedDates } = await supabase
+      .from('blocked_dates')
+      .select('*')
+      .eq('user_id', user.id);
+
+    for (const blocked of blockedDates || []) {
+      // Skip if already synced
+      if (blocked.google_event_id) {
+        // Check if the Google event still exists
+        const checkResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${blocked.google_event_id}`,
+          {
+            headers: { 'Authorization': `Bearer ${accessToken}` },
+          }
+        );
+        
+        if (checkResponse.ok) {
+          console.log('Blocked date already synced:', blocked.id);
+          continue;
+        }
+        // If event was deleted from Google, we'll recreate it
+      }
+
+      // Create all-day event for the blocked period
+      const blockedEvent = {
+        summary: blocked.reason || 'Nicht verfügbar',
+        description: 'Blockierte Zeit - automatisch synchronisiert',
+        start: {
+          date: blocked.start_date,
+        },
+        end: {
+          // Google Calendar end date is exclusive, so add one day
+          date: new Date(new Date(blocked.end_date).getTime() + 86400000).toISOString().split('T')[0],
+        },
+        transparency: 'opaque', // Show as busy
+        colorId: '4', // Flamingo (pinkish-red) color
+      };
+
+      const createResponse = await fetch(
+        'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(blockedEvent),
+        }
+      );
+
+      if (createResponse.ok) {
+        const createdEvent = await createResponse.json();
+        
+        // Update blocked date with Google event ID
+        await supabase
+          .from('blocked_dates')
+          .update({ google_event_id: createdEvent.id })
+          .eq('id', blocked.id);
+        
+        blockedSynced++;
+        console.log('Synced blocked date:', blocked.id, '→', createdEvent.id);
+      } else {
+        const errorData = await createResponse.json();
+        console.error('Failed to sync blocked date:', blocked.id, errorData);
+      }
+    }
+
+    // DELETE: Remove Google events for deleted blocked dates
+    // Find blocked dates that have google_event_id but were deleted locally
+    // This is handled implicitly when user deletes a blocked date - we could add cleanup here
+
+    console.log(`Sync complete: ${pulled} pulled, ${pushed} pushed, ${blockedSynced} blocked dates synced`);
 
     return new Response(
-      JSON.stringify({ success: true, pulled, pushed }),
+      JSON.stringify({ success: true, pulled, pushed, blockedSynced }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
