@@ -1,9 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
-import { Camera, Heart, Home, LucideIcon } from 'lucide-react';
+import { Camera, Home, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GalleryStatus } from '@/constants/gallery-status';
 
 interface GalleryHeroCardProps {
   name: string;
@@ -34,7 +32,6 @@ export function GalleryHeroCard({
   buttonVariant = 'default',
   size = 'default',
 }: GalleryHeroCardProps) {
-  const progress = photosCount > 0 ? Math.round((selectedCount / photosCount) * 100) : 0;
   const isSmall = size === 'small';
 
   const getStatusLabel = (status: string) => {
@@ -49,7 +46,7 @@ export function GalleryHeroCard({
   };
 
   return (
-    <Card className="group overflow-hidden shadow-neu-flat hover:shadow-neu-flat-sm transition-all duration-300 border-0">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg border">
       {/* Hero Image Background */}
       <div className={cn("relative overflow-hidden", isSmall ? "h-52" : "h-64")}>
         {coverImageUrl ? (
@@ -106,9 +103,9 @@ export function GalleryHeroCard({
           disabled={buttonDisabled}
           variant={buttonVariant}
           className={cn(
-            "w-full rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed hover:scale-105 transition-all duration-200 gap-2 font-semibold",
+            "w-full gap-2 font-semibold transition-all duration-200",
             isSmall ? "h-10 text-sm" : "h-12 text-base",
-            buttonVariant === 'default' && "bg-primary text-primary-foreground"
+            buttonVariant === 'default' && "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
           <ButtonIcon className={cn(isSmall ? "h-4 w-4" : "h-5 w-5")} />

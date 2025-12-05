@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { 
   format, 
@@ -55,69 +56,69 @@ export function BookingCalendar({
   };
   
   return (
-    <div className="bg-background rounded-3xl shadow-neu-flat p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="rounded-full"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <h2 className="text-lg font-semibold">
-          {format(currentMonth, 'MMMM yyyy', { locale: de })}
-        </h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="rounded-full"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </Button>
-      </div>
-      
-      {/* Week days header */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {weekDays.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-medium text-muted-foreground py-2"
+    <Card>
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
           >
-            {day}
-          </div>
-        ))}
-      </div>
-      
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((day) => {
-          const isCurrentMonth = isSameMonth(day, currentMonth);
-          const isSelected = selectedDate && isSameDay(day, selectedDate);
-          const isTodayDate = isToday(day);
-          const isAvailable = isDateAvailable(day);
-          
-          return (
-            <button
-              key={day.toISOString()}
-              onClick={() => isAvailable && isCurrentMonth && onSelectDate(day)}
-              disabled={!isAvailable || !isCurrentMonth}
-              className={cn(
-                "aspect-square flex items-center justify-center text-sm rounded-xl transition-all",
-                !isCurrentMonth && "text-muted-foreground/30",
-                isCurrentMonth && !isAvailable && "text-muted-foreground/50 cursor-not-allowed",
-                isCurrentMonth && isAvailable && "hover:bg-primary/10 cursor-pointer",
-                isSelected && "bg-primary text-primary-foreground hover:bg-primary",
-                isTodayDate && !isSelected && "ring-2 ring-primary/30"
-              )}
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="text-lg font-semibold">
+            {format(currentMonth, 'MMMM yyyy', { locale: de })}
+          </h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
+        
+        {/* Week days header */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {weekDays.map((day) => (
+            <div
+              key={day}
+              className="text-center text-sm font-medium text-muted-foreground py-2"
             >
-              {format(day, 'd')}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day) => {
+            const isCurrentMonth = isSameMonth(day, currentMonth);
+            const isSelected = selectedDate && isSameDay(day, selectedDate);
+            const isTodayDate = isToday(day);
+            const isAvailable = isDateAvailable(day);
+            
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => isAvailable && isCurrentMonth && onSelectDate(day)}
+                disabled={!isAvailable || !isCurrentMonth}
+                className={cn(
+                  "aspect-square flex items-center justify-center text-sm rounded-lg transition-all",
+                  !isCurrentMonth && "text-muted-foreground/30",
+                  isCurrentMonth && !isAvailable && "text-muted-foreground/50 cursor-not-allowed",
+                  isCurrentMonth && isAvailable && "hover:bg-primary/10 cursor-pointer",
+                  isSelected && "bg-primary text-primary-foreground hover:bg-primary",
+                  isTodayDate && !isSelected && "ring-2 ring-primary/30"
+                )}
+              >
+                {format(day, 'd')}
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -25,7 +25,7 @@ export default function Buchung() {
   
   if (error) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Fehler</AlertTitle>
@@ -38,9 +38,9 @@ export default function Buchung() {
   }
   
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-muted">
       {/* Header */}
-      <header className="bg-background/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <Calendar className="w-6 h-6 text-primary" />

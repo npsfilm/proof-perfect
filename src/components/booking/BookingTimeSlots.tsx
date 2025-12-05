@@ -2,6 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface AvailableTime {
   status: string;
@@ -26,24 +27,28 @@ export function BookingTimeSlots({
 }: BookingTimeSlotsProps) {
   if (!selectedDate) {
     return (
-      <div className="bg-background rounded-3xl shadow-neu-flat p-6 h-full flex items-center justify-center">
-        <p className="text-muted-foreground text-center">
-          Wählen Sie ein Datum aus dem Kalender
-        </p>
-      </div>
+      <Card className="h-full">
+        <CardContent className="p-6 h-full flex items-center justify-center">
+          <p className="text-muted-foreground text-center">
+            Wählen Sie ein Datum aus dem Kalender
+          </p>
+        </CardContent>
+      </Card>
     );
   }
   
   if (isLoading) {
     return (
-      <div className="bg-background rounded-3xl shadow-neu-flat p-6 space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">
-          Verfügbare Zeiten
-        </h3>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full rounded-xl" />
-        ))}
-      </div>
+      <Card>
+        <CardContent className="p-6 space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground mb-4">
+            Verfügbare Zeiten
+          </h3>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full rounded-lg" />
+          ))}
+        </CardContent>
+      </Card>
     );
   }
   
@@ -51,45 +56,49 @@ export function BookingTimeSlots({
   
   if (availableTimes.length === 0) {
     return (
-      <div className="bg-background rounded-3xl shadow-neu-flat p-6 h-full flex flex-col">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">
-          {format(selectedDate, 'EEEE, d. MMMM', { locale: de })}
-        </h3>
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground text-center">
-            Keine verfügbaren Zeiten an diesem Tag
-          </p>
-        </div>
-      </div>
+      <Card className="h-full">
+        <CardContent className="p-6 h-full flex flex-col">
+          <h3 className="text-sm font-medium text-muted-foreground mb-4">
+            {format(selectedDate, 'EEEE, d. MMMM', { locale: de })}
+          </h3>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-muted-foreground text-center">
+              Keine verfügbaren Zeiten an diesem Tag
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
   
   return (
-    <div className="bg-background rounded-3xl shadow-neu-flat p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        {format(selectedDate, 'EEEE, d. MMMM', { locale: de })}
-      </h3>
-      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-        {availableTimes.map((time) => {
-          const startTime = parseISO(time.start_time);
-          const isSelected = selectedTime?.start_time === time.start_time;
-          
-          return (
-            <button
-              key={time.start_time}
-              onClick={() => onSelectTime(time)}
-              className={cn(
-                "w-full py-3 px-4 rounded-xl text-center font-medium transition-all",
-                isSelected
-                  ? "bg-primary text-primary-foreground shadow-neu-pressed"
-                  : "bg-background shadow-neu-flat-sm hover:shadow-neu-flat hover:scale-[1.02]"
-              )}
-            >
-              {format(startTime, 'HH:mm', { locale: de })} Uhr
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <Card>
+      <CardContent className="p-6">
+        <h3 className="text-sm font-medium text-muted-foreground mb-4">
+          {format(selectedDate, 'EEEE, d. MMMM', { locale: de })}
+        </h3>
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+          {availableTimes.map((time) => {
+            const startTime = parseISO(time.start_time);
+            const isSelected = selectedTime?.start_time === time.start_time;
+            
+            return (
+              <button
+                key={time.start_time}
+                onClick={() => onSelectTime(time)}
+                className={cn(
+                  "w-full py-3 px-4 rounded-lg text-center font-medium transition-all border",
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border hover:border-primary/50 hover:shadow-sm"
+                )}
+              >
+                {format(startTime, 'HH:mm', { locale: de })} Uhr
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
