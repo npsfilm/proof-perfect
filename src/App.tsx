@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./layouts/AdminLayout";
+import ClientLayout from "./layouts/ClientLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import GalleriesList from "./pages/admin/GalleriesList";
 import GalleryCreate from "./pages/admin/GalleryCreate";
@@ -31,12 +32,19 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            {/* Auth routes (no layout) */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/gallery/:slug" element={<ClientGallery />} />
-            <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
-            <Route path="/buchung" element={<Buchung />} />
+            
+            {/* Client routes with ClientLayout */}
+            <Route element={<ClientLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/gallery/:slug" element={<ClientGallery />} />
+              <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
+              <Route path="/buchung" element={<Buchung />} />
+            </Route>
+
+            {/* Admin routes with AdminLayout */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="galleries" element={<GalleriesList />} />
@@ -51,6 +59,7 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="staging-requests" element={<StagingRequests />} />
             </Route>
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

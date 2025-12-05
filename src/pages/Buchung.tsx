@@ -3,8 +3,10 @@ import { BookingFunnel } from '@/components/booking/BookingFunnel';
 
 export default function Buchung() {
   return (
-    <BookingProvider>
-      <BookingFunnel />
-    </BookingProvider>
+    <div className="min-h-full">
+      <BookingProvider>
+        <BookingFunnel />
+      </BookingProvider>
+    </div>
   );
 }
