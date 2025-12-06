@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { useEffect } from 'react';
 
 export interface CalendarEvent {
   id: string;
@@ -56,6 +57,32 @@ export function useEvents(currentDate: Date) {
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('events-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events',
+        },
+        (payload) => {
+          console.log('Calendar event change:', payload.eventType);
+          // Invalidate and refetch events
+          queryClient.invalidateQueries({ queryKey: ['events'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   const createEvent = useMutation({
     mutationFn: async (eventData: CreateEventData) => {
