@@ -26,7 +26,8 @@ export default function AdminCalendar() {
 
   const { events, isLoading, createEvent, updateEvent, deleteEvent } = useEvents(currentDate);
   const { user, handleOAuthSuccess, isConnected } = useGoogleCalendarAuth();
-  const { sync } = useGoogleCalendarSync();
+  // Enable auto-sync: syncs on page load and every 5 minutes
+  const { sync, lastSyncTime, isSyncing } = useGoogleCalendarSync(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [callbackProcessed, setCallbackProcessed] = useState(false);
