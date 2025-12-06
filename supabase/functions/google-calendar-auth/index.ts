@@ -11,19 +11,15 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-// Build redirect URI dynamically
 const getRedirectUri = () => {
   return `${SUPABASE_URL}/functions/v1/google-calendar-auth/callback`;
 };
 
-// Build frontend URL for redirects
 const getFrontendUrl = () => {
-  // This should be configured as an environment variable in production
   return Deno.env.get('FRONTEND_URL') || 'https://preview--immoonpoint.lovable.app';
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -32,13 +28,29 @@ serve(async (req) => {
   const path = url.pathname;
 
   try {
-    // Step 1: Initiate OAuth flow
+    // Step 1: Initiate OAuth flow - requires user_id in query param
     if (!path.includes('/callback')) {
       console.log('Starting Google Calendar OAuth flow');
       
       if (!GOOGLE_CLIENT_ID) {
         throw new Error('GOOGLE_CLIENT_ID not configured');
       }
+
+      // Get user_id from query parameter (passed from frontend)
+      const userId = url.searchParams.get('user_id');
+      if (!userId) {
+        return new Response(
+          JSON.stringify({ error: 'user_id is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Encode user_id in state parameter for security
+      const stateData = {
+        user_id: userId,
+        nonce: crypto.randomUUID(),
+      };
+      const state = btoa(JSON.stringify(stateData));
 
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
@@ -47,12 +59,9 @@ serve(async (req) => {
       authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar');
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
-
-      // Store state for security (in production, use a proper state parameter)
-      const state = crypto.randomUUID();
       authUrl.searchParams.set('state', state);
 
-      console.log('Redirecting to Google OAuth:', authUrl.toString());
+      console.log('Redirecting to Google OAuth for user:', userId);
 
       return new Response(null, {
         status: 302,
@@ -68,6 +77,7 @@ serve(async (req) => {
     
     const code = url.searchParams.get('code');
     const error = url.searchParams.get('error');
+    const state = url.searchParams.get('state');
 
     if (error) {
       console.error('OAuth error:', error);
@@ -77,6 +87,25 @@ serve(async (req) => {
     if (!code) {
       throw new Error('No authorization code received');
     }
+
+    if (!state) {
+      throw new Error('No state parameter received');
+    }
+
+    // Decode and validate state parameter
+    let stateData: { user_id: string; nonce: string };
+    try {
+      stateData = JSON.parse(atob(state));
+      if (!stateData.user_id) {
+        throw new Error('Invalid state: missing user_id');
+      }
+    } catch (e) {
+      console.error('Failed to decode state:', e);
+      throw new Error('Invalid state parameter');
+    }
+
+    const userId = stateData.user_id;
+    console.log('Processing OAuth callback for user:', userId);
 
     if (!GOOGLE_CLIENT_SECRET) {
       throw new Error('GOOGLE_CLIENT_SECRET not configured');
@@ -106,31 +135,31 @@ serve(async (req) => {
       throw new Error(tokenData.error_description || 'Failed to exchange code for tokens');
     }
 
-    console.log('Token exchange successful');
+    console.log('Token exchange successful, storing tokens server-side');
 
-    // Get user from authorization header (if present)
-    // For this flow, we'll need to get the user ID from the session
-    // Since this is a redirect flow, we need to handle this differently
-    
-    // For now, we'll store the tokens and let the frontend handle user association
-    // In a production app, you'd want to use a state parameter with the user ID
-    
+    // Store tokens directly in database using service role
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-
-    // Calculate expiry time
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
-    // Store tokens - we'll need to update this with the actual user ID
-    // For now, redirect with success and handle token storage in frontend
-    const redirectUrl = new URL(`${getFrontendUrl()}/admin/calendar`);
-    redirectUrl.searchParams.set('google_auth', 'success');
-    redirectUrl.searchParams.set('access_token', tokenData.access_token);
-    redirectUrl.searchParams.set('refresh_token', tokenData.refresh_token || '');
-    redirectUrl.searchParams.set('expires_at', expiresAt);
+    const { error: upsertError } = await supabase
+      .from('google_calendar_tokens')
+      .upsert({
+        user_id: userId,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token || '',
+        expires_at: expiresAt,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
 
-    console.log('Redirecting to frontend with tokens');
+    if (upsertError) {
+      console.error('Failed to store tokens:', upsertError);
+      throw new Error('Failed to store tokens');
+    }
 
-    return Response.redirect(redirectUrl.toString(), 302);
+    console.log('Tokens stored successfully, redirecting to frontend');
+
+    // Redirect with only success indicator - no tokens in URL
+    return Response.redirect(`${getFrontendUrl()}/admin/calendar?google_auth=success`, 302);
 
   } catch (error: unknown) {
     console.error('Error in google-calendar-auth:', error);
