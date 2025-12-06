@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
 };
 
 interface PasswordResetRequest {
@@ -18,7 +18,42 @@ serve(async (req) => {
   }
 
   try {
+    // Validate webhook secret
+    const webhookSecret = Deno.env.get('WEBHOOK_SECRET');
+    const providedSecret = req.headers.get('x-webhook-secret');
+
+    if (!webhookSecret) {
+      console.error('[webhook-password-reset] WEBHOOK_SECRET not configured');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error', success: false }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    if (!providedSecret || providedSecret !== webhookSecret) {
+      console.error('[webhook-password-reset] Invalid or missing webhook secret');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', success: false }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
     const { email, reset_link }: PasswordResetRequest = await req.json();
+
+    // Validate required fields
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email address', success: false }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    if (!reset_link || typeof reset_link !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid reset link', success: false }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
 
     console.log('[webhook-password-reset] Processing password reset webhook for:', email);
 
