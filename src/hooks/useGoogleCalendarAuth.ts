@@ -17,7 +17,7 @@ export function useGoogleCalendarAuth() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: tokenData, isLoading: isLoadingToken } = useQuery({
+  const { data: tokenData, isLoading: isLoadingToken, refetch: refetchToken } = useQuery({
     queryKey: ['google-calendar-token', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -38,42 +38,25 @@ export function useGoogleCalendarAuth() {
   const isTokenExpired = tokenData ? new Date(tokenData.expires_at) < new Date() : true;
 
   const initiateOAuth = () => {
-    // Get the project URL for the edge function
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const authUrl = `https://${projectId}.supabase.co/functions/v1/google-calendar-auth`;
+    if (!user) {
+      toast.error('Bitte zuerst anmelden');
+      return;
+    }
     
-    // Open OAuth flow in new window
+    // Pass user_id to edge function for secure state encoding
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const authUrl = `https://${projectId}.supabase.co/functions/v1/google-calendar-auth?user_id=${user.id}`;
+    
     window.location.href = authUrl;
   };
 
-  const saveTokensFromCallback = useMutation({
-    mutationFn: async ({ accessToken, refreshToken, expiresAt }: {
-      accessToken: string;
-      refreshToken: string;
-      expiresAt: string;
-    }) => {
-      if (!user) throw new Error('Not authenticated');
-      
-      const { error } = await supabase
-        .from('google_calendar_tokens')
-        .upsert({
-          user_id: user.id,
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          expires_at: expiresAt,
-        }, { onConflict: 'user_id' });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['google-calendar-token'] });
-      toast.success('Google Kalender verbunden!');
-    },
-    onError: (error) => {
-      console.error('Error saving tokens:', error);
-      toast.error('Fehler beim Speichern der Verbindung');
-    },
-  });
+  // Called after OAuth callback - tokens are already stored server-side
+  const handleOAuthSuccess = async () => {
+    // Refetch token data since it was stored server-side
+    await refetchToken();
+    queryClient.invalidateQueries({ queryKey: ['google-calendar-token'] });
+    toast.success('Google Kalender verbunden!');
+  };
 
   const disconnectCalendar = useMutation({
     mutationFn: async () => {
@@ -103,7 +86,7 @@ export function useGoogleCalendarAuth() {
     isTokenExpired,
     tokenData,
     initiateOAuth,
-    saveTokensFromCallback,
+    handleOAuthSuccess,
     disconnectCalendar,
   };
 }

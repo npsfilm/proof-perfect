@@ -25,44 +25,29 @@ export default function AdminCalendar() {
   } = useCalendarNavigation();
 
   const { events, isLoading, createEvent, updateEvent, deleteEvent } = useEvents(currentDate);
-  const { user, saveTokensFromCallback, isConnected } = useGoogleCalendarAuth();
+  const { user, handleOAuthSuccess, isConnected } = useGoogleCalendarAuth();
   const { sync } = useGoogleCalendarSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [callbackProcessed, setCallbackProcessed] = useState(false);
 
-  // Handle OAuth callback - save tokens from URL parameters
-  // Wait for user to be authenticated before processing
+  // Handle OAuth callback - tokens are stored server-side, just refresh local state
   useEffect(() => {
-    // Skip if already processed or no user yet
     if (callbackProcessed || !user) return;
 
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('google_auth') === 'success') {
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      const expiresAt = params.get('expires_at');
-      
-      if (accessToken && refreshToken && expiresAt) {
-        setCallbackProcessed(true);
-        saveTokensFromCallback.mutate(
-          { accessToken, refreshToken, expiresAt },
-          {
-            onSuccess: () => {
-              // Clean URL and trigger sync
-              window.history.replaceState({}, '', '/admin/calendar');
-              sync();
-            },
-          }
-        );
-      } else {
-        // Clean URL even if tokens are missing
-        window.history.replaceState({}, '', '/admin/calendar');
-        setCallbackProcessed(true);
-      }
+      setCallbackProcessed(true);
+      // Clean URL immediately
+      window.history.replaceState({}, '', '/admin/calendar');
+      // Refresh token state and trigger sync
+      handleOAuthSuccess().then(() => sync());
+    } else if (params.get('error')) {
+      setCallbackProcessed(true);
+      window.history.replaceState({}, '', '/admin/calendar');
     }
-  }, [user, callbackProcessed, saveTokensFromCallback, sync]);
+  }, [user, callbackProcessed, handleOAuthSuccess, sync]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>();
 
