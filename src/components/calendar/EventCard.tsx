@@ -1,8 +1,9 @@
 import { format, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { MapPin } from 'lucide-react';
+import { MapPin, RefreshCw } from 'lucide-react';
 import { CalendarEvent } from '@/hooks/useEvents';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -15,23 +16,27 @@ export function EventCard({ event, onClick, variant = 'compact', className }: Ev
   const startTime = new Date(event.start_time);
   const endTime = new Date(event.end_time);
   const isMultiDay = !isSameDay(startTime, endTime);
+  const isFromGoogle = !!event.google_event_id;
 
   if (variant === 'compact') {
     return (
       <button
         onClick={onClick}
         className={cn(
-          'w-full text-left px-2 py-1 rounded text-xs font-medium truncate transition-opacity hover:opacity-80',
+          'w-full text-left px-2 py-1 rounded text-xs font-medium truncate transition-opacity hover:opacity-80 flex items-center gap-1',
           className
         )}
         style={{ backgroundColor: event.color, color: getContrastColor(event.color) }}
       >
+        {isFromGoogle && (
+          <RefreshCw className="h-2.5 w-2.5 shrink-0 opacity-70" />
+        )}
         {!isMultiDay && (
-          <span className="mr-1 opacity-80">
+          <span className="opacity-80">
             {format(startTime, 'HH:mm')}
           </span>
         )}
-        {event.title}
+        <span className="truncate">{event.title}</span>
       </button>
     );
   }
@@ -48,7 +53,19 @@ export function EventCard({ event, onClick, variant = 'compact', className }: Ev
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-foreground truncate">{event.title}</h4>
+          <div className="flex items-center gap-2">
+            <h4 className="font-medium text-foreground truncate">{event.title}</h4>
+            {isFromGoogle && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <RefreshCw className="h-3 w-3 text-muted-foreground shrink-0" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Von Google Kalender synchronisiert
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {isMultiDay ? (
               <>
@@ -65,6 +82,11 @@ export function EventCard({ event, onClick, variant = 'compact', className }: Ev
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3" />
               {event.location}
+            </p>
+          )}
+          {event.description && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+              {event.description}
             </p>
           )}
         </div>

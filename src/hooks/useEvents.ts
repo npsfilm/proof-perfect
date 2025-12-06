@@ -36,9 +36,9 @@ export function useEvents(currentDate: Date) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch events for a 3-month window around currentDate
-  const rangeStart = startOfMonth(subMonths(currentDate, 1));
-  const rangeEnd = endOfMonth(addMonths(currentDate, 1));
+  // Fetch events for a 6-month window around currentDate (matching Edge Function)
+  const rangeStart = startOfMonth(subMonths(currentDate, 3));
+  const rangeEnd = endOfMonth(addMonths(currentDate, 3));
 
   const { data: events = [], isLoading, error } = useQuery({
     queryKey: ['events', rangeStart.toISOString(), rangeEnd.toISOString()],

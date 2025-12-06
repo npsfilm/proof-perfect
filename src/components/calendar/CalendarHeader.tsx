@@ -1,6 +1,6 @@
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Link2, Unlink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Link2, Unlink, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CalendarView } from '@/hooks/useCalendarNavigation';
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -136,10 +137,24 @@ export function CalendarHeader({
         </div>
       </div>
 
-      {lastSyncTime && (
-        <p className="text-xs text-muted-foreground">
-          Zuletzt synchronisiert: {format(lastSyncTime, 'HH:mm', { locale: de })}
-        </p>
+      {isConnected && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Badge variant="secondary" className="gap-1 font-normal">
+            <CheckCircle2 className="h-3 w-3 text-green-500" />
+            Google verbunden
+          </Badge>
+          {lastSyncTime && (
+            <span>
+              Zuletzt synchronisiert: {formatDistanceToNow(lastSyncTime, { addSuffix: true, locale: de })}
+            </span>
+          )}
+          {isSyncing && (
+            <span className="flex items-center gap-1">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Synchronisiere...
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
