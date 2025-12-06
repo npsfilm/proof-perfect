@@ -16,7 +16,9 @@ const getRedirectUri = () => {
 };
 
 const getFrontendUrl = () => {
-  return Deno.env.get('FRONTEND_URL') || 'https://preview--immoonpoint.lovable.app';
+  const url = Deno.env.get('FRONTEND_URL') || 'https://preview--immoonpoint.lovable.app';
+  // Remove trailing slash to prevent double slashes in redirects
+  return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
 serve(async (req) => {
