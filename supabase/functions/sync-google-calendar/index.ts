@@ -1,30 +1,133 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID');
-const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-
-// Calendars to sync - primary + additional shared calendars
-const CALENDAR_IDS = [
-  { id: 'primary', name: 'Hauptkalender', color: '#3b82f6' },
-  { id: 'hello@npsfilm.de', name: 'NPS Film', color: '#10b981' },
-  { id: 'c_87445ee88350c15ef8f4e0bb32a2bf765f7cdb991c0631a46fe59fdf528570f8@group.calendar.google.com', name: 'Gruppen-Kalender', color: '#f59e0b' },
+// Calendar configurations with their ICS URLs
+const CALENDARS = [
+  {
+    id: 'npsfilm',
+    name: 'NPS Film',
+    envKey: 'CALENDAR_ICS_NPSFILM',
+    color: '#10b981', // green
+  },
+  {
+    id: 'group',
+    name: 'Gruppen-Kalender',
+    envKey: 'CALENDAR_ICS_GROUP',
+    color: '#8b5cf6', // purple
+  },
 ];
 
-interface CalendarSyncStatus {
-  id: string;
-  name: string;
-  color: string;
-  status: 'success' | 'error' | 'no_access';
-  eventCount: number;
-  errorMessage?: string;
+interface ICSEvent {
+  uid: string;
+  summary: string;
+  description?: string;
+  location?: string;
+  dtstart: Date;
+  dtend: Date;
+}
+
+// Parse ICS date format (handles both DATE and DATE-TIME)
+function parseICSDate(dateStr: string): Date {
+  dateStr = dateStr.replace(/"/g, '');
+  
+  // Handle DATE format: 20241215
+  if (dateStr.length === 8) {
+    const year = parseInt(dateStr.substring(0, 4));
+    const month = parseInt(dateStr.substring(4, 6)) - 1;
+    const day = parseInt(dateStr.substring(6, 8));
+    return new Date(year, month, day);
+  }
+  
+  // Handle DATE-TIME format: 20241215T100000 or 20241215T100000Z
+  if (dateStr.includes('T')) {
+    const isUTC = dateStr.endsWith('Z');
+    const cleanStr = dateStr.replace('Z', '');
+    
+    const year = parseInt(cleanStr.substring(0, 4));
+    const month = parseInt(cleanStr.substring(4, 6)) - 1;
+    const day = parseInt(cleanStr.substring(6, 8));
+    const hour = parseInt(cleanStr.substring(9, 11));
+    const minute = parseInt(cleanStr.substring(11, 13));
+    const second = parseInt(cleanStr.substring(13, 15)) || 0;
+    
+    if (isUTC) {
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
+    } else {
+      return new Date(year, month, day, hour, minute, second);
+    }
+  }
+  
+  return new Date(dateStr);
+}
+
+// Parse ICS content into events
+function parseICS(icsContent: string): ICSEvent[] {
+  const events: ICSEvent[] = [];
+  const lines = icsContent.split(/\r?\n/);
+  
+  let inEvent = false;
+  let currentEvent: Partial<ICSEvent> = {};
+  
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    
+    // Handle line folding
+    while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+      i++;
+      line += lines[i].substring(1);
+    }
+    
+    if (line.startsWith('BEGIN:VEVENT')) {
+      inEvent = true;
+      currentEvent = {};
+      continue;
+    }
+    
+    if (line.startsWith('END:VEVENT')) {
+      inEvent = false;
+      if (currentEvent.uid && currentEvent.summary && currentEvent.dtstart && currentEvent.dtend) {
+        events.push(currentEvent as ICSEvent);
+      }
+      continue;
+    }
+    
+    if (!inEvent) continue;
+    
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) continue;
+    
+    const keyPart = line.substring(0, colonIndex);
+    const value = line.substring(colonIndex + 1);
+    const baseKey = keyPart.split(';')[0];
+    
+    switch (baseKey) {
+      case 'UID':
+        currentEvent.uid = value;
+        break;
+      case 'SUMMARY':
+        currentEvent.summary = value.replace(/\\,/g, ',').replace(/\\n/g, '\n').replace(/\\;/g, ';');
+        break;
+      case 'DESCRIPTION':
+        currentEvent.description = value.replace(/\\,/g, ',').replace(/\\n/g, '\n').replace(/\\;/g, ';');
+        break;
+      case 'LOCATION':
+        currentEvent.location = value.replace(/\\,/g, ',').replace(/\\n/g, '\n').replace(/\\;/g, ';');
+        break;
+      case 'DTSTART':
+        currentEvent.dtstart = parseICSDate(value);
+        break;
+      case 'DTEND':
+        currentEvent.dtend = parseICSDate(value);
+        break;
+    }
+  }
+  
+  return events;
 }
 
 serve(async (req) => {
@@ -35,375 +138,132 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      throw new Error('Missing authorization header');
     }
 
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const supabaseAuth = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
     
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
     if (authError || !user) {
-      throw new Error('Invalid authorization');
+      throw new Error('Unauthorized');
     }
 
-    console.log('Sync requested by user:', user.id);
-
-    // Get user's Google Calendar tokens
-    const { data: tokenData, error: tokenError } = await supabase
-      .from('google_calendar_tokens')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (tokenError || !tokenData) {
-      throw new Error('Google Calendar not connected');
-    }
-
-    let accessToken = tokenData.access_token;
-    const expiresAt = new Date(tokenData.expires_at);
-
-    // Check if token needs refresh
-    if (expiresAt < new Date()) {
-      console.log('Token expired, refreshing...');
-      
-      const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: GOOGLE_CLIENT_ID!,
-          client_secret: GOOGLE_CLIENT_SECRET!,
-          refresh_token: tokenData.refresh_token,
-          grant_type: 'refresh_token',
-        }),
-      });
-
-      const refreshData = await refreshResponse.json();
-      
-      if (!refreshResponse.ok) {
-        console.error('Token refresh failed:', refreshData);
-        throw new Error('token expired');
-      }
-
-      accessToken = refreshData.access_token;
-      const newExpiresAt = new Date(Date.now() + refreshData.expires_in * 1000).toISOString();
-
-      await supabase
-        .from('google_calendar_tokens')
-        .update({
-          access_token: accessToken,
-          expires_at: newExpiresAt,
-        })
-        .eq('user_id', user.id);
-
-      console.log('Token refreshed successfully');
-    }
+    console.log(`\n=== iCal Sync started for user: ${user.id} ===\n`);
 
     const now = new Date();
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-    const threeMonthsFromNow = new Date(now.getFullYear(), now.getMonth() + 3, 0);
+    const timeMin = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    const timeMax = new Date(now.getFullYear(), now.getMonth() + 3, 0);
 
-    let totalPulled = 0;
-    let totalPushed = 0;
-    let blockedSynced = 0;
-    const calendarStatuses: CalendarSyncStatus[] = [];
+    let totalInserted = 0;
+    let totalUpdated = 0;
+    let totalSkipped = 0;
+    const calendarStatuses: { name: string; status: string; eventCount: number; inserted: number; updated: number }[] = [];
 
-    // PULL: Fetch events from ALL configured Google Calendars
-    for (const calendar of CALENDAR_IDS) {
-      console.log(`\n--- Pulling events from calendar: ${calendar.name} (${calendar.id}) ---`);
+    for (const calendar of CALENDARS) {
+      const icsUrl = Deno.env.get(calendar.envKey);
       
-      const calendarStatus: CalendarSyncStatus = {
-        id: calendar.id,
-        name: calendar.name,
-        color: calendar.color,
-        status: 'success',
-        eventCount: 0,
-      };
+      if (!icsUrl) {
+        console.log(`⚠️ No ICS URL for ${calendar.name} (${calendar.envKey})`);
+        calendarStatuses.push({ name: calendar.name, status: 'not_configured', eventCount: 0, inserted: 0, updated: 0 });
+        continue;
+      }
+
+      console.log(`\n--- Fetching ${calendar.name} ---`);
 
       try {
-        const calendarResponse = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events?` +
-          `timeMin=${threeMonthsAgo.toISOString()}&` +
-          `timeMax=${threeMonthsFromNow.toISOString()}&` +
-          `singleEvents=true&` +
-          `orderBy=startTime&` +
-          `maxResults=2500`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          }
+        const response = await fetch(icsUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const icsContent = await response.text();
+        const events = parseICS(icsContent);
+        
+        const filteredEvents = events.filter(event => 
+          event.dtstart >= timeMin && event.dtstart <= timeMax
         );
 
-        if (!calendarResponse.ok) {
-          const errorData = await calendarResponse.json();
-          console.error(`❌ Failed to fetch calendar ${calendar.name}:`, JSON.stringify(errorData, null, 2));
-          
-          if (errorData.error?.code === 404) {
-            calendarStatus.status = 'no_access';
-            calendarStatus.errorMessage = 'Kalender nicht gefunden oder kein Zugriff';
-          } else if (errorData.error?.code === 403) {
-            calendarStatus.status = 'no_access';
-            calendarStatus.errorMessage = 'Keine Berechtigung für diesen Kalender';
-          } else {
-            calendarStatus.status = 'error';
-            calendarStatus.errorMessage = errorData.error?.message || 'Unbekannter Fehler';
-          }
-          
-          calendarStatuses.push(calendarStatus);
-          continue;
-        }
+        console.log(`✓ Found ${filteredEvents.length} events in time window`);
 
-        const calendarData = await calendarResponse.json();
-        const googleEvents = calendarData.items || [];
+        let inserted = 0, updated = 0, skipped = 0;
 
-        console.log(`✓ Found ${googleEvents.length} events in ${calendar.name}`);
-        calendarStatus.eventCount = googleEvents.length;
-
-        let insertedCount = 0;
-        let updatedCount = 0;
-        let skippedCount = 0;
-
-        // Process each Google event
-        for (const gEvent of googleEvents) {
-          if (!gEvent.start || (!gEvent.start.dateTime && !gEvent.start.date)) {
-            skippedCount++;
-            continue;
-          }
-
-          const startTime = gEvent.start.dateTime || `${gEvent.start.date}T00:00:00`;
-          const endTime = gEvent.end?.dateTime || gEvent.end?.date 
-            ? (gEvent.end.dateTime || `${gEvent.end.date}T23:59:59`)
-            : startTime;
-
-          const { data: existingEvent, error: fetchError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('google_event_id', gEvent.id)
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (fetchError) {
-            console.error(`Error fetching existing event for ${gEvent.id}:`, fetchError);
-            continue;
-          }
-
-          if (existingEvent) {
-            const googleUpdated = new Date(gEvent.updated);
-            const localUpdated = new Date(existingEvent.updated_at);
-
-            if (googleUpdated > localUpdated) {
-              const { error: updateError } = await supabase
-                .from('events')
-                .update({
-                  title: gEvent.summary || 'Untitled',
-                  description: gEvent.description || null,
-                  start_time: startTime,
-                  end_time: endTime,
-                  location: gEvent.location || null,
-                  calendar_source: calendar.id,
-                  color: calendar.color,
-                  last_synced_at: new Date().toISOString(),
-                })
-                .eq('id', existingEvent.id);
-              
-              if (updateError) {
-                console.error(`Error updating event ${gEvent.id}:`, updateError);
-              } else {
-                updatedCount++;
-                totalPulled++;
-              }
-            } else {
-              skippedCount++;
-            }
-          } else {
-            const { error: insertError } = await supabase
-              .from('events')
-              .insert({
-                user_id: user.id,
-                title: gEvent.summary || 'Untitled',
-                description: gEvent.description || null,
-                start_time: startTime,
-                end_time: endTime,
-                location: gEvent.location || null,
-                google_event_id: gEvent.id,
-                calendar_source: calendar.id,
-                color: calendar.color,
-                last_synced_at: new Date().toISOString(),
-              });
-            
-            if (insertError) {
-              console.error(`Error inserting event ${gEvent.id}:`, insertError);
-            } else {
-              insertedCount++;
-              totalPulled++;
-            }
-          }
-        }
-
-        console.log(`  → Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`);
-        calendarStatuses.push(calendarStatus);
-        
-      } catch (calError) {
-        console.error(`❌ Exception syncing calendar ${calendar.name}:`, calError);
-        calendarStatus.status = 'error';
-        calendarStatus.errorMessage = calError instanceof Error ? calError.message : 'Unbekannter Fehler';
-        calendarStatuses.push(calendarStatus);
-      }
-    }
-
-    // PUSH: Send local events without google_event_id to primary Google Calendar
-    console.log('\n--- Pushing local events to Google Calendar ---');
-
-    const { data: localEvents } = await supabase
-      .from('events')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('google_event_id', null);
-
-    console.log(`Found ${localEvents?.length || 0} local events to push`);
-
-    for (const localEvent of localEvents || []) {
-      const googleEvent = {
-        summary: localEvent.title,
-        description: localEvent.description,
-        location: localEvent.location,
-        start: {
-          dateTime: localEvent.start_time,
-          timeZone: 'Europe/Berlin',
-        },
-        end: {
-          dateTime: localEvent.end_time,
-          timeZone: 'Europe/Berlin',
-        },
-      };
-
-      const createResponse = await fetch(
-        'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(googleEvent),
-        }
-      );
-
-      if (createResponse.ok) {
-        const createdEvent = await createResponse.json();
-        
-        await supabase
+        const { data: existingEvents } = await supabase
           .from('events')
-          .update({
-            google_event_id: createdEvent.id,
-            calendar_source: 'primary',
+          .select('id, google_event_id, title, start_time, end_time')
+          .eq('user_id', user.id)
+          .eq('calendar_source', calendar.id);
+
+        const existingMap = new Map((existingEvents || []).map(e => [e.google_event_id, e]));
+
+        for (const event of filteredEvents) {
+          const eventData = {
+            user_id: user.id,
+            google_event_id: event.uid,
+            title: event.summary || 'Untitled',
+            description: event.description || null,
+            location: event.location || null,
+            start_time: event.dtstart.toISOString(),
+            end_time: event.dtend.toISOString(),
+            calendar_source: calendar.id,
+            color: calendar.color,
             last_synced_at: new Date().toISOString(),
-          })
-          .eq('id', localEvent.id);
-        
-        totalPushed++;
-        console.log(`  ✓ Pushed event: ${localEvent.title}`);
-      } else {
-        const errorData = await createResponse.json();
-        console.error(`  ❌ Failed to push event ${localEvent.id}:`, errorData);
-      }
-    }
+          };
 
-    // SYNC BLOCKED DATES: Push blocked dates to Google Calendar as "Out of Office" events
-    console.log('\n--- Syncing blocked dates to Google Calendar ---');
+          const existing = existingMap.get(event.uid);
 
-    const { data: blockedDates } = await supabase
-      .from('blocked_dates')
-      .select('*')
-      .eq('user_id', user.id);
+          if (existing) {
+            const existingStart = new Date(existing.start_time).getTime();
+            const existingEnd = new Date(existing.end_time).getTime();
+            const newStart = event.dtstart.getTime();
+            const newEnd = event.dtend.getTime();
 
-    console.log(`Found ${blockedDates?.length || 0} blocked dates`);
-
-    for (const blocked of blockedDates || []) {
-      // Skip if already synced
-      if (blocked.google_event_id) {
-        // Check if the Google event still exists
-        const checkResponse = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${blocked.google_event_id}`,
-          {
-            headers: { 'Authorization': `Bearer ${accessToken}` },
+            if (existingStart !== newStart || existingEnd !== newEnd || existing.title !== event.summary) {
+              const { error } = await supabase.from('events').update(eventData).eq('id', existing.id);
+              if (!error) updated++;
+            } else {
+              skipped++;
+            }
+          } else {
+            const { error } = await supabase.from('events').insert(eventData);
+            if (!error) inserted++;
           }
-        );
-        
-        if (checkResponse.ok) {
-          continue;
         }
-        // If event was deleted from Google, we'll recreate it
-      }
 
-      // Create all-day event for the blocked period
-      const blockedEvent = {
-        summary: blocked.reason || 'Nicht verfügbar',
-        description: 'Blockierte Zeit - automatisch synchronisiert',
-        start: {
-          date: blocked.start_date,
-        },
-        end: {
-          // Google Calendar end date is exclusive, so add one day
-          date: new Date(new Date(blocked.end_date).getTime() + 86400000).toISOString().split('T')[0],
-        },
-        transparency: 'opaque', // Show as busy
-        colorId: '4', // Flamingo (pinkish-red) color
-      };
+        console.log(`  → Inserted: ${inserted}, Updated: ${updated}, Skipped: ${skipped}`);
 
-      const createResponse = await fetch(
-        'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(blockedEvent),
-        }
-      );
+        totalInserted += inserted;
+        totalUpdated += updated;
+        totalSkipped += skipped;
 
-      if (createResponse.ok) {
-        const createdEvent = await createResponse.json();
-        
-        // Update blocked date with Google event ID
-        await supabase
-          .from('blocked_dates')
-          .update({ google_event_id: createdEvent.id })
-          .eq('id', blocked.id);
-        
-        blockedSynced++;
-        console.log(`  ✓ Synced blocked date: ${blocked.reason || 'Nicht verfügbar'}`);
-      } else {
-        const errorData = await createResponse.json();
-        console.error(`  ❌ Failed to sync blocked date ${blocked.id}:`, errorData);
+        calendarStatuses.push({ name: calendar.name, status: 'success', eventCount: filteredEvents.length, inserted, updated });
+
+      } catch (calError) {
+        console.error(`✗ Error fetching ${calendar.name}:`, calError);
+        calendarStatuses.push({ name: calendar.name, status: 'error', eventCount: 0, inserted: 0, updated: 0 });
       }
     }
 
-    console.log(`\n=== Sync complete: ${totalPulled} pulled, ${totalPushed} pushed, ${blockedSynced} blocked dates synced ===`);
+    console.log(`\n=== Sync complete: ${totalInserted} inserted, ${totalUpdated} updated, ${totalSkipped} unchanged ===\n`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        pulled: totalPulled, 
-        pushed: totalPushed, 
-        blockedSynced,
-        calendars: calendarStatuses,
-      }),
+      JSON.stringify({ success: true, pulled: totalInserted + totalUpdated, pushed: 0, calendars: calendarStatuses }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: unknown) {
     console.error('Sync error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
