@@ -164,15 +164,14 @@ serve(async (req) => {
 
     let totalInserted = 0;
     let totalUpdated = 0;
-    let totalSkipped = 0;
-    const calendarStatuses: { name: string; status: string; eventCount: number; inserted: number; updated: number }[] = [];
+    const calendarStatuses: { name: string; status: string; eventCount: number; synced: number }[] = [];
 
     for (const calendar of CALENDARS) {
       const icsUrl = Deno.env.get(calendar.envKey);
       
       if (!icsUrl) {
         console.log(`⚠️ No ICS URL for ${calendar.name} (${calendar.envKey})`);
-        calendarStatuses.push({ name: calendar.name, status: 'not_configured', eventCount: 0, inserted: 0, updated: 0 });
+        calendarStatuses.push({ name: calendar.name, status: 'not_configured', eventCount: 0, synced: 0 });
         continue;
       }
 
@@ -193,16 +192,9 @@ serve(async (req) => {
 
         console.log(`✓ Found ${filteredEvents.length} events in time window`);
 
-        let inserted = 0, updated = 0, skipped = 0;
+        let synced = 0;
 
-        const { data: existingEvents } = await supabase
-          .from('events')
-          .select('id, google_event_id, title, start_time, end_time')
-          .eq('user_id', user.id)
-          .eq('calendar_source', calendar.id);
-
-        const existingMap = new Map((existingEvents || []).map(e => [e.google_event_id, e]));
-
+        // Use upsert with the unique constraint (user_id, google_event_id, calendar_source)
         for (const event of filteredEvents) {
           const eventData = {
             user_id: user.id,
@@ -217,44 +209,33 @@ serve(async (req) => {
             last_synced_at: new Date().toISOString(),
           };
 
-          const existing = existingMap.get(event.uid);
+          const { error } = await supabase
+            .from('events')
+            .upsert(eventData, { 
+              onConflict: 'user_id,google_event_id,calendar_source',
+              ignoreDuplicates: false 
+            });
 
-          if (existing) {
-            const existingStart = new Date(existing.start_time).getTime();
-            const existingEnd = new Date(existing.end_time).getTime();
-            const newStart = event.dtstart.getTime();
-            const newEnd = event.dtend.getTime();
-
-            if (existingStart !== newStart || existingEnd !== newEnd || existing.title !== event.summary) {
-              const { error } = await supabase.from('events').update(eventData).eq('id', existing.id);
-              if (!error) updated++;
-            } else {
-              skipped++;
-            }
-          } else {
-            const { error } = await supabase.from('events').insert(eventData);
-            if (!error) inserted++;
-          }
+          if (!error) synced++;
+          else console.error(`Error upserting event ${event.uid}:`, error.message);
         }
 
-        console.log(`  → Inserted: ${inserted}, Updated: ${updated}, Skipped: ${skipped}`);
+        console.log(`  → Synced: ${synced} events`);
 
-        totalInserted += inserted;
-        totalUpdated += updated;
-        totalSkipped += skipped;
+        totalInserted += synced;
 
-        calendarStatuses.push({ name: calendar.name, status: 'success', eventCount: filteredEvents.length, inserted, updated });
+        calendarStatuses.push({ name: calendar.name, status: 'success', eventCount: filteredEvents.length, synced });
 
       } catch (calError) {
         console.error(`✗ Error fetching ${calendar.name}:`, calError);
-        calendarStatuses.push({ name: calendar.name, status: 'error', eventCount: 0, inserted: 0, updated: 0 });
+        calendarStatuses.push({ name: calendar.name, status: 'error', eventCount: 0, synced: 0 });
       }
     }
 
-    console.log(`\n=== Sync complete: ${totalInserted} inserted, ${totalUpdated} updated, ${totalSkipped} unchanged ===\n`);
+    console.log(`\n=== Sync complete: ${totalInserted} events synced ===\n`);
 
     return new Response(
-      JSON.stringify({ success: true, pulled: totalInserted + totalUpdated, pushed: 0, calendars: calendarStatuses }),
+      JSON.stringify({ success: true, pulled: totalInserted, pushed: 0, calendars: calendarStatuses }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

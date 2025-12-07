@@ -1,19 +1,11 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Link2, Unlink, CheckCircle2, Plus, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, CheckCircle2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CalendarView } from '@/hooks/useCalendarNavigation';
-import { useGoogleCalendarAuth } from '@/hooks/useGoogleCalendarAuth';
 import { useGoogleCalendarSync } from '@/hooks/useGoogleCalendarSync';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
 // Calendar sources - matches Edge Function iCal configuration
@@ -45,7 +37,6 @@ export function CalendarHeader({
   visibleCalendars = CALENDAR_SOURCES.map(c => c.id),
   onToggleCalendar,
 }: CalendarHeaderProps) {
-  const { isConnected, isLoadingToken, initiateOAuth, disconnectCalendar } = useGoogleCalendarAuth();
   const { sync, isSyncing, lastSyncTime } = useGoogleCalendarSync();
 
   const getTitle = () => {
@@ -114,51 +105,16 @@ export function CalendarHeader({
             </ToggleGroupItem>
           </ToggleGroup>
 
-          {/* Google Calendar Integration */}
-          <div className="flex items-center gap-2">
-            {isConnected && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => sync()}
-                disabled={isSyncing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Sync...' : 'Sync'}
-              </Button>
-            )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={isLoadingToken}>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {isConnected ? 'Google' : 'Verbinden'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {isConnected ? (
-                  <>
-                    <DropdownMenuItem onClick={() => sync()} disabled={isSyncing}>
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Jetzt synchronisieren
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => disconnectCalendar.mutate()}
-                      className="text-destructive"
-                    >
-                      <Unlink className="h-4 w-4 mr-2" />
-                      Verbindung trennen
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <DropdownMenuItem onClick={initiateOAuth}>
-                    <Link2 className="h-4 w-4 mr-2" />
-                    Mit Google Kalender verbinden
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* Sync Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => sync()}
+            disabled={isSyncing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Sync...' : 'Sync'}
+          </Button>
         </div>
       </div>
 
@@ -200,25 +156,23 @@ export function CalendarHeader({
         </div>
 
         {/* Sync Status */}
-        {isConnected && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="secondary" className="gap-1 font-normal">
-              <CheckCircle2 className="h-3 w-3 text-green-500" />
-              Google verbunden
-            </Badge>
-            {lastSyncTime && (
-              <span>
-                Zuletzt: {formatDistanceToNow(lastSyncTime, { addSuffix: true, locale: de })}
-              </span>
-            )}
-            {isSyncing && (
-              <span className="flex items-center gap-1">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                Synchronisiere...
-              </span>
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Badge variant="secondary" className="gap-1 font-normal">
+            <CheckCircle2 className="h-3 w-3 text-green-500" />
+            iCal verbunden
+          </Badge>
+          {lastSyncTime && (
+            <span>
+              Zuletzt: {formatDistanceToNow(lastSyncTime, { addSuffix: true, locale: de })}
+            </span>
+          )}
+          {isSyncing && (
+            <span className="flex items-center gap-1">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Synchronisiere...
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
