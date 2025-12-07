@@ -16,11 +16,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
-// Calendar sources - matches Edge Function configuration
+// Calendar sources - matches Edge Function iCal configuration
 export const CALENDAR_SOURCES = [
-  { id: 'primary', name: 'Hauptkalender', color: '#3b82f6' },
-  { id: 'hello@npsfilm.de', name: 'NPS Film', color: '#10b981' },
-  { id: 'c_87445ee88350c15ef8f4e0bb32a2bf765f7cdb991c0631a46fe59fdf528570f8@group.calendar.google.com', name: 'Gruppen-Kalender', color: '#f59e0b' },
+  { id: 'npsfilm', name: 'NPS Film', color: '#10b981' },
+  { id: 'group', name: 'Gruppen-Kalender', color: '#8b5cf6' },
 ];
 
 interface CalendarHeaderProps {
