@@ -18,6 +18,15 @@ const CALENDAR_IDS = [
   { id: 'c_87445ee88350c15ef8f4e0bb32a2bf765f7cdb991c0631a46fe59fdf528570f8@group.calendar.google.com', name: 'Gruppen-Kalender', color: '#f59e0b' },
 ];
 
+interface CalendarSyncStatus {
+  id: string;
+  name: string;
+  color: string;
+  status: 'success' | 'error' | 'no_access';
+  eventCount: number;
+  errorMessage?: string;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -97,18 +106,28 @@ serve(async (req) => {
     let totalPulled = 0;
     let totalPushed = 0;
     let blockedSynced = 0;
+    const calendarStatuses: CalendarSyncStatus[] = [];
 
     // PULL: Fetch events from ALL configured Google Calendars
     for (const calendar of CALENDAR_IDS) {
-      console.log(`Pulling events from calendar: ${calendar.name} (${calendar.id})...`);
+      console.log(`\n--- Pulling events from calendar: ${calendar.name} (${calendar.id}) ---`);
       
+      const calendarStatus: CalendarSyncStatus = {
+        id: calendar.id,
+        name: calendar.name,
+        color: calendar.color,
+        status: 'success',
+        eventCount: 0,
+      };
+
       try {
         const calendarResponse = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events?` +
           `timeMin=${threeMonthsAgo.toISOString()}&` +
           `timeMax=${threeMonthsFromNow.toISOString()}&` +
           `singleEvents=true&` +
-          `orderBy=startTime`,
+          `orderBy=startTime&` +
+          `maxResults=2500`,
           {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
@@ -118,19 +137,37 @@ serve(async (req) => {
 
         if (!calendarResponse.ok) {
           const errorData = await calendarResponse.json();
-          console.error(`Failed to fetch calendar ${calendar.id}:`, errorData);
-          // Continue with other calendars even if one fails
+          console.error(`❌ Failed to fetch calendar ${calendar.name}:`, JSON.stringify(errorData, null, 2));
+          
+          if (errorData.error?.code === 404) {
+            calendarStatus.status = 'no_access';
+            calendarStatus.errorMessage = 'Kalender nicht gefunden oder kein Zugriff';
+          } else if (errorData.error?.code === 403) {
+            calendarStatus.status = 'no_access';
+            calendarStatus.errorMessage = 'Keine Berechtigung für diesen Kalender';
+          } else {
+            calendarStatus.status = 'error';
+            calendarStatus.errorMessage = errorData.error?.message || 'Unbekannter Fehler';
+          }
+          
+          calendarStatuses.push(calendarStatus);
           continue;
         }
 
         const calendarData = await calendarResponse.json();
         const googleEvents = calendarData.items || [];
 
-        console.log(`Found ${googleEvents.length} events in ${calendar.name}`);
+        console.log(`✓ Found ${googleEvents.length} events in ${calendar.name}`);
+        calendarStatus.eventCount = googleEvents.length;
+
+        let insertedCount = 0;
+        let updatedCount = 0;
+        let skippedCount = 0;
 
         // Process each Google event
         for (const gEvent of googleEvents) {
           if (!gEvent.start || (!gEvent.start.dateTime && !gEvent.start.date)) {
+            skippedCount++;
             continue;
           }
 
@@ -139,19 +176,24 @@ serve(async (req) => {
             ? (gEvent.end.dateTime || `${gEvent.end.date}T23:59:59`)
             : startTime;
 
-          const { data: existingEvent } = await supabase
+          const { data: existingEvent, error: fetchError } = await supabase
             .from('events')
             .select('*')
             .eq('google_event_id', gEvent.id)
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
+
+          if (fetchError) {
+            console.error(`Error fetching existing event for ${gEvent.id}:`, fetchError);
+            continue;
+          }
 
           if (existingEvent) {
             const googleUpdated = new Date(gEvent.updated);
             const localUpdated = new Date(existingEvent.updated_at);
 
             if (googleUpdated > localUpdated) {
-              await supabase
+              const { error: updateError } = await supabase
                 .from('events')
                 .update({
                   title: gEvent.summary || 'Untitled',
@@ -165,10 +207,17 @@ serve(async (req) => {
                 })
                 .eq('id', existingEvent.id);
               
-              totalPulled++;
+              if (updateError) {
+                console.error(`Error updating event ${gEvent.id}:`, updateError);
+              } else {
+                updatedCount++;
+                totalPulled++;
+              }
+            } else {
+              skippedCount++;
             }
           } else {
-            await supabase
+            const { error: insertError } = await supabase
               .from('events')
               .insert({
                 user_id: user.id,
@@ -183,23 +232,36 @@ serve(async (req) => {
                 last_synced_at: new Date().toISOString(),
               });
             
-            totalPulled++;
+            if (insertError) {
+              console.error(`Error inserting event ${gEvent.id}:`, insertError);
+            } else {
+              insertedCount++;
+              totalPulled++;
+            }
           }
         }
+
+        console.log(`  → Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`);
+        calendarStatuses.push(calendarStatus);
+        
       } catch (calError) {
-        console.error(`Error syncing calendar ${calendar.id}:`, calError);
-        // Continue with other calendars
+        console.error(`❌ Exception syncing calendar ${calendar.name}:`, calError);
+        calendarStatus.status = 'error';
+        calendarStatus.errorMessage = calError instanceof Error ? calError.message : 'Unbekannter Fehler';
+        calendarStatuses.push(calendarStatus);
       }
     }
 
     // PUSH: Send local events without google_event_id to primary Google Calendar
-    console.log('Pushing local events to Google Calendar...');
+    console.log('\n--- Pushing local events to Google Calendar ---');
 
     const { data: localEvents } = await supabase
       .from('events')
       .select('*')
       .eq('user_id', user.id)
       .is('google_event_id', null);
+
+    console.log(`Found ${localEvents?.length || 0} local events to push`);
 
     for (const localEvent of localEvents || []) {
       const googleEvent = {
@@ -241,18 +303,22 @@ serve(async (req) => {
           .eq('id', localEvent.id);
         
         totalPushed++;
+        console.log(`  ✓ Pushed event: ${localEvent.title}`);
       } else {
-        console.error('Failed to push event:', localEvent.id);
+        const errorData = await createResponse.json();
+        console.error(`  ❌ Failed to push event ${localEvent.id}:`, errorData);
       }
     }
 
     // SYNC BLOCKED DATES: Push blocked dates to Google Calendar as "Out of Office" events
-    console.log('Syncing blocked dates to Google Calendar...');
+    console.log('\n--- Syncing blocked dates to Google Calendar ---');
 
     const { data: blockedDates } = await supabase
       .from('blocked_dates')
       .select('*')
       .eq('user_id', user.id);
+
+    console.log(`Found ${blockedDates?.length || 0} blocked dates`);
 
     for (const blocked of blockedDates || []) {
       // Skip if already synced
@@ -266,7 +332,6 @@ serve(async (req) => {
         );
         
         if (checkResponse.ok) {
-          console.log('Blocked date already synced:', blocked.id);
           continue;
         }
         // If event was deleted from Google, we'll recreate it
@@ -309,14 +374,14 @@ serve(async (req) => {
           .eq('id', blocked.id);
         
         blockedSynced++;
-        console.log('Synced blocked date:', blocked.id, '→', createdEvent.id);
+        console.log(`  ✓ Synced blocked date: ${blocked.reason || 'Nicht verfügbar'}`);
       } else {
         const errorData = await createResponse.json();
-        console.error('Failed to sync blocked date:', blocked.id, errorData);
+        console.error(`  ❌ Failed to sync blocked date ${blocked.id}:`, errorData);
       }
     }
 
-    console.log(`Sync complete: ${totalPulled} pulled, ${totalPushed} pushed, ${blockedSynced} blocked dates synced`);
+    console.log(`\n=== Sync complete: ${totalPulled} pulled, ${totalPushed} pushed, ${blockedSynced} blocked dates synced ===`);
 
     return new Response(
       JSON.stringify({ 
@@ -324,7 +389,7 @@ serve(async (req) => {
         pulled: totalPulled, 
         pushed: totalPushed, 
         blockedSynced,
-        calendars: CALENDAR_IDS.map(c => c.name),
+        calendars: calendarStatuses,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

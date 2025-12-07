@@ -15,6 +15,7 @@ export interface CalendarEvent {
   location: string | null;
   color: string;
   google_event_id: string | null;
+  calendar_source: string | null;
   last_synced_at: string | null;
   created_at: string;
   updated_at: string;
