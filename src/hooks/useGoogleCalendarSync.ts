@@ -10,28 +10,7 @@ export function useGoogleCalendarSync(autoSync: boolean = false) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const initialSyncDone = useRef(false);
-
-  // Check if Google Calendar is connected
-  useEffect(() => {
-    if (!user) {
-      setIsConnected(false);
-      return;
-    }
-
-    const checkConnection = async () => {
-      const { data } = await supabase
-        .from('google_calendar_tokens')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      setIsConnected(!!data);
-    };
-
-    checkConnection();
-  }, [user]);
 
   const syncMutation = useMutation({
     mutationFn: async (options?: { silent?: boolean }) => {
@@ -54,20 +33,13 @@ export function useGoogleCalendarSync(autoSync: boolean = false) {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       if (!data?.silent) {
-        const { pulled, pushed } = data || { pulled: 0, pushed: 0 };
-        toast.success(`Sync abgeschlossen: ${pulled} abgerufen, ${pushed} hochgeladen`);
+        const { pulled = 0 } = data || {};
+        toast.success(`Sync abgeschlossen: ${pulled} Events aktualisiert`);
       }
     },
     onError: (error: Error) => {
       console.error('Sync error:', error);
-      
-      if (error.message?.includes('not connected')) {
-        toast.error('Bitte verbinden Sie zuerst Ihren Google Kalender');
-      } else if (error.message?.includes('token expired')) {
-        toast.error('Google-Verbindung abgelaufen. Bitte erneut verbinden.');
-      } else {
-        toast.error('Fehler beim Synchronisieren');
-      }
+      toast.error('Fehler beim Synchronisieren');
     },
   });
 
@@ -75,30 +47,30 @@ export function useGoogleCalendarSync(autoSync: boolean = false) {
     syncMutation.mutate(options);
   }, [syncMutation]);
 
-  // Auto-sync on mount if connected
+  // Auto-sync on mount
   useEffect(() => {
-    if (autoSync && isConnected && user && !initialSyncDone.current) {
+    if (autoSync && user && !initialSyncDone.current) {
       initialSyncDone.current = true;
       sync({ silent: true });
     }
-  }, [autoSync, isConnected, user, sync]);
+  }, [autoSync, user, sync]);
 
   // Interval-based background sync
   useEffect(() => {
-    if (!autoSync || !isConnected || !user) return;
+    if (!autoSync || !user) return;
 
     const intervalId = setInterval(() => {
       sync({ silent: true });
     }, SYNC_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [autoSync, isConnected, user, sync]);
+  }, [autoSync, user, sync]);
 
   return {
     sync: (options?: { silent?: boolean }) => syncMutation.mutate(options),
     isSyncing: syncMutation.isPending,
     lastSyncTime,
     syncError: syncMutation.error,
-    isConnected,
+    isConnected: true, // Always connected with iCal (no OAuth needed)
   };
 }
