@@ -14,6 +14,7 @@ import {
 import { de } from 'date-fns/locale';
 import { CalendarEvent } from '@/hooks/useEvents';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CalendarWeekViewProps {
   currentDate: Date;
@@ -24,6 +25,72 @@ interface CalendarWeekViewProps {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_HEIGHT = 60; // pixels per hour
+
+interface PositionedEvent {
+  event: CalendarEvent;
+  top: number;
+  height: number;
+  left: number;
+  width: number;
+  column: number;
+  totalColumns: number;
+}
+
+// Calculate overlapping event positions
+function calculateEventPositions(events: CalendarEvent[]): PositionedEvent[] {
+  if (events.length === 0) return [];
+
+  // Sort events by start time, then by duration (longer first)
+  const sortedEvents = [...events].sort((a, b) => {
+    const startDiff = new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    if (startDiff !== 0) return startDiff;
+    const durationA = differenceInMinutes(new Date(a.end_time), new Date(a.start_time));
+    const durationB = differenceInMinutes(new Date(b.end_time), new Date(b.start_time));
+    return durationB - durationA;
+  });
+
+  const positionedEvents: PositionedEvent[] = [];
+  const columns: { end: Date; events: CalendarEvent[] }[] = [];
+
+  for (const event of sortedEvents) {
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
+    const startMinutes = getHours(start) * 60 + getMinutes(start);
+    const durationMinutes = differenceInMinutes(end, start);
+
+    // Find a column where this event doesn't overlap
+    let columnIndex = columns.findIndex(col => col.end <= start);
+    
+    if (columnIndex === -1) {
+      // Need a new column
+      columnIndex = columns.length;
+      columns.push({ end, events: [event] });
+    } else {
+      columns[columnIndex].end = end;
+      columns[columnIndex].events.push(event);
+    }
+
+    positionedEvents.push({
+      event,
+      top: (startMinutes / 60) * HOUR_HEIGHT,
+      height: Math.max((durationMinutes / 60) * HOUR_HEIGHT, 24),
+      left: 0,
+      width: 100,
+      column: columnIndex,
+      totalColumns: columns.length,
+    });
+  }
+
+  // Update widths and positions based on total columns
+  const totalColumns = columns.length;
+  for (const positioned of positionedEvents) {
+    positioned.totalColumns = totalColumns;
+    positioned.width = 100 / totalColumns;
+    positioned.left = positioned.column * positioned.width;
+  }
+
+  return positionedEvents;
+}
 
 export function CalendarWeekView({
   currentDate,
@@ -40,18 +107,6 @@ export function CalendarWeekView({
       const eventStart = new Date(event.start_time);
       return isSameDay(eventStart, day);
     });
-  };
-
-  const getEventPosition = (event: CalendarEvent) => {
-    const start = new Date(event.start_time);
-    const end = new Date(event.end_time);
-    const startMinutes = getHours(start) * 60 + getMinutes(start);
-    const durationMinutes = differenceInMinutes(end, start);
-    
-    return {
-      top: (startMinutes / 60) * HOUR_HEIGHT,
-      height: Math.max((durationMinutes / 60) * HOUR_HEIGHT, 20),
-    };
   };
 
   return (
@@ -103,6 +158,7 @@ export function CalendarWeekView({
           {/* Day columns */}
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
+            const positionedEvents = calculateEventPositions(dayEvents);
             
             return (
               <div
@@ -123,29 +179,43 @@ export function CalendarWeekView({
                 ))}
 
                 {/* Events */}
-                {dayEvents.map((event) => {
-                  const { top, height } = getEventPosition(event);
-                  return (
-                    <button
-                      key={event.id}
-                      onClick={() => onEventClick(event)}
-                      className="absolute left-1 right-1 rounded px-2 py-1 text-xs font-medium overflow-hidden text-left hover:opacity-90 transition-opacity"
-                      style={{
-                        top,
-                        height,
-                        backgroundColor: event.color,
-                        color: getContrastColor(event.color),
-                      }}
-                    >
-                      <div className="font-medium truncate">{event.title}</div>
-                      {height > 30 && (
-                        <div className="opacity-80 truncate">
-                          {format(new Date(event.start_time), 'HH:mm')}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                {positionedEvents.map(({ event, top, height, left, width }) => (
+                  <Tooltip key={event.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => onEventClick(event)}
+                        className="absolute rounded px-1.5 py-1 text-xs font-medium overflow-hidden text-left hover:opacity-90 transition-opacity border-l-2"
+                        style={{
+                          top,
+                          height,
+                          left: `calc(${left}% + 2px)`,
+                          width: `calc(${width}% - 4px)`,
+                          backgroundColor: `${event.color}20`,
+                          borderLeftColor: event.color,
+                          color: getContrastColor(event.color, true),
+                        }}
+                      >
+                        <div className="font-medium truncate text-foreground">{event.title}</div>
+                        {height > 30 && (
+                          <div className="opacity-70 truncate text-foreground/70 text-[10px]">
+                            {format(new Date(event.start_time), 'HH:mm')}
+                          </div>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-medium">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(event.start_time), 'HH:mm')} - {format(new Date(event.end_time), 'HH:mm')}
+                        </p>
+                        {event.location && (
+                          <p className="text-xs text-muted-foreground">{event.location}</p>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
               </div>
             );
           })}
@@ -155,7 +225,8 @@ export function CalendarWeekView({
   );
 }
 
-function getContrastColor(hexColor: string): string {
+function getContrastColor(hexColor: string, lightBg = false): string {
+  if (lightBg) return '#1a1a1a'; // Dark text for light background
   const hex = hexColor.replace('#', '');
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);

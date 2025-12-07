@@ -1,11 +1,13 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Link2, Unlink, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, RefreshCw, Link2, Unlink, CheckCircle2, Plus, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CalendarView } from '@/hooks/useCalendarNavigation';
 import { useGoogleCalendarAuth } from '@/hooks/useGoogleCalendarAuth';
 import { useGoogleCalendarSync } from '@/hooks/useGoogleCalendarSync';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +16,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
+// Calendar sources - matches Edge Function configuration
+export const CALENDAR_SOURCES = [
+  { id: 'primary', name: 'Hauptkalender', color: '#3b82f6' },
+  { id: 'hello@npsfilm.de', name: 'NPS Film', color: '#10b981' },
+  { id: 'c_87445ee88350c15ef8f4e0bb32a2bf765f7cdb991c0631a46fe59fdf528570f8@group.calendar.google.com', name: 'Gruppen-Kalender', color: '#f59e0b' },
+];
+
 interface CalendarHeaderProps {
   currentDate: Date;
   view: CalendarView;
@@ -21,6 +30,9 @@ interface CalendarHeaderProps {
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
+  onNewEvent?: () => void;
+  visibleCalendars?: string[];
+  onToggleCalendar?: (calendarId: string) => void;
 }
 
 export function CalendarHeader({
@@ -30,6 +42,9 @@ export function CalendarHeader({
   onPrevious,
   onNext,
   onToday,
+  onNewEvent,
+  visibleCalendars = CALENDAR_SOURCES.map(c => c.id),
+  onToggleCalendar,
 }: CalendarHeaderProps) {
   const { isConnected, isLoadingToken, initiateOAuth, disconnectCalendar } = useGoogleCalendarAuth();
   const { sync, isSyncing, lastSyncTime } = useGoogleCalendarSync();
@@ -51,7 +66,8 @@ export function CalendarHeader({
 
   return (
     <div className="flex flex-col gap-4 pb-4 border-b border-border">
-      <div className="flex items-center justify-between">
+      {/* Top row - Title, navigation, views, actions */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-semibold text-foreground capitalize">
             {getTitle()}
@@ -70,6 +86,15 @@ export function CalendarHeader({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* New Event Button */}
+          {onNewEvent && (
+            <Button onClick={onNewEvent} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Neuer Termin
+            </Button>
+          )}
+
+          {/* View Toggle */}
           <ToggleGroup
             type="single"
             value={view}
@@ -90,6 +115,7 @@ export function CalendarHeader({
             </ToggleGroupItem>
           </ToggleGroup>
 
+          {/* Google Calendar Integration */}
           <div className="flex items-center gap-2">
             {isConnected && (
               <Button
@@ -99,7 +125,7 @@ export function CalendarHeader({
                 disabled={isSyncing}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Synchronisiere...' : 'Sync'}
+                {isSyncing ? 'Sync...' : 'Sync'}
               </Button>
             )}
 
@@ -107,7 +133,7 @@ export function CalendarHeader({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={isLoadingToken}>
                   <Calendar className="h-4 w-4 mr-2" />
-                  {isConnected ? 'Google verbunden' : 'Google verbinden'}
+                  {isConnected ? 'Google' : 'Verbinden'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -137,25 +163,64 @@ export function CalendarHeader({
         </div>
       </div>
 
-      {isConnected && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="secondary" className="gap-1 font-normal">
-            <CheckCircle2 className="h-3 w-3 text-green-500" />
-            Google verbunden
-          </Badge>
-          {lastSyncTime && (
-            <span>
-              Zuletzt synchronisiert: {formatDistanceToNow(lastSyncTime, { addSuffix: true, locale: de })}
-            </span>
-          )}
-          {isSyncing && (
-            <span className="flex items-center gap-1">
-              <RefreshCw className="h-3 w-3 animate-spin" />
-              Synchronisiere...
-            </span>
-          )}
+      {/* Bottom row - Calendar Legend & Filters */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        {/* Calendar Filters */}
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">Kalender:</span>
+          <div className="flex items-center gap-3">
+            {CALENDAR_SOURCES.map((calendar) => {
+              const isVisible = visibleCalendars.includes(calendar.id);
+              return (
+                <label
+                  key={calendar.id}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <Checkbox
+                    checked={isVisible}
+                    onCheckedChange={() => onToggleCalendar?.(calendar.id)}
+                    className="border-2"
+                    style={{ 
+                      borderColor: calendar.color,
+                      backgroundColor: isVisible ? calendar.color : 'transparent',
+                    }}
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: calendar.color }}
+                    />
+                    <span className="text-sm text-foreground group-hover:text-foreground/80">
+                      {calendar.name}
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
         </div>
-      )}
+
+        {/* Sync Status */}
+        {isConnected && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant="secondary" className="gap-1 font-normal">
+              <CheckCircle2 className="h-3 w-3 text-green-500" />
+              Google verbunden
+            </Badge>
+            {lastSyncTime && (
+              <span>
+                Zuletzt: {formatDistanceToNow(lastSyncTime, { addSuffix: true, locale: de })}
+              </span>
+            )}
+            {isSyncing && (
+              <span className="flex items-center gap-1">
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                Synchronisiere...
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
-import { CalendarHeader } from '@/components/calendar/CalendarHeader';
+import { CalendarHeader, CALENDAR_SOURCES } from '@/components/calendar/CalendarHeader';
 import { CalendarMonthView } from '@/components/calendar/CalendarMonthView';
 import { CalendarWeekView } from '@/components/calendar/CalendarWeekView';
 import { CalendarDayView } from '@/components/calendar/CalendarDayView';
@@ -31,6 +31,9 @@ export default function AdminCalendar() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [callbackProcessed, setCallbackProcessed] = useState(false);
+  const [visibleCalendars, setVisibleCalendars] = useState<string[]>(
+    CALENDAR_SOURCES.map(c => c.id)
+  );
 
   // Handle OAuth callback - tokens are stored server-side, just refresh local state
   useEffect(() => {
@@ -49,8 +52,28 @@ export default function AdminCalendar() {
       window.history.replaceState({}, '', '/admin/calendar');
     }
   }, [user, callbackProcessed, handleOAuthSuccess, sync]);
+
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>();
+
+  // Filter events based on visible calendars
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const source = event.calendar_source || 'primary';
+      return visibleCalendars.includes(source);
+    });
+  }, [events, visibleCalendars]);
+
+  const handleToggleCalendar = (calendarId: string) => {
+    setVisibleCalendars(prev => {
+      if (prev.includes(calendarId)) {
+        // Don't allow hiding all calendars
+        if (prev.length === 1) return prev;
+        return prev.filter(id => id !== calendarId);
+      }
+      return [...prev, calendarId];
+    });
+  };
 
   const handleDateClick = (date: Date) => {
     setSelectedEvent(null);
@@ -61,6 +84,12 @@ export default function AdminCalendar() {
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setDefaultDate(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleNewEvent = () => {
+    setSelectedEvent(null);
+    setDefaultDate(new Date());
     setIsModalOpen(true);
   };
 
@@ -100,7 +129,7 @@ export default function AdminCalendar() {
         return (
           <CalendarMonthView
             currentDate={currentDate}
-            events={events}
+            events={filteredEvents}
             onDateClick={handleDateClick}
             onEventClick={handleEventClick}
           />
@@ -109,7 +138,7 @@ export default function AdminCalendar() {
         return (
           <CalendarWeekView
             currentDate={currentDate}
-            events={events}
+            events={filteredEvents}
             onTimeSlotClick={handleDateClick}
             onEventClick={handleEventClick}
           />
@@ -118,7 +147,7 @@ export default function AdminCalendar() {
         return (
           <CalendarDayView
             currentDate={currentDate}
-            events={events}
+            events={filteredEvents}
             onTimeSlotClick={handleDateClick}
             onEventClick={handleEventClick}
           />
@@ -127,7 +156,7 @@ export default function AdminCalendar() {
         return (
           <CalendarListView
             currentDate={currentDate}
-            events={events}
+            events={filteredEvents}
             onEventClick={handleEventClick}
           />
         );
@@ -156,6 +185,9 @@ export default function AdminCalendar() {
             onPrevious={goToPrevious}
             onNext={goToNext}
             onToday={goToToday}
+            onNewEvent={handleNewEvent}
+            visibleCalendars={visibleCalendars}
+            onToggleCalendar={handleToggleCalendar}
           />
         </div>
 
