@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Card } from "@/components/ui/card";
 
 interface BlueHourSliderProps {
   beforeImage?: string;
@@ -11,47 +12,73 @@ export const BlueHourSlider = ({ beforeImage, afterImage, title }: BlueHourSlide
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
-  const handleMove = (clientX: number) => {
+  const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     setSliderPosition(percentage);
-  };
+  }, []);
 
-  const handleMouseDown = () => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     isDraggingRef.current = true;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
     handleMove(e.clientX);
   };
 
-  const handleMouseUp = () => {
-    isDraggingRef.current = false;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isDraggingRef.current = true;
     if (e.touches.length > 0) {
       handleMove(e.touches[0].clientX);
     }
   };
 
+  // Global mouse/touch move and up handlers for smooth dragging outside container
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      handleMove(e.clientX);
+    };
+
+    const handleGlobalMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (!isDraggingRef.current) return;
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX);
+      }
+    };
+
+    const handleGlobalTouchEnd = () => {
+      isDraggingRef.current = false;
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('touchmove', handleGlobalTouchMove);
+    document.addEventListener('touchend', handleGlobalTouchEnd);
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [handleMove]);
+
   return (
-    <div className="w-full">
+    <Card className="w-full p-3 bg-card">
       {title && (
         <p className="text-sm font-medium text-foreground mb-2">{title}</p>
       )}
       <div
         ref={containerRef}
-        className="relative aspect-[3/2] overflow-hidden rounded-2xl cursor-ew-resize select-none shadow-neu-flat"
+        className="relative aspect-[3/2] overflow-hidden rounded-xl cursor-ew-resize select-none"
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchMove={handleTouchMove}
+        onTouchStart={handleTouchStart}
       >
         {/* Before - Daylight image or gradient */}
         {beforeImage ? (
@@ -84,34 +111,30 @@ export const BlueHourSlider = ({ beforeImage, afterImage, title }: BlueHourSlide
           )}
         </div>
 
-        {/* Vorher Label */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-700 uppercase tracking-wide pointer-events-none">
-          Vorher
-        </div>
-
-        {/* Nachher Label */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-white uppercase tracking-wide pointer-events-none">
-          Nachher
-        </div>
-
         {/* Draggable divider */}
         <div
           className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none"
-          style={{ left: `${sliderPosition}%` }}
+          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
         >
           {/* Handle */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center pointer-events-auto cursor-ew-resize">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
             <div className="flex gap-0.5">
-              <div className="w-0.5 h-4 bg-gray-400 rounded-full" />
-              <div className="w-0.5 h-4 bg-gray-400 rounded-full" />
+              <div className="w-0.5 h-5 bg-muted-foreground/50 rounded-full" />
+              <div className="w-0.5 h-5 bg-muted-foreground/50 rounded-full" />
             </div>
           </div>
         </div>
+
+        {/* Labels at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-3 pb-3 pointer-events-none">
+          <span className="px-3 py-1 bg-background/80 backdrop-blur-sm rounded-full text-xs font-semibold text-foreground uppercase tracking-wide">
+            Vorher
+          </span>
+          <span className="px-3 py-1 bg-primary/80 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-foreground uppercase tracking-wide">
+            Nachher
+          </span>
+        </div>
       </div>
-      
-      <p className="text-xs text-muted-foreground mt-2 text-center">
-        Ziehen Sie den Regler, um den Effekt zu sehen
-      </p>
-    </div>
+    </Card>
   );
 };
