@@ -1,4 +1,4 @@
-import { Moon, Sun, Sparkles, Check } from 'lucide-react';
+import { Moon, Sun, CloudSun, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,7 @@ const services = [
     title: 'Virtuelle Blaue Stunde',
     icon: Moon,
     description: 'Verwandeln Sie Ihre Immobilienfotos in stimmungsvolle Dämmerungsaufnahmen mit warmem Innenlicht.',
-    price: 29,
+    price: 49,
     priceUnit: 'pro Bild',
     features: [
       'Realistische Dämmerungsstimmung',
@@ -31,7 +31,7 @@ const services = [
     title: 'Sommer-Winter Transformation',
     icon: Sun,
     description: 'Zeigen Sie Ihre Immobilie in der besten Jahreszeit – unabhängig davon, wann die Fotos aufgenommen wurden.',
-    price: 39,
+    price: 49,
     priceUnit: 'pro Bild',
     features: [
       'Schnee zu grünem Rasen',
@@ -43,20 +43,20 @@ const services = [
     iconColor: 'text-green-500',
   },
   {
-    id: 'sky_replacement',
-    title: 'Himmel-Austausch',
-    icon: Sparkles,
-    description: 'Ersetzen Sie graue, bewölkte Himmel durch strahlend blaue Himmel mit weißen Wolken.',
-    price: 19,
+    id: 'rain_sun',
+    title: 'Regen-Sonne',
+    icon: CloudSun,
+    description: 'Verwandeln Sie Regentage in sonnige Aufnahmen – strahlend blauer Himmel statt grauer Wolken.',
+    price: 49,
     priceUnit: 'pro Bild',
     features: [
-      'Blauer Himmel mit Wolken',
-      'Natürliche Reflexionen',
-      'Passende Beleuchtung',
-      'Schnelle Bearbeitung',
+      'Regenwetter zu Sonnenschein',
+      'Strahlend blauer Himmel',
+      'Natürliche Lichtstimmung',
+      'Trockene Straßen & Flächen',
     ],
-    gradient: 'from-sky-500/20 via-blue-400/10 to-cyan-500/20',
-    iconColor: 'text-sky-500',
+    gradient: 'from-yellow-500/20 via-orange-400/10 to-sky-500/20',
+    iconColor: 'text-yellow-500',
   },
 ];
 
@@ -68,7 +68,7 @@ export default function VirtualEditing() {
       {/* Hero Section */}
       <div className="text-center mb-12 animate-fade-in">
         <Badge variant="secondary" className="mb-4">
-          <Sparkles className="h-3 w-3 mr-1" />
+          <CloudSun className="h-3 w-3 mr-1" />
           Virtuelle Bearbeitung
         </Badge>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
