@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGalleryBySlug } from '@/hooks/useGallery';
@@ -11,18 +11,22 @@ import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilter
 import { ComparisonMode } from '@/components/client/ComparisonMode';
 import { WelcomeModal } from '@/components/client/WelcomeModal';
 import { SelectionSummary } from '@/components/client/SelectionSummary';
-import { SaveStatusIndicator } from '@/components/client/SaveStatusIndicator';
 import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
-import { DeliveryDownloadSection } from '@/components/client/delivery/DeliveryDownloadSection';
 import { usePhotoSelection } from '@/hooks/usePhotoSelection';
 import { usePhotoOrientations } from '@/hooks/usePhotoOrientations';
 import { useComparisonMode } from '@/hooks/useComparisonMode';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Info } from 'lucide-react';
-import { useEffect } from 'react';
+import {
+  GalleryHeader,
+  GalleryProofsBanner,
+  ComparisonModeInstructions,
+  GalleryLoadingState,
+  GalleryNotFound,
+  GalleryLocked,
+  DeliveredGalleryView,
+} from '@/components/client/gallery';
 
 export default function ClientGallery() {
   const { slug } = useParams<{ slug: string }>();
@@ -40,7 +44,6 @@ export default function ClientGallery() {
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
   const { orientations, detectOrientation } = usePhotoOrientations(photos);
 
-  // Use comparison mode hook
   const {
     isComparisonMode,
     comparisonPhotos,
@@ -61,7 +64,6 @@ export default function ClientGallery() {
     },
   });
 
-  // Filter photos based on active filter - MUST be before early returns
   const filteredPhotos = useMemo(() => {
     if (!photos) return undefined;
     switch (photoFilter) {
@@ -74,7 +76,6 @@ export default function ClientGallery() {
     }
   }, [photos, photoFilter]);
 
-  // Calculate filter counts - MUST be before early returns
   const selectedPhotos = photos?.filter(p => p.is_selected) || [];
   const filterCounts = useMemo(() => ({
     all: photos?.length || 0,
@@ -82,7 +83,6 @@ export default function ClientGallery() {
     unselected: (photos?.length || 0) - selectedPhotos.length,
   }), [photos, selectedPhotos]);
 
-  // Check if welcome modal should be shown (only first time ever, and if enabled for gallery)
   useEffect(() => {
     if (gallery && gallery.show_onboarding) {
       const storageKey = 'proofing_welcome_shown';
@@ -97,11 +97,6 @@ export default function ClientGallery() {
     localStorage.setItem('proofing_welcome_shown', 'true');
   };
 
-  const handleShowHelp = () => {
-    setShowWelcome(true);
-  };
-
-  // Keyboard navigation hook
   const handleNavigate = (direction: 'prev' | 'next') => {
     if (!photos || !selectedPhotoId) return;
     
@@ -150,69 +145,32 @@ export default function ClientGallery() {
     }
   };
 
+  // Loading state
   if (authLoading || galleryLoading) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <GalleryLoadingState />;
   }
 
+  // Not found state
   if (!gallery) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-muted-foreground mb-4">Galerie nicht gefunden</p>
-          <Button onClick={() => navigate('/')}>Zum Dashboard</Button>
-        </div>
-      </div>
-    );
+    return <GalleryNotFound onNavigate={() => navigate('/')} />;
   }
 
-  // If gallery is delivered, show download section
+  // Delivered state
   if (gallery.status === 'Delivered') {
-    const selectedCount = photos?.filter(p => p.is_selected).length || 0;
-    const totalCount = photos?.length || 0;
-    
     return (
-      <div className="pb-12">
-        <div className="flex items-center justify-between px-4 lg:px-6 xl:px-8 py-4 border-b border-border">
-          <div>
-            <h2 className="text-xl font-semibold">{gallery.name}</h2>
-            <p className="text-sm text-muted-foreground">{gallery.address}</p>
-          </div>
-          <SaveStatusIndicator isSaving={isSaving} lastSaved={lastSaved} />
-        </div>
-
-        <main className="max-w-6xl mx-auto px-4 lg:px-6 xl:px-8 py-12">
-          <DeliveryDownloadSection gallery={gallery} />
-        </main>
-
-        {role === 'admin' && (
-          <AdminPreviewOverlay 
-            gallery={gallery} 
-            selectedCount={selectedCount}
-            totalCount={totalCount}
-          />
-        )}
-      </div>
+      <DeliveredGalleryView
+        gallery={gallery}
+        photos={photos}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+        isAdmin={role === 'admin'}
+      />
     );
   }
 
+  // Locked state
   if (gallery.is_locked) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Diese Galerie wurde finalisiert und ist nun gesperrt. Sie können keine Änderungen mehr an Ihrer Auswahl vornehmen.
-            </AlertDescription>
-          </Alert>
-          <Button className="mt-4" onClick={() => navigate('/')}>Zum Dashboard</Button>
-        </div>
-      </div>
-    );
+    return <GalleryLocked onNavigate={() => navigate('/')} />;
   }
 
   const selectedPhoto = selectedPhotoId ? photos?.find(p => p.id === selectedPhotoId) : null;
@@ -221,26 +179,15 @@ export default function ClientGallery() {
 
   return (
     <div className="pb-32">
-      {/* Gallery Header */}
-      <div className="flex items-center justify-between px-4 lg:px-6 xl:px-8 py-4 border-b border-border">
-        <div>
-          <h2 className="text-xl font-semibold">{gallery.name}</h2>
-          <p className="text-sm text-muted-foreground">{gallery.address}</p>
-        </div>
-        <SaveStatusIndicator isSaving={isSaving} lastSaved={lastSaved} />
-      </div>
+      <GalleryHeader
+        name={gallery.name}
+        address={gallery.address || null}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+      />
 
-      {/* Banner */}
-      <div className="bg-blue-50 border-b border-blue-200 py-3">
-        <div className="container mx-auto px-4">
-          <p className="text-sm text-blue-900 text-center">
-            <Info className="inline h-4 w-4 mr-1" />
-            <strong>Nur unbearbeitete Proofs.</strong> Farben und Beleuchtung werden in der finalen Version korrigiert. Bitte konzentrieren Sie sich auf Winkel und Komposition.
-          </p>
-        </div>
-      </div>
+      <GalleryProofsBanner />
 
-      {/* Photo Grid */}
       <main className="max-w-[1920px] w-full mx-auto px-4 lg:px-6 xl:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <GalleryFilterBar
@@ -260,49 +207,15 @@ export default function ClientGallery() {
           </Button>
         </div>
 
-        {/* Comparison Mode Instructions */}
         {isComparisonMode && (
-          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-6 shadow-neu-flat-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-neu-flat-sm">
-                  {comparisonPhotos.length}/2
-                </div>
-                <div>
-                  <p className="font-semibold text-primary">Vergleichsmodus aktiv</p>
-                  <p className="text-sm text-muted-foreground">
-                    {comparisonPhotos.length === 0 
-                      ? 'Wählen Sie das erste Foto zum Vergleichen' 
-                      : comparisonPhotos.length === 1
-                      ? `Wählen Sie ein weiteres ${
-                          firstComparisonOrientation === 'portrait' 
-                            ? 'Hochformat' 
-                            : firstComparisonOrientation === 'landscape' 
-                            ? 'Querformat' 
-                            : 'quadratisches'
-                        }-Foto`
-                      : 'Bereit zum Vergleichen!'}
-                  </p>
-                  {firstComparisonOrientation && comparisonPhotos.length === 1 && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Nur Fotos mit gleichem Format können verglichen werden
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {comparisonPhotos.length === 2 && (
-                  <Button onClick={handleStartComparison}>
-                    Bilder vergleichen
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" onClick={handleComparisonToggle}>
-                  Abbrechen
-                </Button>
-              </div>
-            </div>
-          </div>
+          <ComparisonModeInstructions
+            comparisonPhotos={comparisonPhotos}
+            firstComparisonOrientation={firstComparisonOrientation}
+            onStartComparison={handleStartComparison}
+            onCancel={handleComparisonToggle}
+          />
         )}
+
         <VirtualizedPhotoGrid
           photos={filteredPhotos}
           isLoading={photosLoading || urlsLoading}
@@ -317,7 +230,6 @@ export default function ClientGallery() {
         />
       </main>
 
-      {/* Lightbox */}
       {selectedPhoto && photos && (
         <PhotoLightbox
           photo={selectedPhoto}
@@ -329,7 +241,6 @@ export default function ClientGallery() {
         />
       )}
 
-      {/* Comparison Mode */}
       {showComparisonOverlay && comparisonPhoto1 && comparisonPhoto2 && filteredPhotos && (
         <ComparisonMode
           photo1={comparisonPhoto1}
@@ -342,7 +253,6 @@ export default function ClientGallery() {
         />
       )}
 
-      {/* Selection Summary */}
       {photos && photos.length > 0 && (
         <SelectionSummary
           selectedPhotos={selectedPhotos}
@@ -354,7 +264,6 @@ export default function ClientGallery() {
         />
       )}
 
-      {/* Finalization Modals */}
       <FinalizeModals
         isOpen={showFinalizeModals}
         onClose={() => setShowFinalizeModals(false)}
@@ -362,7 +271,6 @@ export default function ClientGallery() {
         onFinalize={handleFinalizeSubmit}
       />
 
-      {/* Welcome Modal */}
       <WelcomeModal
         open={showWelcome}
         onOpenChange={setShowWelcome}
@@ -370,7 +278,6 @@ export default function ClientGallery() {
         onComplete={handleWelcomeComplete}
       />
 
-      {/* Admin Preview Overlay - Only visible to admins */}
       {role === 'admin' && (
         <AdminPreviewOverlay 
           gallery={gallery}
