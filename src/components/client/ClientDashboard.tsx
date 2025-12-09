@@ -1,136 +1,38 @@
-import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { RefreshCw, FolderOpen, ExternalLink, Lock, Unlock, Heart } from 'lucide-react';
+import { useState } from 'react';
+import { RefreshCw, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
-import { ReopenRequestModal } from '@/components/client/ReopenRequestModal';
-import { GalleryHeroCard } from '@/components/client/GalleryHeroCard';
-import { GalleryCompactCard } from '@/components/client/GalleryCompactCard';
-
 import { DashboardHero } from '@/components/client/DashboardHero';
 import { QuickActionsGrid } from '@/components/client/QuickActionsGrid';
-import { CostCalculatorModal } from '@/components/client/CostCalculatorModal';
-import { QuickDownloadsModal } from '@/components/client/QuickDownloadsModal';
-import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
-import { useClientProfile } from '@/hooks/useClientProfile';
-import { useStagingRequests } from '@/hooks/useStagingRequests';
-import { useAuth } from '@/contexts/AuthContext';
-import { GallerySelectionStats } from '@/types/database';
+import {
+  ReopenModalState,
+  useClientDashboardData,
+  ActiveGalleriesSection,
+  ClosedGalleriesSection,
+  DeliveredGalleriesSection,
+  DashboardModals,
+} from './dashboard';
 
 export function ClientDashboard() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [reopenGalleryId, setReopenGalleryId] = useState<string | null>(null);
-  const [reopenGalleryName, setReopenGalleryName] = useState('');
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [downloadsOpen, setDownloadsOpen] = useState(false);
-
-  const { data: clientProfile } = useClientProfile(user?.email);
-  const { data: stagingRequests } = useStagingRequests();
-
-  const { data: stats, isLoading, refetch } = useQuery({
-    queryKey: ['client-gallery-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_gallery_selection_stats')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as GallerySelectionStats[];
-    },
+  const [reopenModal, setReopenModal] = useState<ReopenModalState>({
+    galleryId: null,
+    galleryName: '',
   });
 
-  // Fetch cover photos for all galleries
-  const galleryIds = useMemo(() => stats?.map(g => g.gallery_id || '').filter(Boolean) || [], [stats]);
-  const { data: coverPhotos } = useGalleryCoverPhotos(galleryIds);
-
-  // Section galleries into Active, Closed, and Completed
-  const { activeGalleries, closedGalleries, completedGalleries } = useMemo(() => {
-    const active: GallerySelectionStats[] = [];
-    const closed: GallerySelectionStats[] = [];
-    const completed: GallerySelectionStats[] = [];
-    
-    (stats || []).forEach(gallery => {
-      if (gallery.status === 'Planning' || gallery.status === 'Open' || gallery.status === 'Processing') {
-        active.push(gallery);
-      } else if (gallery.status === 'Closed') {
-        closed.push(gallery);
-      } else {
-        completed.push(gallery); // Delivered
-      }
-    });
-    
-    return { activeGalleries: active, closedGalleries: closed, completedGalleries: completed };
-  }, [stats]);
-
-  // Count open staging requests
-  const openStagingCount = useMemo(() => {
-    return stagingRequests?.filter(r => r.status === 'pending').length || 0;
-  }, [stagingRequests]);
-
-  // Helper to check if gallery is new (< 2 days old)
-  const isNewGallery = (createdAt: string | null) => {
-    if (!createdAt) return false;
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    return new Date(createdAt) > twoDaysAgo;
-  };
-
-
-  const getButtonConfig = (status: string, slug: string, galleryId: string, name: string) => {
-    switch (status) {
-      case 'Planning':
-        return {
-          label: 'In Vorbereitung',
-          icon: Lock,
-          disabled: true,
-          action: () => {},
-        };
-      case 'Open':
-        return {
-          label: 'Fotos auswählen',
-          icon: Heart,
-          disabled: false,
-          action: () => navigate(`/gallery/${slug}`),
-        };
-      case 'Closed':
-        return {
-          label: 'Um Wiedereröffnung bitten',
-          icon: Unlock,
-          disabled: false,
-          variant: 'outline' as const,
-          action: () => {
-            setReopenGalleryId(galleryId);
-            setReopenGalleryName(name);
-          },
-        };
-      case 'Processing':
-        return {
-          label: 'In Bearbeitung',
-          icon: RefreshCw,
-          disabled: true,
-          action: () => {},
-        };
-      case 'Delivered':
-        return {
-          label: 'Herunterladen',
-          icon: ExternalLink,
-          disabled: false,
-          action: () => navigate(`/gallery/${slug}`),
-        };
-      default:
-        return {
-          label: 'Galerie öffnen',
-          icon: FolderOpen,
-          disabled: false,
-          action: () => navigate(`/gallery/${slug}`),
-        };
-    }
-  };
+  const {
+    clientProfile,
+    stats,
+    isLoading,
+    refetch,
+    coverPhotos,
+    gallerySections,
+    openStagingCount,
+    isNewGallery,
+    getButtonConfig,
+  } = useClientDashboardData(setReopenModal);
 
   if (isLoading) {
     return (
@@ -141,6 +43,7 @@ export function ClientDashboard() {
   }
 
   const hasNoGalleries = !stats || stats.length === 0;
+  const { activeGalleries, closedGalleries, completedGalleries } = gallerySections;
 
   return (
     <div className="container mx-auto px-4 lg:px-6 py-8 max-w-[1920px]">
@@ -179,124 +82,24 @@ export function ClientDashboard() {
           />
         ) : (
           <>
-            {/* Active Projects Section */}
-            {activeGalleries.length > 0 && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Aktive Projekte ({activeGalleries.length})
-                  </h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {activeGalleries.map((gallery) => {
-                    const buttonConfig = getButtonConfig(
-                      gallery.status || 'Planning',
-                      gallery.slug || '',
-                      gallery.gallery_id || '',
-                      gallery.name || ''
-                    );
+            <ActiveGalleriesSection
+              galleries={activeGalleries}
+              coverPhotos={coverPhotos}
+              getButtonConfig={getButtonConfig}
+            />
 
-                    const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
+            <ClosedGalleriesSection
+              galleries={closedGalleries}
+              getButtonConfig={getButtonConfig}
+              isNewGallery={isNewGallery}
+            />
 
-                    return (
-                      <GalleryHeroCard
-                        key={gallery.gallery_id}
-                        name={gallery.name || ''}
-                        status={gallery.status || 'Planning'}
-                        photosCount={gallery.photos_count || 0}
-                        selectedCount={gallery.selected_count || 0}
-                        stagingCount={gallery.staging_count || 0}
-                        coverImageUrl={coverImageUrl}
-                        buttonLabel={buttonConfig.label}
-                        buttonIcon={buttonConfig.icon}
-                        buttonAction={buttonConfig.action}
-                        buttonDisabled={buttonConfig.disabled}
-                        buttonVariant={buttonConfig.variant}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <DeliveredGalleriesSection
+              galleries={completedGalleries}
+              coverPhotos={coverPhotos}
+              getButtonConfig={getButtonConfig}
+            />
 
-            {/* Closed Projects Section */}
-            {closedGalleries.length > 0 && (
-              <div className="space-y-3 animate-fade-in">
-                <h3 className="text-lg font-semibold text-muted-foreground">
-                  Abgeschlossen ({closedGalleries.length})
-                </h3>
-                
-                <div className="space-y-2">
-                  {closedGalleries.map((gallery) => {
-                    const buttonConfig = getButtonConfig(
-                      gallery.status || 'Closed',
-                      gallery.slug || '',
-                      gallery.gallery_id || '',
-                      gallery.name || ''
-                    );
-
-                    return (
-                      <GalleryCompactCard
-                        key={gallery.gallery_id}
-                        name={gallery.name || ''}
-                        status={gallery.status || 'Closed'}
-                        photosCount={gallery.photos_count || 0}
-                        selectedCount={gallery.selected_count || 0}
-                        buttonLabel={buttonConfig.label}
-                        buttonIcon={buttonConfig.icon}
-                        buttonAction={buttonConfig.action}
-                        buttonDisabled={buttonConfig.disabled}
-                        buttonVariant={buttonConfig.variant}
-                        isNew={isNewGallery(gallery.created_at)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Delivered Projects Section */}
-            {completedGalleries.length > 0 && (
-              <div className="space-y-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-muted-foreground">
-                  Geliefert ({completedGalleries.length})
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {completedGalleries.map((gallery) => {
-                    const buttonConfig = getButtonConfig(
-                      gallery.status || 'Delivered',
-                      gallery.slug || '',
-                      gallery.gallery_id || '',
-                      gallery.name || ''
-                    );
-
-                    const coverImageUrl = coverPhotos?.[gallery.gallery_id || '']?.signed_url;
-
-                    return (
-                      <GalleryHeroCard
-                        key={gallery.gallery_id}
-                        name={gallery.name || ''}
-                        status={gallery.status || 'Delivered'}
-                        photosCount={gallery.photos_count || 0}
-                        selectedCount={gallery.selected_count || 0}
-                        stagingCount={gallery.staging_count || 0}
-                        coverImageUrl={coverImageUrl}
-                        buttonLabel={buttonConfig.label}
-                        buttonIcon={buttonConfig.icon}
-                        buttonAction={buttonConfig.action}
-                        buttonDisabled={buttonConfig.disabled}
-                        buttonVariant={buttonConfig.variant}
-                        size="small"
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Empty state for active galleries */}
             {activeGalleries.length === 0 && (
               <EmptyState
                 icon={FolderOpen}
@@ -308,28 +111,14 @@ export function ClientDashboard() {
         )}
       </div>
 
-      {/* Modals */}
-      <CostCalculatorModal
-        open={calculatorOpen}
-        onOpenChange={setCalculatorOpen}
-      />
-
-      <QuickDownloadsModal
-        open={downloadsOpen}
-        onOpenChange={setDownloadsOpen}
+      <DashboardModals
+        calculatorOpen={calculatorOpen}
+        setCalculatorOpen={setCalculatorOpen}
+        downloadsOpen={downloadsOpen}
+        setDownloadsOpen={setDownloadsOpen}
+        reopenModal={reopenModal}
+        setReopenModal={setReopenModal}
         deliveredGalleries={completedGalleries}
-      />
-
-      <ReopenRequestModal
-        open={!!reopenGalleryId}
-        onOpenChange={(open) => {
-          if (!open) {
-            setReopenGalleryId(null);
-            setReopenGalleryName('');
-          }
-        }}
-        galleryId={reopenGalleryId || ''}
-        galleryName={reopenGalleryName}
       />
     </div>
   );
