@@ -47,18 +47,18 @@ export function CalendarDayView({
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="py-4 text-center border-b border-border bg-muted/30">
-        <div className="text-sm text-muted-foreground">
+      <div className="py-2 md:py-4 text-center border-b border-border bg-muted/30">
+        <div className="text-xs md:text-sm text-muted-foreground">
           {format(currentDate, 'EEEE', { locale: de })}
         </div>
-        <div className="text-3xl font-medium text-foreground">
+        <div className="text-xl md:text-3xl font-medium text-foreground">
           {format(currentDate, 'd. MMMM yyyy', { locale: de })}
         </div>
       </div>
 
       {/* Time grid */}
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-[60px_1fr]" style={{ minHeight: HOURS.length * HOUR_HEIGHT }}>
+        <div className="grid grid-cols-[45px_1fr] md:grid-cols-[60px_1fr]" style={{ minHeight: HOURS.length * HOUR_HEIGHT }}>
           {/* Time column */}
           <div className="border-r border-border">
             {HOURS.map((hour) => (
@@ -67,7 +67,7 @@ export function CalendarDayView({
                 className="relative border-b border-border"
                 style={{ height: HOUR_HEIGHT }}
               >
-                <span className="absolute -top-2.5 right-2 text-xs text-muted-foreground">
+                <span className="absolute -top-2.5 right-1 md:right-2 text-[10px] md:text-xs text-muted-foreground">
                   {format(setHours(setMinutes(new Date(), 0), hour), 'HH:mm')}
                 </span>
               </div>
@@ -93,7 +93,7 @@ export function CalendarDayView({
                 <button
                   key={event.id}
                   onClick={() => onEventClick(event)}
-                  className="absolute left-2 right-2 rounded-lg px-3 py-2 text-left hover:opacity-90 transition-opacity shadow-sm"
+                  className="absolute left-1 right-1 md:left-2 md:right-2 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-left hover:opacity-90 transition-opacity shadow-sm"
                   style={{
                     top,
                     height,
@@ -101,13 +101,13 @@ export function CalendarDayView({
                     color: getContrastColor(event.color),
                   }}
                 >
-                  <div className="font-medium">{event.title}</div>
-                  <div className="text-sm opacity-80">
+                  <div className="font-medium text-sm md:text-base">{event.title}</div>
+                  <div className="text-xs md:text-sm opacity-80">
                     {format(new Date(event.start_time), 'HH:mm')} -{' '}
                     {format(new Date(event.end_time), 'HH:mm')}
                   </div>
                   {height > 60 && event.location && (
-                    <div className="text-sm opacity-70 mt-1">{event.location}</div>
+                    <div className="text-xs md:text-sm opacity-70 mt-1">{event.location}</div>
                   )}
                 </button>
               );
