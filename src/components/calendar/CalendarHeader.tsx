@@ -55,32 +55,33 @@ export function CalendarHeader({
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-4 border-b border-border">
+    <div className="flex flex-col gap-2 md:gap-4 pb-2 md:pb-4 border-b border-border">
       {/* Top row - Title, navigation, views, actions */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-semibold text-foreground capitalize">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <h2 className="text-lg md:text-2xl font-semibold text-foreground capitalize">
             {getTitle()}
           </h2>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" onClick={onPrevious}>
+          <div className="flex items-center gap-0.5 md:gap-1">
+            <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9" onClick={onPrevious}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={onToday}>
+            <Button variant="outline" size="sm" onClick={onToday} className="text-xs md:text-sm px-2 md:px-3">
               Heute
             </Button>
-            <Button variant="outline" size="icon" onClick={onNext}>
+            <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9" onClick={onNext}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
           {/* New Event Button */}
           {onNewEvent && (
-            <Button onClick={onNewEvent} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Neuer Termin
+            <Button onClick={onNewEvent} size="sm" className="text-xs md:text-sm">
+              <Plus className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Neuer Termin</span>
+              <span className="sm:hidden">Neu</span>
             </Button>
           )}
 
@@ -89,19 +90,23 @@ export function CalendarHeader({
             type="single"
             value={view}
             onValueChange={(value) => value && onViewChange(value as CalendarView)}
-            className="bg-muted rounded-lg p-1"
+            className="bg-muted rounded-lg p-0.5 md:p-1"
           >
-            <ToggleGroupItem value="month" size="sm" className="data-[state=on]:bg-background">
-              Monat
+            <ToggleGroupItem value="month" size="sm" className="data-[state=on]:bg-background text-xs md:text-sm px-2 md:px-3">
+              <span className="hidden sm:inline">Monat</span>
+              <span className="sm:hidden">M</span>
             </ToggleGroupItem>
-            <ToggleGroupItem value="week" size="sm" className="data-[state=on]:bg-background">
-              Woche
+            <ToggleGroupItem value="week" size="sm" className="data-[state=on]:bg-background text-xs md:text-sm px-2 md:px-3">
+              <span className="hidden sm:inline">Woche</span>
+              <span className="sm:hidden">W</span>
             </ToggleGroupItem>
-            <ToggleGroupItem value="day" size="sm" className="data-[state=on]:bg-background">
-              Tag
+            <ToggleGroupItem value="day" size="sm" className="data-[state=on]:bg-background text-xs md:text-sm px-2 md:px-3">
+              <span className="hidden sm:inline">Tag</span>
+              <span className="sm:hidden">T</span>
             </ToggleGroupItem>
-            <ToggleGroupItem value="list" size="sm" className="data-[state=on]:bg-background">
-              Liste
+            <ToggleGroupItem value="list" size="sm" className="data-[state=on]:bg-background text-xs md:text-sm px-2 md:px-3">
+              <span className="hidden sm:inline">Liste</span>
+              <span className="sm:hidden">L</span>
             </ToggleGroupItem>
           </ToggleGroup>
 
@@ -111,15 +116,16 @@ export function CalendarHeader({
             size="sm"
             onClick={() => sync()}
             disabled={isSyncing}
+            className="text-xs md:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Sync...' : 'Sync'}
+            <RefreshCw className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline ml-2">{isSyncing ? 'Sync...' : 'Sync'}</span>
           </Button>
         </div>
       </div>
 
-      {/* Bottom row - Calendar Legend & Filters */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      {/* Bottom row - Calendar Legend & Filters - hidden on mobile */}
+      <div className="hidden md:flex items-center justify-between flex-wrap gap-3">
         {/* Calendar Filters */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">Kalender:</span>

@@ -93,15 +93,15 @@ export default function GalleriesList() {
 
   return (
     <PageContainer size="full">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <PageHeader
           title="Galerien"
           description="Alle Galerien verwalten und organisieren"
           breadcrumbs={[{ label: 'Galerien' }]}
           actions={
-            <>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {filteredGalleries.length > 0 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 order-2 sm:order-1">
                   <Checkbox
                     id="select-all"
                     checked={isAllSelected}
@@ -109,17 +109,17 @@ export default function GalleriesList() {
                   />
                   <label
                     htmlFor="select-all"
-                    className="text-sm font-medium cursor-pointer"
+                    className="text-sm font-medium cursor-pointer whitespace-nowrap"
                   >
                     Alle auswählen
                   </label>
                 </div>
               )}
-              <Button onClick={() => navigate('/admin/galleries/new')}>
+              <Button onClick={() => navigate('/admin/galleries/new')} className="order-1 sm:order-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Neue Galerie
               </Button>
-            </>
+            </div>
           }
         />
 
@@ -150,7 +150,7 @@ export default function GalleriesList() {
                 )}
               </div>
             )}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {filteredGalleries.map((gallery) => (
                 <Card
                   key={gallery.id}
