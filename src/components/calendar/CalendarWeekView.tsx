@@ -112,22 +112,22 @@ export function CalendarWeekView({
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header with days */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border shrink-0">
+      <div className="grid grid-cols-[40px_repeat(7,1fr)] md:grid-cols-[60px_repeat(7,1fr)] border-b border-border shrink-0">
         <div className="border-r border-border" />
         {days.map((day) => (
           <div
             key={day.toISOString()}
             className={cn(
-              'py-3 text-center border-r border-border',
+              'py-1.5 md:py-3 text-center border-r border-border',
               isToday(day) && 'bg-primary/5'
             )}
           >
-            <div className="text-sm text-muted-foreground">
-              {format(day, 'EEE', { locale: de })}
+            <div className="text-[10px] md:text-sm text-muted-foreground">
+              {format(day, 'EEEEE', { locale: de })}
             </div>
             <div
               className={cn(
-                'text-lg font-medium',
+                'text-sm md:text-lg font-medium',
                 isToday(day) && 'text-primary'
               )}
             >
@@ -139,7 +139,7 @@ export function CalendarWeekView({
 
       {/* Time grid */}
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-[60px_repeat(7,1fr)]" style={{ minHeight: HOURS.length * HOUR_HEIGHT }}>
+        <div className="grid grid-cols-[40px_repeat(7,1fr)] md:grid-cols-[60px_repeat(7,1fr)]" style={{ minHeight: HOURS.length * HOUR_HEIGHT }}>
           {/* Time column */}
           <div className="border-r border-border">
             {HOURS.map((hour) => (
@@ -148,8 +148,8 @@ export function CalendarWeekView({
                 className="relative border-b border-border"
                 style={{ height: HOUR_HEIGHT }}
               >
-                <span className="absolute -top-2.5 right-2 text-xs text-muted-foreground">
-                  {format(setHours(setMinutes(new Date(), 0), hour), 'HH:mm')}
+                <span className="absolute -top-2.5 right-0.5 md:right-2 text-[10px] md:text-xs text-muted-foreground">
+                  {format(setHours(setMinutes(new Date(), 0), hour), 'HH')}
                 </span>
               </div>
             ))}
@@ -184,20 +184,20 @@ export function CalendarWeekView({
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => onEventClick(event)}
-                        className="absolute rounded px-1.5 py-1 text-xs font-medium overflow-hidden text-left hover:opacity-90 transition-opacity border-l-2"
+                        className="absolute rounded px-0.5 md:px-1.5 py-0.5 md:py-1 text-[8px] md:text-xs font-medium overflow-hidden text-left hover:opacity-90 transition-opacity border-l-2"
                         style={{
                           top,
                           height,
-                          left: `calc(${left}% + 2px)`,
-                          width: `calc(${width}% - 4px)`,
+                          left: `calc(${left}% + 1px)`,
+                          width: `calc(${width}% - 2px)`,
                           backgroundColor: `${event.color}20`,
                           borderLeftColor: event.color,
                           color: getContrastColor(event.color, true),
                         }}
                       >
-                        <div className="font-medium truncate text-foreground">{event.title}</div>
+                        <div className="font-medium truncate text-foreground text-[8px] md:text-xs">{event.title}</div>
                         {height > 30 && (
-                          <div className="opacity-70 truncate text-foreground/70 text-[10px]">
+                          <div className="opacity-70 truncate text-foreground/70 text-[8px] md:text-[10px] hidden md:block">
                             {format(new Date(event.start_time), 'HH:mm')}
                           </div>
                         )}

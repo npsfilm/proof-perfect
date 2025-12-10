@@ -48,14 +48,17 @@ export function CalendarMonthView({
 
   const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+  // On mobile, show fewer events
+  const maxVisibleEvents = typeof window !== 'undefined' && window.innerWidth < 640 ? 1 : 3;
+
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col overflow-auto">
       {/* Header */}
-      <div className="grid grid-cols-7 border-b border-border">
+      <div className="grid grid-cols-7 border-b border-border sticky top-0 bg-card z-10">
         {weekDays.map((day) => (
           <div
             key={day}
-            className="py-2 text-center text-sm font-medium text-muted-foreground"
+            className="py-1.5 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground"
           >
             {day}
           </div>
@@ -68,14 +71,14 @@ export function CalendarMonthView({
           const dayEvents = getEventsForDay(day);
           const isCurrentMonth = isSameMonth(day, currentDate);
           const isCurrentDay = isToday(day);
-          const visibleEvents = dayEvents.slice(0, 3);
-          const hiddenCount = dayEvents.length - 3;
+          const visibleEvents = dayEvents.slice(0, maxVisibleEvents);
+          const hiddenCount = dayEvents.length - maxVisibleEvents;
 
           return (
             <div
               key={day.toISOString()}
               className={cn(
-                'min-h-[120px] p-1.5 border-b border-r border-border cursor-pointer hover:bg-accent/30 transition-colors group',
+                'min-h-[60px] md:min-h-[100px] lg:min-h-[120px] p-0.5 md:p-1.5 border-b border-r border-border cursor-pointer hover:bg-accent/30 transition-colors group',
                 !isCurrentMonth && 'bg-muted/30',
                 index % 7 === 0 && 'border-l'
               )}
@@ -84,7 +87,7 @@ export function CalendarMonthView({
               <div className="flex flex-col h-full">
                 <span
                   className={cn(
-                    'inline-flex items-center justify-center w-7 h-7 text-sm rounded-full mb-1 transition-colors',
+                    'inline-flex items-center justify-center w-5 h-5 md:w-7 md:h-7 text-xs md:text-sm rounded-full mb-0.5 md:mb-1 transition-colors',
                     isCurrentDay && 'bg-primary text-primary-foreground font-medium',
                     !isCurrentMonth && 'text-muted-foreground',
                     !isCurrentDay && 'group-hover:bg-accent'
@@ -124,16 +127,16 @@ export function CalendarMonthView({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button 
-                          className="text-xs text-muted-foreground hover:text-foreground pl-2 w-full text-left"
+                          className="text-[10px] md:text-xs text-muted-foreground hover:text-foreground pl-1 md:pl-2 w-full text-left"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          +{hiddenCount} weitere
+                          +{hiddenCount}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-xs">
                         <ScrollArea className="max-h-48">
                           <div className="space-y-2 p-1">
-                            {dayEvents.slice(3).map((event) => (
+                            {dayEvents.slice(maxVisibleEvents).map((event) => (
                               <button
                                 key={event.id}
                                 onClick={() => onEventClick(event)}

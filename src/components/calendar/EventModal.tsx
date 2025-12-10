@@ -144,7 +144,7 @@ export function EventModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
@@ -162,19 +162,19 @@ export function EventModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start</Label>
               <div className="flex gap-2">
-                <Input type="date" {...register('start_date')} />
-                <Input type="time" {...register('start_time')} className="w-24" />
+                <Input type="date" {...register('start_date')} className="flex-1" />
+                <Input type="time" {...register('start_time')} className="w-[100px]" />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Ende</Label>
               <div className="flex gap-2">
-                <Input type="date" {...register('end_date')} />
-                <Input type="time" {...register('end_time')} className="w-24" />
+                <Input type="date" {...register('end_date')} className="flex-1" />
+                <Input type="time" {...register('end_time')} className="w-[100px]" />
               </div>
             </div>
           </div>
@@ -221,11 +221,11 @@ export function EventModal({
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             {isEditing && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="destructive" size="sm">
+                  <Button type="button" variant="destructive" size="sm" className="w-full sm:w-auto">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Löschen
                   </Button>
@@ -244,12 +244,14 @@ export function EventModal({
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button type="button" variant="outline" onClick={onClose}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? 'Speichern...' : isEditing ? 'Aktualisieren' : 'Erstellen'}
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1 sm:flex-initial">
+                Abbrechen
+              </Button>
+              <Button type="submit" disabled={isSaving} className="flex-1 sm:flex-initial">
+                {isSaving ? 'Speichern...' : isEditing ? 'Aktualisieren' : 'Erstellen'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
