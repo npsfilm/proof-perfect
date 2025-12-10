@@ -86,7 +86,7 @@ export default function GalleryReview() {
 
   return (
     <PageContainer size="xl">
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <PageHeader
           title={gallery.status === 'Delivered' ? `Geliefert: ${gallery.name}` : `In Bearbeitung: ${gallery.name}`}
           description="Kundenauswahl und Feedback"
@@ -96,7 +96,7 @@ export default function GalleryReview() {
             { label: 'Überprüfung' }
           ]}
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {gallery.reviewed_at && (
                 <TimeElapsed 
                   startTime={gallery.reviewed_at} 
@@ -104,7 +104,7 @@ export default function GalleryReview() {
                   variant="secondary"
                 />
               )}
-              <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'}>
+              <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'} className="justify-center">
                 {STATUS_LABELS[gallery.status] || gallery.status}
               </Badge>
               {gallery.status === 'Delivered' && (
@@ -113,6 +113,7 @@ export default function GalleryReview() {
                   size="sm"
                   onClick={handleResendDelivery}
                   disabled={resending}
+                  className="w-full sm:w-auto"
                 >
                   {resending ? (
                     <>

@@ -176,8 +176,8 @@ export default function AdminCalendar() {
         ]}
       />
 
-      <div className="flex flex-col h-[calc(100vh-12rem)] bg-card rounded-lg border border-border shadow-sm overflow-hidden">
-        <div className="p-4">
+      <div className="flex flex-col h-[calc(100vh-10rem)] md:h-[calc(100vh-12rem)] bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+        <div className="p-2 md:p-4">
           <CalendarHeader
             currentDate={currentDate}
             view={view}

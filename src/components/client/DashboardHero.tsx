@@ -29,7 +29,7 @@ export function DashboardHero({ clientName, anrede }: DashboardHeroProps) {
   const displayName = clientName ? `${anrede || ''} ${clientName}`.trim() : '';
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 md:p-10 text-primary-foreground animate-fade-in">
+    <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-5 sm:p-6 md:p-8 lg:p-10 text-primary-foreground animate-fade-in">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -37,18 +37,18 @@ export function DashboardHero({ clientName, anrede }: DashboardHeroProps) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-3">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+        <div className="space-y-2 md:space-y-3">
           <div className="flex items-center gap-2 text-primary-foreground/80">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">{quote}</span>
+            <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4" />
+            <span className="text-xs md:text-sm font-medium">{quote}</span>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
             {greeting}{displayName ? `, ${displayName}` : ''}!
           </h1>
           
-          <p className="text-primary-foreground/80 text-lg max-w-xl">
+          <p className="text-primary-foreground/80 text-sm md:text-lg max-w-xl">
             Willkommen bei ImmoOnPoint. Verwalten Sie Ihre Projekte und entdecken Sie unsere Services.
           </p>
         </div>

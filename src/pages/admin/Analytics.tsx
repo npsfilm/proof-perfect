@@ -28,7 +28,7 @@ export default function Analytics() {
 
   return (
     <PageContainer size="full">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <PageHeader
           title="Analytik-Dashboard"
           description="Leistungskennzahlen und Einblicke"
@@ -36,7 +36,7 @@ export default function Analytics() {
         />
 
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function Analytics() {
       </div>
 
       {/* Charts Row 1 */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
         {/* Gallery Status Distribution */}
         <Card>
           <CardHeader>
@@ -113,7 +113,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             {analytics.galleriesByStatus.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={analytics.galleriesByStatus}
@@ -146,7 +146,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             {analytics.stagingRequests.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={analytics.stagingRequests}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="stagingStyle" />
@@ -170,7 +170,7 @@ export default function Analytics() {
         </CardHeader>
         <CardContent>
           {analytics.recentActivity.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={analytics.recentActivity}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis

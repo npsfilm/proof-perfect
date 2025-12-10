@@ -64,35 +64,35 @@ export default function VirtualEditing() {
   const navigate = useNavigate();
 
   return (
-    <div className="container max-w-6xl mx-auto px-4 py-8">
+    <div className="container max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-8">
       {/* Hero Section */}
-      <div className="text-center mb-12 animate-fade-in">
-        <Badge variant="secondary" className="mb-4">
+      <div className="text-center mb-8 md:mb-12 animate-fade-in">
+        <Badge variant="secondary" className="mb-3 md:mb-4">
           <CloudSun className="h-3 w-3 mr-1" />
           Virtuelle Bearbeitung
         </Badge>
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
           Verwandeln Sie Ihre Immobilienfotos
         </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+        <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
           Professionelle Bildbearbeitung für maximale Wirkung. 
           Blaue Stunde, Jahreszeiten-Transformation und mehr.
         </p>
       </div>
 
       {/* Blue Hour Demo */}
-      <Card className="mb-12 overflow-hidden animate-fade-in">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="flex items-center justify-center gap-2">
-            <Moon className="h-5 w-5 text-blue-500" />
+      <Card className="mb-8 md:mb-12 overflow-hidden animate-fade-in">
+        <CardHeader className="text-center pb-2 px-4 md:px-6">
+          <CardTitle className="flex items-center justify-center gap-2 text-base md:text-lg">
+            <Moon className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
             Virtuelle Blaue Stunde – Vorher / Nachher
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs md:text-sm">
             Ziehen Sie den Regler, um den Unterschied zu sehen
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
+        <CardContent className="p-3 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <BlueHourSlider
               beforeImage={blueHourBefore1}
               afterImage={blueHourAfter1}
@@ -106,7 +106,7 @@ export default function VirtualEditing() {
       </Card>
 
       {/* Services Grid */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
         {services.map((service, index) => (
           <Card 
             key={service.id} 
@@ -142,12 +142,12 @@ export default function VirtualEditing() {
 
       {/* Pricing Info */}
       <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in">
-        <CardContent className="p-8 text-center">
-          <h3 className="text-xl font-semibold mb-2">Mengenrabatt</h3>
-          <p className="text-muted-foreground mb-4">
+        <CardContent className="p-4 md:p-8 text-center">
+          <h3 className="text-lg md:text-xl font-semibold mb-2">Mengenrabatt</h3>
+          <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
             Bei 5 oder mehr Bildern erhalten Sie <span className="font-semibold text-primary">1 Bild gratis</span>!
           </p>
-          <Button onClick={() => navigate('/?tab=staging')} size="lg">
+          <Button onClick={() => navigate('/?tab=staging')} size="default" className="w-full sm:w-auto">
             Jetzt Staging anfordern
           </Button>
         </CardContent>

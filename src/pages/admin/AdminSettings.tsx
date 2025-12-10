@@ -125,26 +125,28 @@ export default function AdminSettings() {
 
   return (
     <PageContainer size="lg">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <PageHeader
           title="Einstellungen"
           description="System-Konfiguration, Verfügbarkeit und E-Mail-Templates"
           breadcrumbs={[{ label: 'Einstellungen' }]}
         />
 
-        <Tabs defaultValue="availability" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="availability" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Verfügbarkeit
+        <Tabs defaultValue="availability" className="space-y-4 md:space-y-6">
+          <TabsList className="w-full sm:w-auto flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="availability" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
+              <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Verfügbarkeit</span>
+              <span className="sm:hidden">Zeiten</span>
             </TabsTrigger>
-            <TabsTrigger value="webhooks" className="flex items-center gap-2">
-              <Webhook className="h-4 w-4" />
+            <TabsTrigger value="webhooks" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
+              <Webhook className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Webhooks
             </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              E-Mail-Templates
+            <TabsTrigger value="emails" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
+              <Mail className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">E-Mail-Templates</span>
+              <span className="sm:hidden">E-Mails</span>
             </TabsTrigger>
           </TabsList>
 

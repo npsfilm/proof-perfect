@@ -46,7 +46,7 @@ export function ClientSettingsTab({ client, userEmail }: ClientSettingsTabProps)
   };
 
   return (
-    <div className="container mx-auto px-4 lg:px-6 py-8 max-w-4xl space-y-6">
+    <div className="container mx-auto px-3 md:px-4 lg:px-6 py-4 md:py-8 max-w-4xl space-y-4 md:space-y-6">
       <Card className="shadow-neu-flat">
         <CardHeader>
           <CardTitle>Persönliche Daten</CardTitle>
@@ -55,7 +55,7 @@ export function ClientSettingsTab({ client, userEmail }: ClientSettingsTabProps)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Vorname</Label>
               <Input value={client?.vorname || ''} disabled />

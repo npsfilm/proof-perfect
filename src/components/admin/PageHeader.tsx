@@ -43,18 +43,18 @@ export function PageHeader({ title, description, breadcrumbs, actions }: PageHea
         </nav>
       )}
       
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">{title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{title}</h1>
           {description && (
-            <p className="text-muted-foreground mt-1.5 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-1.5 animate-fade-in" style={{ animationDelay: '100ms' }}>
               {description}
             </p>
           )}
         </div>
         
         {actions && (
-          <div className="flex items-center gap-2 flex-shrink-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <div className="flex items-center gap-2 flex-shrink-0 animate-fade-in flex-wrap" style={{ animationDelay: '150ms' }}>
             {actions}
           </div>
         )}

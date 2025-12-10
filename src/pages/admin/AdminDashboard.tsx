@@ -23,7 +23,7 @@ export default function AdminDashboard() {
 
   return (
     <PageContainer size="full">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <PageHeader
           title="Dashboard"
           description="Übersicht über Ihre Galerien und Aktivitäten"
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
         {isLoading ? (
           <StatCardSkeletonGrid count={4} />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Galerien gesamt</CardTitle>
@@ -80,8 +80,8 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <Card>
               <CardHeader>
                 <CardTitle>Neueste Galerien</CardTitle>
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-1 lg:order-2">
             <ActivityFeed />
           </div>
         </div>

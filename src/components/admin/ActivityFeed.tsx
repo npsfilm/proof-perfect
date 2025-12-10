@@ -72,25 +72,25 @@ function ActivityItemComponent({ activity }: { activity: ActivityItem }) {
 
   return (
     <div
-      className={`flex gap-3 p-3 rounded-lg transition-all cursor-pointer hover:bg-muted/50 ${
+      className={`flex gap-2 md:gap-3 p-2 md:p-3 rounded-lg transition-all cursor-pointer hover:bg-muted/50 ${
         activity.status === 'failed' ? 'border-l-2 border-destructive' : ''
       }`}
       onClick={handleClick}
     >
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full ${config.bgColor} flex items-center justify-center`}>
-        <Icon className={`h-4 w-4 ${config.color}`} />
+      <div className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full ${config.bgColor} flex items-center justify-center`}>
+        <Icon className={`h-3.5 w-3.5 md:h-4 md:w-4 ${config.color}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium truncate">{activity.title}</p>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">{relativeTime}</span>
+        <div className="flex items-start justify-between gap-1 md:gap-2">
+          <p className="text-xs md:text-sm font-medium truncate">{activity.title}</p>
+          <span className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap">{relativeTime}</span>
         </div>
-        <p className="text-xs text-muted-foreground truncate mt-0.5">
+        <p className="text-[10px] md:text-xs text-muted-foreground truncate mt-0.5">
           {activity.description}
           {activity.actorEmail && ` · ${activity.actorEmail.split('@')[0]}`}
         </p>
         {activity.status === 'failed' && (
-          <p className="text-xs text-destructive mt-1">Fehlgeschlagen</p>
+          <p className="text-[10px] md:text-xs text-destructive mt-1">Fehlgeschlagen</p>
         )}
       </div>
     </div>
@@ -102,13 +102,13 @@ export function ActivityFeed() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
+      <CardHeader className="pb-2 md:pb-3 px-3 md:px-6 pt-3 md:pt-6">
+        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+          <Clock className="h-4 w-4 md:h-5 md:w-5" />
           Aktivitäten
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 md:px-6 pb-3 md:pb-6">
         {isLoading ? (
           <LoadingState message="Lädt Aktivitäten..." />
         ) : !activities || activities.length === 0 ? (
@@ -118,7 +118,7 @@ export function ActivityFeed() {
             description="Sobald Galerien gesendet oder überprüft werden, erscheinen sie hier."
           />
         ) : (
-          <div className="space-y-1 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-1 max-h-[400px] md:max-h-[600px] overflow-y-auto pr-1 md:pr-2">
             {activities.map((activity) => (
               <ActivityItemComponent key={activity.id} activity={activity} />
             ))}

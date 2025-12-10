@@ -50,38 +50,40 @@ export function ActionRequiredInbox() {
 
   return (
     <Card className="border-primary/20">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-primary" />
+      <CardHeader className="pb-2 md:pb-3 px-3 md:px-6 pt-3 md:pt-6">
+        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+          <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
           Aktion erforderlich
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs md:text-sm">
           Galerien und Anfragen, die Ihre Aufmerksamkeit benötigen
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
+      <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+        <div className="space-y-2 md:space-y-3">
           {items.map((item) => (
             <Alert 
               key={item.id} 
               variant={getVariant(item.priority)}
               className="shadow-sm"
             >
-              <div className="flex items-start gap-3">
-                {getIcon(item.type)}
-                <div className="flex-1 space-y-1">
-                  <AlertTitle className="text-base font-semibold">
-                    {item.title}
-                  </AlertTitle>
-                  <AlertDescription className="text-sm">
-                    {item.description}
-                  </AlertDescription>
+              <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+                <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+                  <span className="flex-shrink-0 mt-0.5">{getIcon(item.type)}</span>
+                  <div className="flex-1 space-y-0.5 md:space-y-1 min-w-0">
+                    <AlertTitle className="text-sm md:text-base font-semibold">
+                      {item.title}
+                    </AlertTitle>
+                    <AlertDescription className="text-xs md:text-sm">
+                      {item.description}
+                    </AlertDescription>
+                  </div>
                 </div>
                 <Button
                   variant={item.priority === 'high' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleAction(item.type)}
-                  className="ml-auto"
+                  className="w-full sm:w-auto flex-shrink-0"
                 >
                   {item.type === 'delivery_pending' ? 'Ausliefern' : 'Anfragen anzeigen'}
                 </Button>

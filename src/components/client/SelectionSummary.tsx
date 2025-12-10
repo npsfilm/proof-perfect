@@ -31,32 +31,33 @@ export function SelectionSummary({
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-40 transition-all duration-300">
       {/* Header Bar */}
-      <div className="px-4 py-4 flex items-center justify-between gap-4">
+      <div className="px-3 md:px-4 py-3 md:py-4 flex items-center justify-between gap-2 md:gap-4">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity min-w-0"
         >
-          {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
-          <span className="font-medium">Ausgewählte Fotos</span>
-          <Badge variant="secondary">
+          {isExpanded ? <ChevronDown className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" /> : <ChevronUp className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />}
+          <span className="font-medium text-sm md:text-base truncate">Ausgewählt</span>
+          <Badge variant="secondary" className="flex-shrink-0">
             {selectedPhotos.length}
           </Badge>
         </button>
         <Button 
           onClick={onFinalize}
-          size="lg"
+          size="default"
           disabled={selectedPhotos.length === 0 || disabled}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap text-sm md:text-base px-3 md:px-4"
         >
-          Auswahl abschließen
+          <span className="hidden sm:inline">Auswahl abschließen</span>
+          <span className="sm:hidden">Abschließen</span>
         </Button>
       </div>
 
       {/* Expandable Content */}
       {isExpanded && (
         <div className="animate-accordion-down overflow-hidden">
-          <ScrollArea className="h-72 px-4 pb-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <ScrollArea className="h-48 md:h-72 px-3 md:px-4 pb-3 md:pb-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-3">
               {selectedPhotos.map((photo) => {
                 return (
                   <div
