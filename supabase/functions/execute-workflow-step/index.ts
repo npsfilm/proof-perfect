@@ -12,10 +12,17 @@ interface NodeConfig {
   field?: string;
   operator?: string;
   value?: string;
-  template_id?: string;
+  template_key?: string;
+  template_id?: string; // legacy
+  recipient_type?: string;
+  custom_recipients?: string;
   webhook_url?: string;
+  url?: string;
+  method?: string;
   new_status?: string;
   message?: string;
+  message_template?: string;
+  priority?: string;
 }
 
 interface WorkflowNode {
@@ -319,38 +326,86 @@ async function completeRun(supabase: any, runId: string, status: string, error?:
     .eq('id', runId);
 }
 
+// Resolve email recipients based on recipient_type and payload
+function resolveRecipients(config: NodeConfig, payload: Record<string, any>): string[] {
+  const recipientType = config.recipient_type || 'admin';
+  
+  switch (recipientType) {
+    case 'new_client':
+      // For client_created trigger
+      return payload.email ? [payload.email] : [];
+    case 'booking_contact':
+      // For booking_created trigger
+      return payload.contact_email ? [payload.contact_email] : [];
+    case 'gallery_clients':
+      // For gallery-related triggers
+      if (Array.isArray(payload.client_emails)) {
+        return payload.client_emails;
+      }
+      return payload.client_emails ? [payload.client_emails] : [];
+    case 'requester':
+      // For reopen_request and staging_requested triggers
+      return payload.user_email ? [payload.user_email] : 
+             payload.requester_email ? [payload.requester_email] : [];
+    case 'admin':
+      // Admin email - could be fetched from settings
+      return ['admin@immoonpoint.de'];
+    case 'custom':
+      // Custom recipients from config
+      if (config.custom_recipients) {
+        return config.custom_recipients.split(',').map((e: string) => e.trim()).filter(Boolean);
+      }
+      return [];
+    default:
+      console.log(`[resolveRecipients] Unknown recipient_type: ${recipientType}`);
+      return [];
+  }
+}
+
 async function executeAction(supabase: any, node: WorkflowNode, payload: any) {
   const config = node.node_config;
   
   switch (node.action_type) {
     case 'send_email': {
-      if (config.template_id) {
-        console.log(`[executeAction] Sending email with template ${config.template_id}`);
-        // Call send-email function
+      const templateKey = config.template_key || config.template_id;
+      if (templateKey) {
+        const recipients = resolveRecipients(config, payload);
+        console.log(`[executeAction] Sending email with template ${templateKey} to ${recipients.join(', ')}`);
+        
+        if (recipients.length === 0) {
+          console.log(`[executeAction] No recipients found, skipping email`);
+          break;
+        }
+
         const supabaseUrl = Deno.env.get('SUPABASE_URL');
         const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
         
-        await fetch(`${supabaseUrl}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceKey}`
-          },
-          body: JSON.stringify({
-            template_key: config.template_id,
-            recipient_email: payload.client_emails?.[0] || payload.contact_email,
-            placeholders: payload
-          })
-        });
+        // Send to each recipient
+        for (const recipient of recipients) {
+          await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${serviceKey}`
+            },
+            body: JSON.stringify({
+              template_key: templateKey,
+              recipient_email: recipient,
+              placeholders: payload
+            })
+          });
+        }
       }
       break;
     }
 
     case 'send_webhook': {
-      if (config.webhook_url) {
-        console.log(`[executeAction] Sending webhook to ${config.webhook_url}`);
-        await fetch(config.webhook_url, {
-          method: 'POST',
+      const webhookUrl = config.url || config.webhook_url;
+      if (webhookUrl) {
+        const method = config.method || 'POST';
+        console.log(`[executeAction] Sending ${method} webhook to ${webhookUrl}`);
+        await fetch(webhookUrl, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -370,7 +425,9 @@ async function executeAction(supabase: any, node: WorkflowNode, payload: any) {
     }
 
     case 'notify_admin': {
-      console.log(`[executeAction] Admin notification: ${config.message || 'Workflow notification'}`);
+      const message = config.message_template || config.message || 'Workflow notification';
+      const priority = config.priority || 'normal';
+      console.log(`[executeAction] Admin notification (${priority}): ${message}`);
       // Could integrate with in-app notifications or email
       break;
     }

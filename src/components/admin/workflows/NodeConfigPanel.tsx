@@ -81,8 +81,12 @@ export function NodeConfigPanel({ node, triggerEvent, onUpdate, onDelete, onClos
             <div>
               <Label className="text-xs">Trigger-Event</Label>
               <Select
-                value={(nodeData.trigger_event as string) || ''}
-                onValueChange={(v) => updateData('trigger_event', v)}
+                value={(nodeData.trigger_event as string) || (nodeConfig.trigger_event as string) || ''}
+                onValueChange={(v) => {
+                  // Update both data.trigger_event AND node_config.trigger_event
+                  updateData('trigger_event', v);
+                  updateConfig('trigger_event', v);
+                }}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Event auswählen" />
@@ -160,17 +164,23 @@ export function NodeConfigPanel({ node, triggerEvent, onUpdate, onDelete, onClos
                 <div>
                   <Label className="text-xs">Empfänger</Label>
                   <Select
-                    value={(nodeConfig.recipient_type as string) || 'gallery_clients'}
+                    value={(nodeConfig.recipient_type as string) || triggerDef?.recipientOptions?.[0]?.value || 'admin'}
                     onValueChange={(v) => updateConfig('recipient_type', v)}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gallery_clients">Galerie-Kunden</SelectItem>
-                      <SelectItem value="booking_contact">Buchungskontakt</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="custom">Benutzerdefiniert</SelectItem>
+                      {triggerDef?.recipientOptions?.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      )) || (
+                        <>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="custom">Benutzerdefiniert</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
