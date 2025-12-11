@@ -31,25 +31,25 @@ export default function AdminLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-muted/30">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 md:h-16 border-b border-border bg-background shadow-neu-flat-sm flex items-center justify-between px-3 md:px-6 sticky top-0 z-10 backdrop-blur-sm bg-background/95">
+          <header className="h-14 md:h-16 border-b border-border bg-background flex items-center justify-between px-3 md:px-6 sticky top-0 z-10">
             <div className="flex items-center gap-2 md:gap-4">
-              <SidebarTrigger className="transition-transform duration-200 hover:scale-110 active:scale-95" />
+              <SidebarTrigger className="transition-colors hover:bg-muted" />
             </div>
             <div className="flex items-center gap-2 md:gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/')}
-                className="gap-1.5 md:gap-2 rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed transition-all duration-200 hover:scale-105 active:scale-95 px-2.5 md:px-3"
+                className="gap-1.5 md:gap-2"
                 title="Zur Kunden-Ansicht wechseln"
               >
                 <Eye className="h-4 w-4" />
                 <span className="hidden sm:inline">Kunden-Ansicht</span>
               </Button>
-              <span className="text-sm text-muted-foreground hidden md:inline transition-colors duration-200 hover:text-foreground truncate max-w-[150px]">{user.email}</span>
+              <span className="text-sm text-muted-foreground hidden md:inline truncate max-w-[150px]">{user.email}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -61,7 +61,7 @@ export default function AdminLayout() {
               </Button>
             </div>
           </header>
-          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-background">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
             <PageTransition>
               <Outlet />
             </PageTransition>
