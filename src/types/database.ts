@@ -185,7 +185,7 @@ export interface UserActivity {
   user_id: string;
   email: string;
   role?: RoleType;
-  last_sign_in_at?: string;
+  last_activity?: string;
   galleries_assigned: number;
   selections_made: number;
 }

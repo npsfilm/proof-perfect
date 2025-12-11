@@ -27,7 +27,7 @@ export function useUserActivity(page: number = 0, pageSize: number = 50) {
       const { data, error } = await supabase
         .from('v_user_activity')
         .select('*')
-        .order('last_sign_in_at', { ascending: false, nullsFirst: false })
+        .order('last_activity', { ascending: false, nullsFirst: false })
         .range(from, to);
       
       if (error) throw error;
