@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface AnalyticsSectionProps {
@@ -11,6 +13,38 @@ interface AnalyticsSectionProps {
 }
 
 export function AnalyticsSection({ settings, onUpdate }: AnalyticsSectionProps) {
+  const [localGaId, setLocalGaId] = useState(settings.google_analytics_id || '');
+  const [localGtmId, setLocalGtmId] = useState(settings.google_tag_manager_id || '');
+  const [localFbPixelId, setLocalFbPixelId] = useState(settings.facebook_pixel_id || '');
+
+  const debouncedGaId = useDebounce(localGaId, 500);
+  const debouncedGtmId = useDebounce(localGtmId, 500);
+  const debouncedFbPixelId = useDebounce(localFbPixelId, 500);
+
+  // Sync local state when settings change from outside
+  useEffect(() => { setLocalGaId(settings.google_analytics_id || ''); }, [settings.google_analytics_id]);
+  useEffect(() => { setLocalGtmId(settings.google_tag_manager_id || ''); }, [settings.google_tag_manager_id]);
+  useEffect(() => { setLocalFbPixelId(settings.facebook_pixel_id || ''); }, [settings.facebook_pixel_id]);
+
+  // Save debounced values
+  useEffect(() => {
+    if (debouncedGaId !== (settings.google_analytics_id || '')) {
+      onUpdate({ google_analytics_id: debouncedGaId });
+    }
+  }, [debouncedGaId]);
+
+  useEffect(() => {
+    if (debouncedGtmId !== (settings.google_tag_manager_id || '')) {
+      onUpdate({ google_tag_manager_id: debouncedGtmId });
+    }
+  }, [debouncedGtmId]);
+
+  useEffect(() => {
+    if (debouncedFbPixelId !== (settings.facebook_pixel_id || '')) {
+      onUpdate({ facebook_pixel_id: debouncedFbPixelId });
+    }
+  }, [debouncedFbPixelId]);
+
   return (
     <div className="space-y-6">
       <Alert>
@@ -31,8 +65,8 @@ export function AnalyticsSection({ settings, onUpdate }: AnalyticsSectionProps) 
             <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
             <Input
               id="google_analytics_id"
-              value={settings.google_analytics_id || ''}
-              onChange={(e) => onUpdate({ google_analytics_id: e.target.value })}
+              value={localGaId}
+              onChange={(e) => setLocalGaId(e.target.value)}
               placeholder="G-XXXXXXXXXX oder UA-XXXXXXXXX-X"
             />
             <p className="text-xs text-muted-foreground">
@@ -52,8 +86,8 @@ export function AnalyticsSection({ settings, onUpdate }: AnalyticsSectionProps) 
             <Label htmlFor="google_tag_manager_id">GTM Container ID</Label>
             <Input
               id="google_tag_manager_id"
-              value={settings.google_tag_manager_id || ''}
-              onChange={(e) => onUpdate({ google_tag_manager_id: e.target.value })}
+              value={localGtmId}
+              onChange={(e) => setLocalGtmId(e.target.value)}
               placeholder="GTM-XXXXXXX"
             />
             <p className="text-xs text-muted-foreground">
@@ -73,8 +107,8 @@ export function AnalyticsSection({ settings, onUpdate }: AnalyticsSectionProps) 
             <Label htmlFor="facebook_pixel_id">Pixel ID</Label>
             <Input
               id="facebook_pixel_id"
-              value={settings.facebook_pixel_id || ''}
-              onChange={(e) => onUpdate({ facebook_pixel_id: e.target.value })}
+              value={localFbPixelId}
+              onChange={(e) => setLocalFbPixelId(e.target.value)}
               placeholder="123456789012345"
             />
             <p className="text-xs text-muted-foreground">

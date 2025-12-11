@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageUploader } from './ImageUploader';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface SocialMediaSectionProps {
@@ -12,6 +14,19 @@ interface SocialMediaSectionProps {
 }
 
 export function SocialMediaSection({ settings, onUpdate, onUploadImage }: SocialMediaSectionProps) {
+  const [localTwitterHandle, setLocalTwitterHandle] = useState(settings.twitter_handle || '');
+  const debouncedTwitterHandle = useDebounce(localTwitterHandle, 500);
+
+  useEffect(() => {
+    setLocalTwitterHandle(settings.twitter_handle || '');
+  }, [settings.twitter_handle]);
+
+  useEffect(() => {
+    if (debouncedTwitterHandle !== (settings.twitter_handle || '')) {
+      onUpdate({ twitter_handle: debouncedTwitterHandle });
+    }
+  }, [debouncedTwitterHandle]);
+
   const handleOgImageUpload = async (file: File) => {
     const url = await onUploadImage(file, 'og-image');
     if (url) onUpdate({ og_image_url: url });
@@ -101,8 +116,8 @@ export function SocialMediaSection({ settings, onUpdate, onUploadImage }: Social
               <Label htmlFor="twitter_handle">Twitter Handle</Label>
               <Input
                 id="twitter_handle"
-                value={settings.twitter_handle || ''}
-                onChange={(e) => onUpdate({ twitter_handle: e.target.value })}
+                value={localTwitterHandle}
+                onChange={(e) => setLocalTwitterHandle(e.target.value)}
                 placeholder="@immoonpoint"
               />
             </div>

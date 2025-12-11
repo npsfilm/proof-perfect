@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ImageUploader } from './ImageUploader';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface BrandingSectionProps {
@@ -11,6 +13,34 @@ interface BrandingSectionProps {
 }
 
 export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingSectionProps) {
+  const [localSiteName, setLocalSiteName] = useState(settings.site_name || '');
+  const [localSupportEmail, setLocalSupportEmail] = useState(settings.support_email || '');
+
+  const debouncedSiteName = useDebounce(localSiteName, 500);
+  const debouncedSupportEmail = useDebounce(localSupportEmail, 500);
+
+  // Sync local state when settings change from outside
+  useEffect(() => {
+    setLocalSiteName(settings.site_name || '');
+  }, [settings.site_name]);
+
+  useEffect(() => {
+    setLocalSupportEmail(settings.support_email || '');
+  }, [settings.support_email]);
+
+  // Save debounced values
+  useEffect(() => {
+    if (debouncedSiteName !== (settings.site_name || '')) {
+      onUpdate({ site_name: debouncedSiteName });
+    }
+  }, [debouncedSiteName]);
+
+  useEffect(() => {
+    if (debouncedSupportEmail !== (settings.support_email || '')) {
+      onUpdate({ support_email: debouncedSupportEmail });
+    }
+  }, [debouncedSupportEmail]);
+
   const handleLogoUpload = async (file: File) => {
     const url = await onUploadImage(file, 'logo');
     if (url) onUpdate({ logo_url: url });
@@ -54,8 +84,8 @@ export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingS
               <Label htmlFor="site_name">Website-Name</Label>
               <Input
                 id="site_name"
-                value={settings.site_name || ''}
-                onChange={(e) => onUpdate({ site_name: e.target.value })}
+                value={localSiteName}
+                onChange={(e) => setLocalSiteName(e.target.value)}
                 placeholder="ImmoOnPoint"
               />
             </div>
@@ -64,8 +94,8 @@ export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingS
               <Input
                 id="support_email"
                 type="email"
-                value={settings.support_email || ''}
-                onChange={(e) => onUpdate({ support_email: e.target.value })}
+                value={localSupportEmail}
+                onChange={(e) => setLocalSupportEmail(e.target.value)}
                 placeholder="support@immoonpoint.de"
               />
               <p className="text-xs text-muted-foreground">
