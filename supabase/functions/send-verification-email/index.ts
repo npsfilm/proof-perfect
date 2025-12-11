@@ -20,6 +20,36 @@ const generateToken = (): string => {
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 };
 
+const getFrontendUrl = (req: Request): string => {
+  // 1. Priority: Origin header from request
+  const origin = req.headers.get('origin');
+  if (origin) {
+    console.log(`Using origin from request header: ${origin}`);
+    return origin;
+  }
+  
+  // 2. Priority: Referer header as fallback
+  const referer = req.headers.get('referer');
+  if (referer) {
+    try {
+      const url = new URL(referer);
+      console.log(`Using referer origin: ${url.origin}`);
+      return url.origin;
+    } catch {}
+  }
+  
+  // 3. Priority: Environment variable
+  const envUrl = Deno.env.get("FRONTEND_URL");
+  if (envUrl) {
+    console.log(`Using FRONTEND_URL from env: ${envUrl}`);
+    return envUrl;
+  }
+  
+  // 4. Fallback: Production URL
+  console.log("Using fallback production URL");
+  return "https://app.immoonpoint.de";
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -67,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to create verification token");
     }
 
-    const frontendUrl = Deno.env.get("FRONTEND_URL") || "https://preview--e98e6ad0-e98e-4506-a7b9-2d57c5d2ea51.lovable.app";
+    const frontendUrl = getFrontendUrl(req);
     const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
 
     const emailResponse = await resend.emails.send({
