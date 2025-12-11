@@ -58,7 +58,7 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
     } else {
       toast({
         title: 'Gespeichert',
-        description: 'Ihre Einstellungen wurden aktualisiert.',
+        description: t('Deine Einstellungen wurden aktualisiert.', 'Ihre Einstellungen wurden aktualisiert.'),
       });
       queryClient.invalidateQueries({ queryKey: ['client-profile'] });
     }

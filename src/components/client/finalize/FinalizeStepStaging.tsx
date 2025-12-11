@@ -7,6 +7,7 @@ import { Photo } from '@/types/database';
 import { STAGING_STYLES } from '@/constants/staging';
 import { FinalizePricingSummary } from './FinalizePricingSummary';
 import { cn } from '@/lib/utils';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface FinalizeStepStagingProps {
   selectedPhotos: Photo[];
@@ -45,6 +46,7 @@ export function FinalizeStepStaging({
   onFileChange,
   isMobile,
 }: FinalizeStepStagingProps) {
+  const { t } = useAnsprache();
   const stagingCount = Object.values(stagingSelections).filter(v => v).length;
   const hasStagingRequests = stagingCount > 0;
 
@@ -154,7 +156,7 @@ export function FinalizeStepStaging({
                   id="staging-comment"
                   value={stagingComment}
                   onChange={(e) => onCommentChange(e.target.value)}
-                  placeholder="Beschreiben Sie Ihre Vorstellungen oder besondere Wünsche..."
+                  placeholder={t('Beschreibe deine Vorstellungen oder besondere Wünsche...', 'Beschreiben Sie Ihre Vorstellungen oder besondere Wünsche...')}
                   rows={3}
                   className="resize-none shadow-neu-pressed rounded-2xl"
                 />
@@ -183,14 +185,14 @@ export function FinalizeStepStaging({
                           <Check className="h-6 w-6 text-primary" />
                         </div>
                         <p className="text-sm font-medium text-primary">{referenceFile.name}</p>
-                        <p className="text-xs text-muted-foreground">Klicken zum Ändern</p>
+                        <p className="text-xs text-muted-foreground">{t('Klicken zum Ändern', 'Klicken zum Ändern')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-colors">
                           <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
-                        <p className="text-sm font-medium">Klicken zum Hochladen</p>
+                        <p className="text-sm font-medium">{t('Klicken zum Hochladen', 'Klicken zum Hochladen')}</p>
                         <p className="text-xs text-muted-foreground">PNG, JPG bis zu 10MB</p>
                       </div>
                     )}

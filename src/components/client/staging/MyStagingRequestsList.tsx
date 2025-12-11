@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Clock, CheckCircle2, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 const statusConfig = {
   pending: {
@@ -26,6 +27,7 @@ const statusConfig = {
 };
 
 export function MyStagingRequestsList() {
+  const { t } = useAnsprache();
   const { data: requests, isLoading } = useStagingRequests();
 
   if (isLoading) {
@@ -37,7 +39,7 @@ export function MyStagingRequestsList() {
       <EmptyState
         icon={Clock}
         title="Keine Staging-Anfragen"
-        description="Sie haben noch keine nachträglichen Staging-Anfragen gestellt."
+        description={t('Du hast noch keine nachträglichen Staging-Anfragen gestellt.', 'Sie haben noch keine nachträglichen Staging-Anfragen gestellt.')}
       />
     );
   }

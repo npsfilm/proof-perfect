@@ -72,7 +72,7 @@ export function StagingRequestFlow() {
             <div>
               <Label className="text-base font-semibold">Galerie auswählen</Label>
               <p className="text-sm text-muted-foreground mb-3">
-                Wählen Sie eine gelieferte Galerie aus
+                {t('Wähle eine gelieferte Galerie aus', 'Wählen Sie eine gelieferte Galerie aus')}
               </p>
               <DeliveredGallerySelector
                 value={selectedGalleryId}
@@ -87,7 +87,7 @@ export function StagingRequestFlow() {
             <div>
               <Label className="text-base font-semibold">Fotos auswählen</Label>
               <p className="text-sm text-muted-foreground mb-3">
-                Wählen Sie die Fotos aus, für die Sie Staging wünschen
+                {t('Wähle die Fotos aus, für die du Staging wünschst', 'Wählen Sie die Fotos aus, für die Sie Staging wünschen')}
               </p>
               <StagingPhotoGrid
                 galleryId={selectedGalleryId}
@@ -106,7 +106,7 @@ export function StagingRequestFlow() {
             <div>
               <Label className="text-base font-semibold">Stil wählen</Label>
               <p className="text-sm text-muted-foreground mb-3">
-                Wählen Sie den gewünschten Staging-Stil
+                {t('Wähle den gewünschten Staging-Stil', 'Wählen Sie den gewünschten Staging-Stil')}
               </p>
               <StagingStyleSelector
                 value={stagingStyle}

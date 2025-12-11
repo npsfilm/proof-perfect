@@ -7,6 +7,7 @@ import { useInvoices } from '@/hooks/useInvoices';
 import { InvoiceStatus } from '@/types/company';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface InvoicesTabProps {
   companyId: string;
@@ -20,6 +21,7 @@ const STATUS_CONFIG: Record<InvoiceStatus, { label: string; icon: React.ElementT
 };
 
 export function InvoicesTab({ companyId }: InvoicesTabProps) {
+  const { t } = useAnsprache();
   const { data: invoices = [], isLoading } = useInvoices(companyId);
 
   const formatAmount = (cents: number) => {
@@ -77,7 +79,7 @@ export function InvoicesTab({ companyId }: InvoicesTabProps) {
             Rechnungsübersicht
           </CardTitle>
           <CardDescription>
-            Alle Rechnungen für Ihre Firma
+            {t('Alle Rechnungen für deine Firma', 'Alle Rechnungen für Ihre Firma')}
           </CardDescription>
         </CardHeader>
         <CardContent>

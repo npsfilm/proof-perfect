@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ComparisonModeInstructionsProps, Orientation } from './types';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 export function ComparisonModeInstructions({
   comparisonPhotos,
@@ -7,6 +8,8 @@ export function ComparisonModeInstructions({
   onStartComparison,
   onCancel,
 }: ComparisonModeInstructionsProps) {
+  const { t } = useAnsprache();
+  
   const getOrientationLabel = () => {
     switch (firstComparisonOrientation) {
       case 'portrait':
@@ -22,10 +25,10 @@ export function ComparisonModeInstructions({
 
   const getInstructionText = () => {
     if (comparisonPhotos.length === 0) {
-      return 'Wählen Sie das erste Foto zum Vergleichen';
+      return t('Wähle das erste Foto zum Vergleichen', 'Wählen Sie das erste Foto zum Vergleichen');
     }
     if (comparisonPhotos.length === 1) {
-      return `Wählen Sie ein weiteres ${getOrientationLabel()}-Foto`;
+      return t(`Wähle ein weiteres ${getOrientationLabel()}-Foto`, `Wählen Sie ein weiteres ${getOrientationLabel()}-Foto`);
     }
     return 'Bereit zum Vergleichen!';
   };
