@@ -29,10 +29,10 @@ const typeIcons = {
 };
 
 const typeColors = {
-  recommended: 'text-yellow-500',
-  cheapest: 'text-green-500',
-  flexible: 'text-blue-500',
-  weekend: 'text-purple-500',
+  recommended: 'text-slot-recommended',
+  cheapest: 'text-slot-cheapest',
+  flexible: 'text-slot-flexible',
+  weekend: 'text-slot-weekend',
 };
 
 export function SlotCard({
@@ -54,7 +54,7 @@ export function SlotCard({
       className={cn(
         'w-full p-4 rounded-lg border-2 text-left transition-all hover:border-primary/50',
         isSelected ? 'border-primary bg-primary/5' : 'border-border',
-        type === 'weekend' && 'bg-yellow-50/50 dark:bg-yellow-950/10'
+        type === 'weekend' && 'bg-slot-weekend/10'
       )}
     >
       <div className="flex items-start justify-between mb-3">
@@ -105,7 +105,7 @@ export function SlotCard({
       )}
 
       {type === 'weekend' && (
-        <div className="mt-3 pt-3 border-t text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+        <div className="mt-3 pt-3 border-t text-xs text-warning font-medium">
           ⚠️ Wochenendbuchungen erfordern Bestätigung. Zuschlag: 25-50%
         </div>
       )}

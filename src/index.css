@@ -58,6 +58,35 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 240 5.9% 90%;
     --sidebar-ring: 217 47% 32%;
+
+    /* Status Colors */
+    --status-planning-bg: 240 5% 96%;
+    --status-planning-text: 240 5% 26%;
+    --status-open-bg: 214 95% 93%;
+    --status-open-text: 214 100% 30%;
+    --status-closed-bg: 48 96% 89%;
+    --status-closed-text: 48 100% 29%;
+    --status-processing-bg: 27 96% 91%;
+    --status-processing-text: 27 100% 30%;
+    --status-delivered-bg: 142 76% 91%;
+    --status-delivered-text: 142 100% 25%;
+
+    /* Service Colors */
+    --service-express: 0 84% 60%;
+    --service-staging: 271 76% 53%;
+    --service-bluehour-start: 217 91% 50%;
+    --service-bluehour-end: 27 96% 55%;
+
+    /* Slot Colors */
+    --slot-recommended: 45 93% 47%;
+    --slot-cheapest: 142 71% 45%;
+    --slot-flexible: 217 91% 60%;
+    --slot-weekend: 271 81% 56%;
+
+    /* Utility Colors */
+    --info: 214 100% 50%;
+    --warning: 45 93% 47%;
+    --success: 142 71% 45%;
   }
 
   .dark {
@@ -107,6 +136,35 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217 47% 45%;
+
+    /* Status Colors - Dark Mode */
+    --status-planning-bg: 240 5% 20%;
+    --status-planning-text: 240 5% 80%;
+    --status-open-bg: 214 50% 20%;
+    --status-open-text: 214 100% 70%;
+    --status-closed-bg: 48 50% 20%;
+    --status-closed-text: 48 100% 70%;
+    --status-processing-bg: 27 50% 20%;
+    --status-processing-text: 27 100% 70%;
+    --status-delivered-bg: 142 40% 20%;
+    --status-delivered-text: 142 100% 70%;
+
+    /* Service Colors - Dark Mode */
+    --service-express: 0 84% 50%;
+    --service-staging: 271 76% 60%;
+    --service-bluehour-start: 217 91% 60%;
+    --service-bluehour-end: 27 96% 60%;
+
+    /* Slot Colors - Dark Mode */
+    --slot-recommended: 45 93% 55%;
+    --slot-cheapest: 142 71% 50%;
+    --slot-flexible: 217 91% 65%;
+    --slot-weekend: 271 81% 60%;
+
+    /* Utility Colors - Dark Mode */
+    --info: 214 100% 60%;
+    --warning: 45 93% 55%;
+    --success: 142 71% 50%;
   }
 }
 

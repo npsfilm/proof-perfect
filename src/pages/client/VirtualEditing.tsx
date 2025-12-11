@@ -23,8 +23,8 @@ const services = [
       'Dramatischer Himmel',
       'Professionelle Farbkorrektur',
     ],
-    gradient: 'from-blue-600/20 via-orange-500/10 to-purple-600/20',
-    iconColor: 'text-blue-500',
+    gradient: 'from-service-bluehour-start/20 via-service-bluehour-end/10 to-service-staging/20',
+    iconColor: 'text-info',
   },
   {
     id: 'summer_winter',
@@ -39,8 +39,8 @@ const services = [
       'Saisonale Anpassung',
       'Natürliche Ergebnisse',
     ],
-    gradient: 'from-green-500/20 via-yellow-500/10 to-emerald-600/20',
-    iconColor: 'text-green-500',
+    gradient: 'from-success/20 via-warning/10 to-success/20',
+    iconColor: 'text-success',
   },
   {
     id: 'rain_sun',
@@ -55,8 +55,8 @@ const services = [
       'Natürliche Lichtstimmung',
       'Trockene Straßen & Flächen',
     ],
-    gradient: 'from-yellow-500/20 via-orange-400/10 to-sky-500/20',
-    iconColor: 'text-yellow-500',
+    gradient: 'from-warning/20 via-service-bluehour-end/10 to-info/20',
+    iconColor: 'text-warning',
   },
 ];
 
@@ -84,7 +84,7 @@ export default function VirtualEditing() {
       <Card className="mb-8 md:mb-12 overflow-hidden animate-fade-in">
         <CardHeader className="text-center pb-2 px-4 md:px-6">
           <CardTitle className="flex items-center justify-center gap-2 text-base md:text-lg">
-            <Moon className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
+            <Moon className="h-4 w-4 md:h-5 md:w-5 text-info" />
             Virtuelle Blaue Stunde – Vorher / Nachher
           </CardTitle>
           <CardDescription className="text-xs md:text-sm">
@@ -130,7 +130,7 @@ export default function VirtualEditing() {
               <ul className="space-y-2">
                 {service.features.map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    <Check className="h-4 w-4 text-success flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
