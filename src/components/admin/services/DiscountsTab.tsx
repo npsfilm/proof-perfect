@@ -195,14 +195,14 @@ export function DiscountsTab() {
               <div className="space-y-2">
                 <Label>Service (optional)</Label>
                 <Select
-                  value={formData.service_id}
-                  onValueChange={(value) => setFormData({ ...formData, service_id: value })}
+                  value={formData.service_id || "__global__"}
+                  onValueChange={(value) => setFormData({ ...formData, service_id: value === "__global__" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Global (alle Services)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Global (alle Services)</SelectItem>
+                    <SelectItem value="__global__">Global (alle Services)</SelectItem>
                     {services?.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         {service.name}
