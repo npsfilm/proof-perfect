@@ -106,7 +106,7 @@ export function WelcomeModal({ open, onOpenChange, galleryName, onComplete }: We
             )}
           </p>
           <p className="text-muted-foreground">
-            Perfekt, um zwischen ähnlichen Aufnahmen zu entscheiden!
+            {t('Perfekt, um zwischen ähnlichen Aufnahmen zu entscheiden!', 'Perfekt, um zwischen ähnlichen Aufnahmen zu entscheiden!')}
           </p>
         </div>
       ),

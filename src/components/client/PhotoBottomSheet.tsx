@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { PhotoAnnotation } from '@/types/database';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface PhotoBottomSheetProps {
   isOpen: boolean;
@@ -50,6 +51,8 @@ export function PhotoBottomSheet({
   currentUserId,
   onDeleteAnnotation,
 }: PhotoBottomSheetProps) {
+  const { t } = useAnsprache();
+  
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
@@ -126,7 +129,7 @@ export function PhotoBottomSheet({
             <Label htmlFor="comment-mobile">Kommentar (optional)</Label>
             <Textarea
               id="comment-mobile"
-              placeholder="Notizen oder Feedback zu diesem Foto hinzufügen..."
+              placeholder={t('Notizen oder Feedback zu diesem Foto hinzufügen...', 'Notizen oder Feedback zu diesem Foto hinzufügen...')}
               value={comment}
               onChange={(e) => onCommentChange(e.target.value)}
               onBlur={onCommentBlur}

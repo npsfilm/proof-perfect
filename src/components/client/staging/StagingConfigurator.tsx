@@ -19,8 +19,10 @@ import { Loader2, ImagePlus, ChevronLeft, ChevronRight, Wand2, X, Image as Image
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 export function StagingConfigurator() {
+  const { t } = useAnsprache();
   const { data: galleries, isLoading: galleriesLoading } = useDeliveredGalleries();
   const createStagingRequest = useCreateStagingRequest();
   
@@ -141,7 +143,7 @@ export function StagingConfigurator() {
     if (!selectedGalleryId || selectedPhotoIds.length === 0) {
       toast({
         title: 'Fehler',
-        description: 'Bitte wählen Sie mindestens ein Foto aus.',
+        description: t('Bitte wähle mindestens ein Foto aus.', 'Bitte wählen Sie mindestens ein Foto aus.'),
         variant: 'destructive',
       });
       return;
@@ -150,7 +152,7 @@ export function StagingConfigurator() {
     if (!stagingStyle) {
       toast({
         title: 'Fehler',
-        description: 'Bitte wählen Sie einen Einrichtungsstil.',
+        description: t('Bitte wähle einen Einrichtungsstil.', 'Bitte wählen Sie einen Einrichtungsstil.'),
         variant: 'destructive',
       });
       return;

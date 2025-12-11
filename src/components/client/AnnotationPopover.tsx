@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { X } from 'lucide-react';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface AnnotationPopoverProps {
   position: { x: number; y: number };
@@ -10,6 +11,7 @@ interface AnnotationPopoverProps {
 }
 
 export function AnnotationPopover({ position, onSave, onCancel }: AnnotationPopoverProps) {
+  const { t } = useAnsprache();
   const [comment, setComment] = useState('');
 
   const handleSave = () => {
@@ -46,7 +48,7 @@ export function AnnotationPopover({ position, onSave, onCancel }: AnnotationPopo
         </Button>
       </div>
       <Textarea
-        placeholder="Ihre Anmerkung zu diesem Bereich..."
+        placeholder={t('Deine Anmerkung zu diesem Bereich...', 'Ihre Anmerkung zu diesem Bereich...')}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={3}

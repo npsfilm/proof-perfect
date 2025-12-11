@@ -474,7 +474,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
             <Label htmlFor="comment">Kommentar (optional)</Label>
             <Textarea
               id="comment"
-              placeholder="Notizen oder Feedback zu diesem Foto hinzufügen..."
+              placeholder={t('Notizen oder Feedback zu diesem Foto hinzufügen...', 'Notizen oder Feedback zu diesem Foto hinzufügen...')}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onBlur={handleCommentBlur}

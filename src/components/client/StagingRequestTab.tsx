@@ -6,8 +6,10 @@ import { useDeliveredGalleries } from '@/hooks/useDeliveredGalleries';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Separator } from '@/components/ui/separator';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 export function StagingRequestTab() {
+  const { t } = useAnsprache();
   const { data: galleries, isLoading } = useDeliveredGalleries();
 
   if (isLoading) {
@@ -28,14 +30,14 @@ export function StagingRequestTab() {
               Nachträgliches Staging anfordern
             </CardTitle>
             <CardDescription>
-              Fordern Sie virtuelles Staging für bereits gelieferte Galerien an.
+              {t('Fordere virtuelles Staging für bereits gelieferte Galerien an.', 'Fordern Sie virtuelles Staging für bereits gelieferte Galerien an.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <EmptyState
               icon={Building2}
               title="Keine gelieferten Galerien"
-              description="Sie haben noch keine gelieferten Galerien. Staging-Anfragen können nur für bereits gelieferte Galerien gestellt werden."
+              description={t('Du hast noch keine gelieferten Galerien. Staging-Anfragen können nur für bereits gelieferte Galerien gestellt werden.', 'Sie haben noch keine gelieferten Galerien. Staging-Anfragen können nur für bereits gelieferte Galerien gestellt werden.')}
             />
           </CardContent>
         </Card>

@@ -1,6 +1,7 @@
 import { AnnotationMarker } from '../AnnotationMarker';
 import { AnnotationPopover } from '../AnnotationPopover';
 import { PhotoAnnotation } from '@/types/database';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface AnnotationLayerProps {
   annotations: PhotoAnnotation[];
@@ -25,6 +26,8 @@ export function AnnotationLayer({
   onCancelAnnotation,
   onDeleteAnnotation,
 }: AnnotationLayerProps) {
+  const { t } = useAnsprache();
+  
   return (
     <>
       {/* Annotation Markers - only visible when not zoomed */}
@@ -51,7 +54,7 @@ export function AnnotationLayer({
       {/* Annotation Mode Indicator */}
       {annotationMode && zoom === 1 && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg z-10">
-          Klicken Sie auf das Bild, um eine Anmerkung hinzuzufügen
+          {t('Klicke auf das Bild, um eine Anmerkung hinzuzufügen', 'Klicken Sie auf das Bild, um eine Anmerkung hinzuzufügen')}
         </div>
       )}
     </>
