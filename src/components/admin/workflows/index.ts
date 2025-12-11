@@ -5,3 +5,4 @@ export { WorkflowRunsDialog } from './WorkflowRunsDialog';
 export { WorkflowCanvas } from './WorkflowCanvas';
 export { WorkflowToolbar } from './WorkflowToolbar';
 export { NodeConfigPanel } from './NodeConfigPanel';
+export { WorkflowTestPanel } from './WorkflowTestPanel';
