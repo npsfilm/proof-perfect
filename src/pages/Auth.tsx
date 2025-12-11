@@ -66,13 +66,34 @@ export default function Auth() {
           });
         }
       } else {
-        const { error, needsVerification } = await signUp(email, password);
+        const { error, needsVerification, loggedIn } = await signUp(email, password);
         
         if (error) {
+          if (error.code === 'invalid_password') {
+            // Benutzer existiert, aber Passwort ist falsch
+            setUnverifiedUser(null);
+            toast({
+              title: 'Passwort falsch',
+              description: 'Das eingegebene Passwort ist nicht korrekt.',
+              variant: 'destructive',
+            });
+            // Wechsle zur Login-Ansicht und zeige Passwort-vergessen Link
+            setIsLogin(true);
+          } else if (error.code === 'email_not_verified') {
+            // Benutzer existiert aber E-Mail nicht verifiziert
+            setUnverifiedUser({ userId: error.userId, email: error.email });
+          } else {
+            toast({
+              title: 'Fehler',
+              description: error.message,
+              variant: 'destructive',
+            });
+          }
+        } else if (loggedIn) {
+          // Benutzer wurde automatisch eingeloggt (existierte bereits mit korrektem Passwort)
           toast({
-            title: 'Fehler',
-            description: error.message,
-            variant: 'destructive',
+            title: 'Willkommen zurück!',
+            description: 'Sie wurden erfolgreich angemeldet.',
           });
         } else if (needsVerification) {
           setShowVerificationMessage(true);

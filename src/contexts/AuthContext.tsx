@@ -9,7 +9,7 @@ interface AuthContextType {
   role: RoleType | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean }>;
+  signUp: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean; loggedIn?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   resendVerificationEmail: (userId: string, email: string) => Promise<{ error: any }>;
@@ -145,6 +145,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     
+    // 1. Zuerst prüfen, ob Benutzer bereits existiert
+    try {
+      const { data: checkResult, error: checkError } = await supabase.functions.invoke('check-email-verified', {
+        body: { email: normalizedEmail },
+      });
+
+      if (!checkError && checkResult?.exists) {
+        // Benutzer existiert bereits
+        if (checkResult?.verified) {
+          // E-Mail ist verifiziert - versuche mit Passwort einzuloggen
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email: normalizedEmail,
+            password,
+          });
+          
+          if (loginError) {
+            // Falsches Passwort
+            return { 
+              error: { 
+                message: 'Das Passwort ist nicht korrekt.',
+                code: 'invalid_password',
+              } 
+            };
+          }
+          
+          // Erfolgreich eingeloggt!
+          return { error: null, loggedIn: true };
+        } else {
+          // Benutzer existiert aber E-Mail nicht verifiziert
+          return { 
+            error: { 
+              message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.',
+              code: 'email_not_verified',
+              userId: checkResult.userId,
+              email: normalizedEmail
+            } 
+          };
+        }
+      }
+    } catch (e) {
+      console.error('Error checking existing user:', e);
+      // Continue with signup if check fails
+    }
+
+    // 2. Neuer Benutzer - normale Registrierung
     const { data, error } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
