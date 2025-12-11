@@ -19,7 +19,11 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
   const queryClient = useQueryClient();
 
   const handleSendToClient = async () => {
+    console.log('handleSendToClient called');
+    console.log('selectedClients:', selectedClients);
+    
     if (selectedClients.length === 0) {
+      console.log('No clients selected');
       toast({
         title: 'Keine Kunden',
         description: 'Bitte wählen Sie mindestens einen Kunden aus.',
@@ -28,16 +32,18 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
       return;
     }
 
-    if (!photos || photos.length === 0) {
-      toast({
-        title: 'Keine Fotos',
-        description: 'Bitte laden Sie Fotos hoch, bevor Sie diese an Kunden senden.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // Temporarily disabled for email testing
+    // if (!photos || photos.length === 0) {
+    //   toast({
+    //     title: 'Keine Fotos',
+    //     description: 'Bitte laden Sie Fotos hoch, bevor Sie diese an Kunden senden.',
+    //     variant: 'destructive',
+    //   });
+    //   return;
+    // }
 
     setSending(true);
+    console.log('Sending email...');
     try {
       // Update existing gallery_clients
       const existingClientIds = galleryClients?.map((gc: any) => gc.client_id) || [];
