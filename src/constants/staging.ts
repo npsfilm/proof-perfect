@@ -24,14 +24,4 @@ export const STAGING_STYLE_OPTIONS = [
 
 export type StagingStyleOption = typeof STAGING_STYLE_OPTIONS[number]['id'];
 
-// Legacy string array for backward compatibility with existing components
-export const STAGING_STYLES = [
-  'Modern',
-  'Scandi',
-  'Industrial',
-  'Boho',
-  'Minimalistisch',
-  'Klassisch',
-] as const;
-
-export type StagingStyle = typeof STAGING_STYLES[number];
+// STAGING_STYLES removed - now database-driven via useStagingStyles hook
