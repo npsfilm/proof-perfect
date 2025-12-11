@@ -1,13 +1,13 @@
-import { Home, Check, Upload } from 'lucide-react';
+import { Home, Check, Upload, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Photo } from '@/types/database';
-import { STAGING_STYLES } from '@/constants/staging';
 import { FinalizePricingSummary } from './FinalizePricingSummary';
 import { cn } from '@/lib/utils';
 import { useAnsprache } from '@/contexts/AnspracheContext';
+import { useStagingStyles } from '@/hooks/useStagingStyles';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface FinalizeStepStagingProps {
   selectedPhotos: Photo[];
@@ -47,8 +47,12 @@ export function FinalizeStepStaging({
   isMobile,
 }: FinalizeStepStagingProps) {
   const { t } = useAnsprache();
+  const { data: styles, isLoading: stylesLoading } = useStagingStyles();
   const stagingCount = Object.values(stagingSelections).filter(v => v).length;
   const hasStagingRequests = stagingCount > 0;
+
+  // Filter to only active styles
+  const activeStyles = styles?.filter(s => s.is_active !== false) || [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,17 +135,66 @@ export function FinalizeStepStaging({
 
           {hasStagingRequests && (
             <div className="space-y-3">
-              <Label htmlFor="staging-style" className="text-base font-semibold">Staging-Stil</Label>
-              <Select value={stagingStyle} onValueChange={onStyleChange}>
-                <SelectTrigger id="staging-style" className="shadow-neu-pressed rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STAGING_STYLES.map(style => (
-                    <SelectItem key={style} value={style}>{style}</SelectItem>
+              <Label className="text-base font-semibold">Staging-Stil</Label>
+              {stylesLoading ? (
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                  {[1, 2, 3, 4].map(i => (
+                    <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
                   ))}
-                </SelectContent>
-              </Select>
+                </div>
+              ) : (
+                <div className={cn(
+                  "grid gap-2",
+                  isMobile ? "grid-cols-3" : "grid-cols-4"
+                )}>
+                  {activeStyles.map((style) => {
+                    const isSelected = stagingStyle === style.slug || stagingStyle === style.name;
+                    
+                    return (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={() => onStyleChange(style.slug)}
+                        className={cn(
+                          "relative rounded-lg overflow-hidden border-2 transition-all",
+                          "hover:border-primary/50",
+                          isSelected
+                            ? "ring-2 ring-primary border-primary"
+                            : "border-border"
+                        )}
+                      >
+                        {style.thumbnail_url ? (
+                          <img
+                            src={style.thumbnail_url}
+                            alt={style.name}
+                            className="w-full aspect-[4/3] object-cover"
+                          />
+                        ) : (
+                          <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className={cn(
+                          "py-1 text-center bg-background",
+                          isSelected && "bg-primary/5"
+                        )}>
+                          <span className={cn(
+                            "text-xs font-medium",
+                            isSelected ? "text-primary" : "text-foreground"
+                          )}>
+                            {style.name}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-1 right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

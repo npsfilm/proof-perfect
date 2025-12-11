@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Pencil, Trash2, GripVertical, Upload, ImageIcon, Loader2 } from 'lucide-react';
 import {
   useStagingStyles,
   useCreateStagingStyle,
@@ -20,6 +20,8 @@ import {
   StagingStyle,
 } from '@/hooks/useStagingStyles';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function StagingStylesTab() {
   const { data: styles, isLoading } = useStagingStyles();
@@ -29,6 +31,8 @@ export function StagingStylesTab() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStyle, setEditingStyle] = useState<StagingStyle | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -65,6 +69,42 @@ export function StagingStylesTab() {
       resetForm();
     }
     setIsDialogOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const slug = formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (!slug) {
+      toast.error('Bitte zuerst einen Namen eingeben');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `staging-styles/${slug}.${fileExt}`;
+
+      // Upload to branding bucket
+      const { error: uploadError } = await supabase.storage
+        .from('branding')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('branding')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, thumbnail_url: urlData.publicUrl }));
+      toast.success('Bild hochgeladen');
+    } catch (error: any) {
+      toast.error('Fehler beim Hochladen: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -136,28 +176,58 @@ export function StagingStylesTab() {
                   placeholder="wird automatisch generiert"
                 />
               </div>
+              
+              {/* Image Upload Section */}
               <div className="space-y-2">
-                <Label htmlFor="color_class">Farb-Klasse (Tailwind)</Label>
-                <Input
-                  id="color_class"
-                  value={formData.color_class}
-                  onChange={(e) => setFormData({ ...formData, color_class: e.target.value })}
-                  placeholder="z.B. bg-blue-500"
+                <Label>Vorschaubild</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
                 />
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground">Vorschau:</span>
-                  <div className={`w-8 h-8 rounded ${formData.color_class}`} />
-                </div>
+                
+                {formData.thumbnail_url ? (
+                  <div className="relative group">
+                    <img
+                      src={formData.thumbnail_url}
+                      alt="Vorschau"
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Bild ändern'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading || !formData.name}
+                    className="w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
+                    ) : (
+                      <>
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {formData.name ? 'Bild hochladen' : 'Erst Namen eingeben'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
-                <Input
-                  id="thumbnail_url"
-                  value={formData.thumbnail_url}
-                  onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="sort_order">Reihenfolge</Label>
                 <Input
@@ -178,7 +248,7 @@ export function StagingStylesTab() {
               <Button 
                 onClick={handleSubmit} 
                 className="w-full"
-                disabled={createStyle.isPending || updateStyle.isPending}
+                disabled={createStyle.isPending || updateStyle.isPending || !formData.name}
               >
                 {editingStyle ? 'Speichern' : 'Erstellen'}
               </Button>
@@ -191,16 +261,16 @@ export function StagingStylesTab() {
           {styles?.map((style) => (
             <div
               key={style.id}
-              className={`relative group rounded-lg border p-4 ${!style.is_active ? 'opacity-50' : ''}`}
+              className={`relative group rounded-lg border overflow-hidden ${!style.is_active ? 'opacity-50' : ''}`}
             >
-              <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
-                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-move z-10">
+                <GripVertical className="h-4 w-4 text-white drop-shadow-md" />
               </div>
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(style)}>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
+                <Button variant="secondary" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(style)}>
                   <Pencil className="h-3 w-3" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDelete(style.id)}>
+                <Button variant="secondary" size="icon" className="h-6 w-6" onClick={() => handleDelete(style.id)}>
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </Button>
               </div>
@@ -209,16 +279,20 @@ export function StagingStylesTab() {
                 <img
                   src={style.thumbnail_url}
                   alt={style.name}
-                  className="w-full h-20 object-cover rounded mb-2"
+                  className="w-full aspect-[4/3] object-cover"
                 />
               ) : (
-                <div className={`w-full h-20 rounded mb-2 ${style.color_class}`} />
+                <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                </div>
               )}
               
-              <p className="text-sm font-medium text-center">{style.name}</p>
-              {!style.is_active && (
-                <p className="text-xs text-muted-foreground text-center">Inaktiv</p>
-              )}
+              <div className="p-2 bg-background">
+                <p className="text-sm font-medium text-center truncate">{style.name}</p>
+                {!style.is_active && (
+                  <p className="text-xs text-muted-foreground text-center">Inaktiv</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
