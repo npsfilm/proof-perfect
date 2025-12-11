@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Euro } from 'lucide-react';
 import { useAnsprache } from '@/contexts/AnspracheContext';
+import { useDiscounts } from '@/hooks/useDiscounts';
 
 interface StagingPricingSummaryProps {
   photoCount: number;
@@ -14,11 +15,25 @@ export function StagingPricingSummary({
   totalPrice,
 }: StagingPricingSummaryProps) {
   const { t } = useAnsprache();
-  const hasBulkDiscount = photoCount >= 6;
-  const freePhotos = Math.floor(photoCount / 6);
+  const { data: discounts } = useDiscounts();
+
+  // Get discount info from database
+  const stagingDiscount = discounts?.find(d => 
+    d.discount_type === 'buy_x_get_y' && d.is_active
+  );
+  const buyQuantity = stagingDiscount?.buy_quantity || 5;
+  const freeQuantity = stagingDiscount?.free_quantity || 1;
+  const discountThreshold = buyQuantity + freeQuantity;
+
+  // Calculate free photos based on discount
+  const discountSets = Math.floor(photoCount / discountThreshold);
+  const remainingPhotos = photoCount % discountThreshold;
+  const freePhotos = discountSets * freeQuantity + (remainingPhotos > buyQuantity ? remainingPhotos - buyQuantity : 0);
+  const hasBulkDiscount = freePhotos > 0;
+  const savings = freePhotos * basePrice;
 
   return (
-    <Card className="shadow-neu-flat bg-primary/5">
+    <Card className="shadow-sm bg-primary/5">
       <CardContent className="pt-6">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-lg font-semibold">
@@ -39,10 +54,10 @@ export function StagingPricingSummary({
             {hasBulkDiscount && (
               <div className="flex justify-between text-primary">
                 <span>
-                  5+1 Rabatt ({freePhotos} {freePhotos === 1 ? 'Foto' : 'Fotos'} gratis)
+                  {buyQuantity}+{freeQuantity} Rabatt ({freePhotos} {freePhotos === 1 ? 'Foto' : 'Fotos'} gratis)
                 </span>
                 <span className="font-medium">
-                  -{freePhotos * basePrice}€
+                  -{savings}€
                 </span>
               </div>
             )}
@@ -57,7 +72,7 @@ export function StagingPricingSummary({
 
           {hasBulkDiscount && (
             <p className="text-xs text-muted-foreground pt-2 border-t">
-              🎉 {t(`Du sparst ${freePhotos * basePrice}€ mit dem 5+1 Angebot!`, `Sie sparen ${freePhotos * basePrice}€ mit dem 5+1 Angebot!`)}
+              🎉 {t(`Du sparst ${savings}€ mit dem ${buyQuantity}+${freeQuantity} Angebot!`, `Sie sparen ${savings}€ mit dem ${buyQuantity}+${freeQuantity} Angebot!`)}
             </p>
           )}
         </div>
