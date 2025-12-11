@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Gallery } from '@/types/database';
-import { FormSection } from '@/components/admin/FormSection';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUpdateGallery } from '@/hooks/useGalleries';
-import { MapPin, Package, MessageSquare, Building2, Save, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { MapPin, Target, Camera, MessageSquare, Building2, Pencil, Save, X, Copy, Link } from 'lucide-react';
 
 interface EditableGalleryInfoProps {
   gallery: Gallery;
@@ -18,6 +19,7 @@ interface EditableGalleryInfoProps {
 }
 
 export function EditableGalleryInfo({ gallery, companies, photoCount, isDraft }: EditableGalleryInfoProps) {
+  const { toast } = useToast();
   const updateGalleryMutation = useUpdateGallery();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,22 +64,24 @@ export function EditableGalleryInfo({ gallery, companies, photoCount, isDraft }:
     setIsEditing(false);
   };
 
-  const handleStartEdit = () => {
-    if (isDraft) {
-      setIsEditing(true);
-    }
+  const copyGalleryUrl = () => {
+    const url = `${window.location.origin}/gallery/${gallery.slug}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: 'URL kopiert', description: 'Die Galerie-URL wurde in die Zwischenablage kopiert.' });
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Objekt-Details */}
-      <FormSection
-        icon={<MapPin className="h-5 w-5" />}
-        title="Objekt-Details"
-        description={isEditing ? "Bearbeiten Sie die Grundinformationen" : "Grundinformationen zur Immobilie"}
-      >
-        {isEditing ? (
-          <div className="space-y-4">
+  const companyName = gallery.company_id 
+    ? companies?.find(c => c.id === gallery.company_id)?.name || 'Unbekannt'
+    : 'Keines';
+
+  if (isEditing) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">Galerie bearbeiten</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-name">Galerie-Name *</Label>
               <Input
@@ -86,54 +90,10 @@ export function EditableGalleryInfo({ gallery, companies, photoCount, isDraft }:
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="z.B. Moderne Villa am See"
                 required
-                className="text-base"
               />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="edit-address">Immobilien-Adresse</Label>
-              <Textarea
-                id="edit-address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Musterstraße 123, 12345 Musterstadt"
-                rows={3}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4" onClick={handleStartEdit}>
-            <div className={isDraft ? 'cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors' : ''}>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Galerie-Name</p>
-              <p className="text-lg font-semibold mt-1">{gallery.name}</p>
-            </div>
-
-            {gallery.address && (
-              <div className={isDraft ? 'cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors' : ''}>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Adresse</p>
-                <p className="font-medium mt-1 whitespace-pre-line leading-relaxed">{gallery.address}</p>
-              </div>
-            )}
-
-            {!gallery.address && isDraft && (
-              <div className="cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors">
-                <p className="text-sm text-muted-foreground italic">Klicken Sie zum Hinzufügen einer Adresse</p>
-              </div>
-            )}
-          </div>
-        )}
-      </FormSection>
-
-      {/* Paket-Einstellungen */}
-      <FormSection
-        icon={<Package className="h-5 w-5" />}
-        title="Paket-Einstellungen"
-        description={isEditing ? "Passen Sie die Einstellungen an" : "Foto-Anzahl und Kommunikationsform"}
-      >
-        {isEditing ? (
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-target">Ziel-Paketanzahl *</Label>
+              <Label htmlFor="edit-target">Ziel-Fotos *</Label>
               <Input
                 id="edit-target"
                 type="number"
@@ -143,124 +103,152 @@ export function EditableGalleryInfo({ gallery, companies, photoCount, isDraft }:
                   setFormData({ ...formData, package_target_count: parseInt(e.target.value) })
                 }
                 required
-                className="text-base"
               />
             </div>
+          </div>
 
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                Anredeform *
-              </Label>
+          <div className="space-y-2">
+            <Label htmlFor="edit-address">Adresse</Label>
+            <Textarea
+              id="edit-address"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              placeholder="Musterstraße 123, 12345 Musterstadt"
+              rows={2}
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Anredeform *</Label>
               <RadioGroup
                 value={formData.salutation_type}
                 onValueChange={(value) =>
                   setFormData({ ...formData, salutation_type: value as 'Du' | 'Sie' })
                 }
+                className="flex gap-4"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Du" id="edit-du" />
-                  <Label htmlFor="edit-du" className="font-normal cursor-pointer">
-                    Du (informell)
-                  </Label>
+                  <Label htmlFor="edit-du" className="font-normal cursor-pointer">Du</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Sie" id="edit-sie" />
-                  <Label htmlFor="edit-sie" className="font-normal cursor-pointer">
-                    Sie (formell)
-                  </Label>
+                  <Label htmlFor="edit-sie" className="font-normal cursor-pointer">Sie</Label>
                 </div>
               </RadioGroup>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-company">Unternehmen</Label>
+              <Select
+                value={formData.company_id || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
+              >
+                <SelectTrigger id="edit-company">
+                  <SelectValue placeholder="Keines" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Keines</SelectItem>
+                  {companies?.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-4" onClick={handleStartEdit}>
-            <div className={isDraft ? 'cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors' : ''}>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Paket-Ziel</p>
-              <p className="text-2xl font-bold text-primary mt-1">{gallery.package_target_count}</p>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleCancel}
+              disabled={updateGalleryMutation.isPending}
+            >
+              <X className="h-4 w-4 mr-1" />
+              Abbrechen
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={updateGalleryMutation.isPending || !hasChanges}
+            >
+              <Save className="h-4 w-4 mr-1" />
+              {updateGalleryMutation.isPending ? 'Speichert...' : 'Speichern'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg font-semibold truncate">{gallery.name}</CardTitle>
+            {gallery.address && (
+              <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
+                <MapPin className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{gallery.address}</span>
+              </p>
+            )}
+          </div>
+          {isDraft && (
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+            <Target className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{gallery.package_target_count}</p>
+              <p className="text-xs text-muted-foreground">Ziel</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+            <Camera className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{photoCount}</p>
               <p className="text-xs text-muted-foreground">Fotos</p>
             </div>
-
-            <div className={isDraft ? 'cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors' : ''}>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Anrede</p>
-              <p className="text-lg font-semibold mt-1">{gallery.salutation_type}</p>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+            <MessageSquare className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{gallery.salutation_type}</p>
+              <p className="text-xs text-muted-foreground">Anrede</p>
             </div>
           </div>
-        )}
-
-        {!isEditing && (
-          <div className="pt-2 border-t">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Hochgeladene Fotos</p>
-            <p className="text-2xl font-bold mt-1">{photoCount}</p>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+            <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">{companyName}</p>
+              <p className="text-xs text-muted-foreground">Firma</p>
+            </div>
           </div>
-        )}
-      </FormSection>
+        </div>
 
-      {/* Organisation */}
-      <FormSection
-        icon={<Building2 className="h-5 w-5" />}
-        title="Organisation"
-        description={isEditing ? "Unternehmenszuordnung ändern" : "Unternehmenszuordnung"}
-      >
-        {isEditing ? (
-          <div className="space-y-2">
-            <Label htmlFor="edit-company">Unternehmen</Label>
-            <Select
-              value={formData.company_id}
-              onValueChange={(value) => setFormData({ ...formData, company_id: value === 'none' ? '' : value })}
-            >
-              <SelectTrigger id="edit-company">
-                <SelectValue placeholder="Keines" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Keines</SelectItem>
-                {companies?.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        ) : (
-          <div className={isDraft ? 'cursor-pointer hover:bg-muted/50 p-3 rounded-xl transition-colors' : ''} onClick={handleStartEdit}>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Unternehmen</p>
-            <p className="font-medium mt-1">
-              {gallery.company_id 
-                ? companies?.find(c => c.id === gallery.company_id)?.name || 'Unbekannt'
-                : 'Keines zugewiesen'}
-            </p>
-          </div>
-        )}
-      </FormSection>
-
-      {/* Edit Actions */}
-      {isEditing && (
-        <div className="flex items-center justify-end gap-3 p-4 bg-muted/50 rounded-xl">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={updateGalleryMutation.isPending}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Abbrechen
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={updateGalleryMutation.isPending || !hasChanges}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {updateGalleryMutation.isPending ? 'Speichert...' : 'Änderungen speichern'}
+        {/* URL Row */}
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 text-sm">
+          <Link className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <span className="text-muted-foreground truncate flex-1">
+            /gallery/{gallery.slug}
+          </span>
+          <Button variant="ghost" size="sm" className="h-7 px-2" onClick={copyGalleryUrl}>
+            <Copy className="h-3 w-3" />
           </Button>
         </div>
-      )}
-
-      {isDraft && !isEditing && (
-        <p className="text-sm text-muted-foreground text-center italic">
-          💡 Klicken Sie auf einen Bereich, um ihn zu bearbeiten
-        </p>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
