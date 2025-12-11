@@ -137,6 +137,126 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_packages: {
+        Row: {
+          created_at: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean | null
+          package_type: string
+          photo_count: number
+          price_cents: number
+          requires_additional_info: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_minutes: number
+          id?: string
+          is_active?: boolean | null
+          package_type: string
+          photo_count: number
+          price_cents: number
+          requires_additional_info?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          package_type?: string
+          photo_count?: number
+          price_cents?: number
+          requires_additional_info?: boolean | null
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          address: string
+          batch_id: string
+          company_name: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string | null
+          drive_distance_km: number | null
+          drive_time_from_previous_minutes: number | null
+          estimated_duration_minutes: number
+          id: string
+          is_weekend_request: boolean | null
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          package_type: string
+          photo_count: number
+          property_index: number
+          property_type: string | null
+          scheduled_date: string
+          scheduled_end: string
+          scheduled_start: string
+          source: string | null
+          square_meters: number | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          batch_id: string
+          company_name?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string | null
+          drive_distance_km?: number | null
+          drive_time_from_previous_minutes?: number | null
+          estimated_duration_minutes: number
+          id?: string
+          is_weekend_request?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          package_type: string
+          photo_count: number
+          property_index?: number
+          property_type?: string | null
+          scheduled_date: string
+          scheduled_end: string
+          scheduled_start: string
+          source?: string | null
+          square_meters?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          batch_id?: string
+          company_name?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          drive_distance_km?: number | null
+          drive_time_from_previous_minutes?: number | null
+          estimated_duration_minutes?: number
+          id?: string
+          is_weekend_request?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          package_type?: string
+          photo_count?: number
+          property_index?: number
+          property_type?: string | null
+          scheduled_date?: string
+          scheduled_end?: string
+          scheduled_start?: string
+          source?: string | null
+          square_meters?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       client_watermarks: {
         Row: {
           created_at: string
