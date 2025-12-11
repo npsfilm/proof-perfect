@@ -1,5 +1,6 @@
 export * from './types';
 export * from './EditableGalleryInfo';
+export * from './EmailCustomizeDialog';
 export * from './GalleryClientsCard';
 export * from './GalleryPhotosSection';
 export * from './GallerySendActions';

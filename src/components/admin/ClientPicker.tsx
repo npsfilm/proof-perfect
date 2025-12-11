@@ -14,10 +14,11 @@ import { cn } from '@/lib/utils';
 interface ClientPickerProps {
   selectedClients: Client[];
   onClientsChange: (clients: Client[]) => void;
+  onCompanyAutoSelect?: (companyId: string) => void;
   disabled?: boolean;
 }
 
-export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: ClientPickerProps) => {
+export const ClientPicker = ({ selectedClients, onClientsChange, onCompanyAutoSelect, disabled }: ClientPickerProps) => {
   const { data: allClients, isLoading } = useClients();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +38,7 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
     });
   }, [allClients, searchQuery]);
 
-  const handleSelectClient = (client: Client) => {
+  const handleSelectClient = (client: Client & { company_id?: string | null }) => {
     const validClients = selectedClients.filter(c => c && c.id);
     const isSelected = validClients.some(c => c.id === client.id);
     
@@ -45,6 +46,10 @@ export const ClientPicker = ({ selectedClients, onClientsChange, disabled }: Cli
       onClientsChange(validClients.filter(c => c.id !== client.id));
     } else {
       onClientsChange([...validClients, client]);
+      // Auto-select company if client has one
+      if (client.company_id && onCompanyAutoSelect) {
+        onCompanyAutoSelect(client.company_id);
+      }
     }
   };
 
