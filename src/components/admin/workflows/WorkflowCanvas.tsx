@@ -291,22 +291,27 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Update workflow name if changed
-      if (workflowName !== workflow?.name) {
-        await updateWorkflow.mutateAsync({
-          id: workflowId,
-          name: workflowName,
-          trigger_event: triggerEvent,
-        });
-      }
+      // Get trigger event from trigger node (could be in data or node_config)
+      const triggerNode = nodes.find((n) => n.type === 'trigger');
+      const currentTriggerEvent = triggerNode?.data?.trigger_event || 
+                                   triggerNode?.data?.node_config?.trigger_event || 
+                                   triggerEvent;
+
+      // Always update workflow to sync trigger_event
+      await updateWorkflow.mutateAsync({
+        id: workflowId,
+        name: workflowName,
+        trigger_event: currentTriggerEvent,
+      });
 
       // Save trigger node if it's temp
       const tempTrigger = nodes.find((n) => n.id === 'temp-trigger');
       if (tempTrigger) {
+        const triggerEventValue = tempTrigger.data.trigger_event || tempTrigger.data.node_config?.trigger_event;
         await createNode.mutateAsync({
           workflow_id: workflowId,
           node_type: 'trigger',
-          node_config: { trigger_event: tempTrigger.data.trigger_event },
+          node_config: { trigger_event: triggerEventValue },
           position_x: Math.round(tempTrigger.position.x),
           position_y: Math.round(tempTrigger.position.y),
         });

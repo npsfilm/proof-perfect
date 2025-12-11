@@ -33,11 +33,18 @@ export type ConditionOperator =
   | 'is_true'
   | 'is_false';
 
+export interface RecipientOption {
+  value: string;
+  label: string;
+  field?: string; // Field path in payload to get email from
+}
+
 export interface TriggerDefinition {
   key: TriggerEvent;
   label: string;
   description: string;
   availableData: string[];
+  recipientOptions: RecipientOption[];
 }
 
 export interface ActionDefinition {
@@ -131,61 +138,105 @@ export interface WorkflowWithNodes extends Workflow {
   workflow_edges: WorkflowEdge[];
 }
 
-// Trigger-Definitionen
+// Trigger-Definitionen mit spezifischen Empfänger-Optionen
 export const TRIGGER_DEFINITIONS: TriggerDefinition[] = [
   {
     key: 'gallery_created',
     label: 'Galerie erstellt',
     description: 'Wird ausgelöst, wenn eine neue Galerie angelegt wird',
     availableData: ['gallery_id', 'gallery_name', 'address', 'company_id'],
+    recipientOptions: [
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'gallery_sent_to_client',
     label: 'Galerie an Kunde gesendet',
     description: 'Wird ausgelöst, wenn eine Galerie an Kunden versendet wird',
     availableData: ['gallery_id', 'client_emails', 'gallery_url', 'gallery_name'],
+    recipientOptions: [
+      { value: 'gallery_clients', label: 'Galerie-Kunden', field: 'client_emails' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'gallery_review_submitted',
     label: 'Kundenauswahl abgeschlossen',
     description: 'Wird ausgelöst, wenn ein Kunde seine Fotoauswahl abschließt',
-    availableData: ['gallery_id', 'selected_count', 'staging_count', 'blue_hour_count', 'feedback'],
+    availableData: ['gallery_id', 'selected_count', 'staging_count', 'blue_hour_count', 'feedback', 'client_emails'],
+    recipientOptions: [
+      { value: 'gallery_clients', label: 'Galerie-Kunden', field: 'client_emails' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'gallery_delivered',
     label: 'Galerie geliefert',
     description: 'Wird ausgelöst, wenn die finalen Fotos geliefert werden',
-    availableData: ['gallery_id', 'download_link', 'file_count'],
+    availableData: ['gallery_id', 'download_link', 'file_count', 'client_emails'],
+    recipientOptions: [
+      { value: 'gallery_clients', label: 'Galerie-Kunden', field: 'client_emails' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'booking_created',
     label: 'Buchung eingegangen',
     description: 'Wird ausgelöst, wenn eine neue Buchung erstellt wird',
     availableData: ['booking_id', 'contact_email', 'contact_name', 'address', 'scheduled_date', 'package_type'],
+    recipientOptions: [
+      { value: 'booking_contact', label: 'Buchungskontakt', field: 'contact_email' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'staging_requested',
     label: 'Staging angefordert',
     description: 'Wird ausgelöst, wenn ein Kunde virtuelles Staging anfordert',
-    availableData: ['request_id', 'gallery_id', 'photo_count', 'staging_style'],
+    availableData: ['request_id', 'gallery_id', 'photo_count', 'staging_style', 'requester_email'],
+    recipientOptions: [
+      { value: 'requester', label: 'Antragsteller', field: 'requester_email' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'reopen_request_submitted',
     label: 'Wiedereröffnung angefragt',
     description: 'Wird ausgelöst, wenn ein Kunde eine Wiedereröffnung anfragt',
     availableData: ['request_id', 'gallery_id', 'message', 'user_email'],
+    recipientOptions: [
+      { value: 'requester', label: 'Antragsteller', field: 'user_email' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'reopen_request_approved',
     label: 'Wiedereröffnung genehmigt',
     description: 'Wird ausgelöst, wenn eine Wiedereröffnung genehmigt wird',
     availableData: ['request_id', 'gallery_id', 'user_email'],
+    recipientOptions: [
+      { value: 'requester', label: 'Antragsteller', field: 'user_email' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
   {
     key: 'client_created',
     label: 'Kunde erstellt',
     description: 'Wird ausgelöst, wenn ein neuer Kunde angelegt wird',
     availableData: ['client_id', 'email', 'vorname', 'nachname', 'company_id'],
+    recipientOptions: [
+      { value: 'new_client', label: 'Neuer Kunde', field: 'email' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Benutzerdefiniert' },
+    ],
   },
 ];
 
