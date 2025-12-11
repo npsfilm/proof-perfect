@@ -1573,6 +1573,123 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_settings: {
+        Row: {
+          business_address_city: string | null
+          business_address_country: string | null
+          business_address_street: string | null
+          business_address_zip: string | null
+          business_description: string | null
+          business_email: string | null
+          business_geo_lat: number | null
+          business_geo_lng: number | null
+          business_name: string | null
+          business_phone: string | null
+          created_at: string
+          cta_primary_text: string | null
+          cta_secondary_text: string | null
+          facebook_pixel_id: string | null
+          favicon_url: string | null
+          footer_tagline: string | null
+          google_analytics_id: string | null
+          google_tag_manager_id: string | null
+          hero_headline: string | null
+          hero_image_url: string | null
+          hero_subheadline: string | null
+          id: string
+          logo_dark_url: string | null
+          logo_icon_url: string | null
+          logo_url: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title_suffix: string | null
+          og_image_url: string | null
+          og_locale: string | null
+          og_type: string | null
+          schema_org_type: string | null
+          site_name: string
+          twitter_card_type: string | null
+          twitter_handle: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_address_city?: string | null
+          business_address_country?: string | null
+          business_address_street?: string | null
+          business_address_zip?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_geo_lat?: number | null
+          business_geo_lng?: number | null
+          business_name?: string | null
+          business_phone?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_secondary_text?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
+          footer_tagline?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
+          hero_headline?: string | null
+          hero_image_url?: string | null
+          hero_subheadline?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_icon_url?: string | null
+          logo_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title_suffix?: string | null
+          og_image_url?: string | null
+          og_locale?: string | null
+          og_type?: string | null
+          schema_org_type?: string | null
+          site_name?: string
+          twitter_card_type?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_address_city?: string | null
+          business_address_country?: string | null
+          business_address_street?: string | null
+          business_address_zip?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_geo_lat?: number | null
+          business_geo_lng?: number | null
+          business_name?: string | null
+          business_phone?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_secondary_text?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
+          footer_tagline?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
+          hero_headline?: string | null
+          hero_image_url?: string | null
+          hero_subheadline?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_icon_url?: string | null
+          logo_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title_suffix?: string | null
+          og_image_url?: string | null
+          og_locale?: string | null
+          og_type?: string | null
+          schema_org_type?: string | null
+          site_name?: string
+          twitter_card_type?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_categories: {
         Row: {
           created_at: string
