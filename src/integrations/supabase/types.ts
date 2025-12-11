@@ -1573,6 +1573,57 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_workflow_steps: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          node_id: string
+          payload: Json | null
+          processed_at: string | null
+          scheduled_for: string
+          status: string | null
+          workflow_run_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          node_id: string
+          payload?: Json | null
+          processed_at?: string | null
+          scheduled_for: string
+          status?: string | null
+          workflow_run_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          node_id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          scheduled_for?: string
+          status?: string | null
+          workflow_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_workflow_steps_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_workflow_steps_workflow_run_id_fkey"
+            columns: ["workflow_run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seo_settings: {
         Row: {
           business_address_city: string | null
@@ -2282,10 +2333,105 @@ export type Database = {
           },
         ]
       }
+      workflow_edges: {
+        Row: {
+          created_at: string | null
+          edge_label: string | null
+          id: string
+          sort_order: number | null
+          source_node_id: string
+          target_node_id: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          edge_label?: string | null
+          id?: string
+          sort_order?: number | null
+          source_node_id: string
+          target_node_id: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string | null
+          edge_label?: string | null
+          id?: string
+          sort_order?: number | null
+          source_node_id?: string
+          target_node_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_edges_source_node_id_fkey"
+            columns: ["source_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_edges_target_node_id_fkey"
+            columns: ["target_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_edges_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_nodes: {
+        Row: {
+          action_type: string | null
+          created_at: string | null
+          id: string
+          node_config: Json | null
+          node_type: string
+          position_x: number | null
+          position_y: number | null
+          workflow_id: string
+        }
+        Insert: {
+          action_type?: string | null
+          created_at?: string | null
+          id?: string
+          node_config?: Json | null
+          node_type: string
+          position_x?: number | null
+          position_y?: number | null
+          workflow_id: string
+        }
+        Update: {
+          action_type?: string | null
+          created_at?: string | null
+          id?: string
+          node_config?: Json | null
+          node_type?: string
+          position_x?: number | null
+          position_y?: number | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_nodes_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_runs: {
         Row: {
           completed_at: string | null
+          current_node_id: string | null
           error_message: string | null
+          execution_path: Json | null
           id: string
           started_at: string | null
           status: string | null
@@ -2295,7 +2441,9 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          current_node_id?: string | null
           error_message?: string | null
+          execution_path?: Json | null
           id?: string
           started_at?: string | null
           status?: string | null
@@ -2305,7 +2453,9 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          current_node_id?: string | null
           error_message?: string | null
+          execution_path?: Json | null
           id?: string
           started_at?: string | null
           status?: string | null
@@ -2314,6 +2464,13 @@ export type Database = {
           workflow_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "workflow_runs_current_node_id_fkey"
+            columns: ["current_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workflow_runs_workflow_id_fkey"
             columns: ["workflow_id"]

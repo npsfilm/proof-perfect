@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Zap, MoreVertical, Pencil, Trash2, Play, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,33 +21,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useWorkflows, useDeleteWorkflow, useToggleWorkflow } from '@/hooks/useWorkflows';
+import { useWorkflows, useDeleteWorkflow, useToggleWorkflow, useCreateWorkflow } from '@/hooks/useWorkflows';
 import { getTriggerDefinition, getActionDefinition } from '@/types/workflows';
-import { WorkflowEditor } from './WorkflowEditor';
 import { WorkflowRunsDialog } from './WorkflowRunsDialog';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 
 export function WorkflowsTab() {
+  const navigate = useNavigate();
   const { data: workflows, isLoading } = useWorkflows();
   const deleteWorkflow = useDeleteWorkflow();
   const toggleWorkflow = useToggleWorkflow();
+  const createWorkflow = useCreateWorkflow();
   
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workflowToDelete, setWorkflowToDelete] = useState<string | null>(null);
   const [runsDialogOpen, setRunsDialogOpen] = useState(false);
   const [runsWorkflowId, setRunsWorkflowId] = useState<string | null>(null);
 
   const handleEdit = (id: string) => {
-    setEditingWorkflowId(id);
-    setEditorOpen(true);
+    navigate(`/admin/workflows/${id}`);
   };
 
-  const handleCreate = () => {
-    setEditingWorkflowId(null);
-    setEditorOpen(true);
+  const handleCreate = async () => {
+    const result = await createWorkflow.mutateAsync({
+      name: 'Neuer Workflow',
+      description: null,
+      trigger_event: 'gallery_created',
+      is_active: false,
+      conditions: {},
+    });
+    navigate(`/admin/workflows/${result.id}`);
   };
 
   const handleDelete = (id: string) => {
@@ -180,12 +185,6 @@ export function WorkflowsTab() {
           })}
         </div>
       )}
-
-      <WorkflowEditor
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        workflowId={editingWorkflowId}
-      />
 
       <WorkflowRunsDialog
         open={runsDialogOpen}
