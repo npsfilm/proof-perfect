@@ -1,7 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getEmailTemplate, getEmailDesignSettings, getFromAddress, buildEmailHtml } from "../_shared/email-helpers.ts";
+import { 
+  getEmailTemplate, 
+  getEmailDesignSettings, 
+  getFromAddress, 
+  getReplyTo,
+  getEmailHeaders,
+  buildEmailHtml,
+  buildEmailText 
+} from "../_shared/email-helpers.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -75,9 +83,13 @@ const handler = async (req: Request): Promise<Response> => {
     const template = await getEmailTemplate(supabaseAdmin, "password_reset");
     const designSettings = await getEmailDesignSettings(supabaseAdmin);
     
-    // Get from address from template or use default
-    const fromAddress = getFromAddress(template);
+    // Get email configuration from settings
+    const fromAddress = getFromAddress(template, designSettings);
+    const replyTo = getReplyTo(designSettings);
+    const headers = getEmailHeaders(designSettings);
+    
     console.log(`Using from address: ${fromAddress}`);
+    if (replyTo) console.log(`Using reply-to: ${replyTo}`);
 
     // Check if user exists (but don't reveal this to the client for security)
     const { data: profile } = await supabaseAdmin
@@ -122,15 +134,23 @@ const handler = async (req: Request): Promise<Response> => {
     const frontendUrl = getFrontendUrl(req);
     const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
 
-    // Build email HTML from template or use fallback
+    // Build email HTML and text from template or use fallback
     let emailHtml: string;
+    let emailText: string;
     let emailSubject: string;
 
     if (template) {
       emailHtml = buildEmailHtml(
         template,
         designSettings,
-        "sie", // Default to formal
+        "sie",
+        { action_url: resetLink },
+        resetLink
+      );
+      emailText = buildEmailText(
+        template,
+        designSettings,
+        "sie",
         { action_url: resetLink },
         resetLink
       );
@@ -196,13 +216,30 @@ const handler = async (req: Request): Promise<Response> => {
 </body>
 </html>
       `;
+      emailText = `ImmoOnPoint
+
+Passwort zurücksetzen
+
+Sie haben eine Anfrage zum Zurücksetzen Ihres Passworts gestellt. Klicken Sie auf den folgenden Link, um ein neues Passwort festzulegen:
+
+${resetLink}
+
+Hinweis: Dieser Link ist aus Sicherheitsgründen nur 1 Stunde gültig.
+
+Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.
+
+---
+© ${new Date().getFullYear()} ImmoOnPoint. Alle Rechte vorbehalten.`;
     }
 
     const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: [normalizedEmail],
+      reply_to: replyTo,
       subject: emailSubject,
       html: emailHtml,
+      text: emailText,
+      headers,
     });
 
     console.log("Password reset email sent successfully:", emailResponse);

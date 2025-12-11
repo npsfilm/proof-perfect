@@ -5,4 +5,5 @@ export { EmailTemplateList } from './EmailTemplateList';
 export { EmailTemplateEditor } from './EmailTemplateEditorModal';
 export { PlaceholderReference } from './PlaceholderReference';
 export { EmailTestSender } from './EmailTestSender';
+export { EmailGeneralSettings } from './EmailGeneralSettings';
 export * from './types';

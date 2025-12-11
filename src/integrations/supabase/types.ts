@@ -731,14 +731,22 @@ export type Database = {
           container_max_width: number
           content_padding: number
           created_at: string
+          default_from_email: string | null
+          default_from_name: string | null
           font_family: string
           footer_text: string | null
           heading_font_size: number
           id: string
+          include_physical_address: boolean | null
           line_height: number
           logo_url: string | null
           logo_width: number
+          physical_address_country: string | null
+          physical_address_line1: string | null
+          physical_address_line2: string | null
           primary_color: string
+          reply_to_email: string | null
+          reply_to_name: string | null
           secondary_color: string
           show_social_links: boolean
           social_facebook: string | null
@@ -746,6 +754,8 @@ export type Database = {
           social_linkedin: string | null
           text_color: string
           text_muted_color: string
+          unsubscribe_email: string | null
+          unsubscribe_url: string | null
           updated_at: string
           use_branding_logo: boolean | null
         }
@@ -764,14 +774,22 @@ export type Database = {
           container_max_width?: number
           content_padding?: number
           created_at?: string
+          default_from_email?: string | null
+          default_from_name?: string | null
           font_family?: string
           footer_text?: string | null
           heading_font_size?: number
           id?: string
+          include_physical_address?: boolean | null
           line_height?: number
           logo_url?: string | null
           logo_width?: number
+          physical_address_country?: string | null
+          physical_address_line1?: string | null
+          physical_address_line2?: string | null
           primary_color?: string
+          reply_to_email?: string | null
+          reply_to_name?: string | null
           secondary_color?: string
           show_social_links?: boolean
           social_facebook?: string | null
@@ -779,6 +797,8 @@ export type Database = {
           social_linkedin?: string | null
           text_color?: string
           text_muted_color?: string
+          unsubscribe_email?: string | null
+          unsubscribe_url?: string | null
           updated_at?: string
           use_branding_logo?: boolean | null
         }
@@ -797,14 +817,22 @@ export type Database = {
           container_max_width?: number
           content_padding?: number
           created_at?: string
+          default_from_email?: string | null
+          default_from_name?: string | null
           font_family?: string
           footer_text?: string | null
           heading_font_size?: number
           id?: string
+          include_physical_address?: boolean | null
           line_height?: number
           logo_url?: string | null
           logo_width?: number
+          physical_address_country?: string | null
+          physical_address_line1?: string | null
+          physical_address_line2?: string | null
           primary_color?: string
+          reply_to_email?: string | null
+          reply_to_name?: string | null
           secondary_color?: string
           show_social_links?: boolean
           social_facebook?: string | null
@@ -812,6 +840,8 @@ export type Database = {
           social_linkedin?: string | null
           text_color?: string
           text_muted_color?: string
+          unsubscribe_email?: string | null
+          unsubscribe_url?: string | null
           updated_at?: string
           use_branding_logo?: boolean | null
         }

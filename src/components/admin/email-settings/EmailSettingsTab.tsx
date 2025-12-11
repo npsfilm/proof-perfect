@@ -1,14 +1,19 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Mail, Users, Newspaper, Send, FileText } from 'lucide-react';
+import { Palette, Mail, Users, Newspaper, Send, FileText, Settings } from 'lucide-react';
 import { EmailDesignEditor } from './EmailDesignEditor';
 import { EmailTemplateList } from './EmailTemplateList';
 import { PlaceholderReference } from './PlaceholderReference';
 import { EmailTestSender } from './EmailTestSender';
+import { EmailGeneralSettings } from './EmailGeneralSettings';
 
 export function EmailSettingsTab() {
   return (
-    <Tabs defaultValue="design" className="space-y-6">
-      <TabsList className="grid grid-cols-2 md:grid-cols-6 h-auto gap-1">
+    <Tabs defaultValue="general" className="space-y-6">
+      <TabsList className="grid grid-cols-3 md:grid-cols-7 h-auto gap-1">
+        <TabsTrigger value="general" className="flex items-center gap-2 py-2">
+          <Settings className="h-4 w-4" />
+          <span className="hidden sm:inline">Allgemein</span>
+        </TabsTrigger>
         <TabsTrigger value="design" className="flex items-center gap-2 py-2">
           <Palette className="h-4 w-4" />
           <span className="hidden sm:inline">Design</span>
@@ -34,6 +39,10 @@ export function EmailSettingsTab() {
           <span className="hidden sm:inline">Test</span>
         </TabsTrigger>
       </TabsList>
+
+      <TabsContent value="general">
+        <EmailGeneralSettings />
+      </TabsContent>
 
       <TabsContent value="design">
         <EmailDesignEditor />
