@@ -40,11 +40,17 @@ export interface EmailDesignSettings {
   body_font_size: number;
   line_height: number;
   footer_text: string | null;
-  // Anti-spam settings
+  // Sender settings
   default_from_name: string | null;
   default_from_email: string | null;
   reply_to_email: string | null;
   reply_to_name: string | null;
+  // Newsletter sender settings
+  newsletter_from_name: string | null;
+  newsletter_from_email: string | null;
+  newsletter_reply_to_email: string | null;
+  newsletter_reply_to_name: string | null;
+  // Anti-spam settings
   unsubscribe_email: string | null;
   unsubscribe_url: string | null;
   physical_address_line1: string | null;
@@ -53,7 +59,41 @@ export interface EmailDesignSettings {
   include_physical_address: boolean;
 }
 
-const DEFAULT_FROM = "ImmoOnPoint <noreply@immoonpoint.de>";
+const DEFAULT_FROM = "ImmoOnPoint <info@immoonpoint.de>";
+
+/**
+ * Get the from address for newsletters
+ */
+export function getNewsletterFromAddress(
+  designSettings: EmailDesignSettings | null
+): string {
+  if (designSettings?.newsletter_from_email && designSettings?.newsletter_from_name) {
+    return `${designSettings.newsletter_from_name} <${designSettings.newsletter_from_email}>`;
+  }
+  
+  if (designSettings?.newsletter_from_email) {
+    return `ImmoOnPoint Tipps <${designSettings.newsletter_from_email}>`;
+  }
+  
+  // Fallback to general sender
+  return getFromAddress(null, designSettings);
+}
+
+/**
+ * Get Reply-To for newsletters
+ */
+export function getNewsletterReplyTo(designSettings: EmailDesignSettings | null): string | undefined {
+  if (!designSettings?.newsletter_reply_to_email) {
+    // Fallback to general reply-to
+    return getReplyTo(designSettings);
+  }
+  
+  if (designSettings.newsletter_reply_to_name) {
+    return `${designSettings.newsletter_reply_to_name} <${designSettings.newsletter_reply_to_email}>`;
+  }
+  
+  return designSettings.newsletter_reply_to_email;
+}
 
 /**
  * Get email template from database by template_key

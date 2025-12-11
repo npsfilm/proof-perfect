@@ -741,6 +741,10 @@ export type Database = {
           line_height: number
           logo_url: string | null
           logo_width: number
+          newsletter_from_email: string | null
+          newsletter_from_name: string | null
+          newsletter_reply_to_email: string | null
+          newsletter_reply_to_name: string | null
           physical_address_country: string | null
           physical_address_line1: string | null
           physical_address_line2: string | null
@@ -784,6 +788,10 @@ export type Database = {
           line_height?: number
           logo_url?: string | null
           logo_width?: number
+          newsletter_from_email?: string | null
+          newsletter_from_name?: string | null
+          newsletter_reply_to_email?: string | null
+          newsletter_reply_to_name?: string | null
           physical_address_country?: string | null
           physical_address_line1?: string | null
           physical_address_line2?: string | null
@@ -827,6 +835,10 @@ export type Database = {
           line_height?: number
           logo_url?: string | null
           logo_width?: number
+          newsletter_from_email?: string | null
+          newsletter_from_name?: string | null
+          newsletter_reply_to_email?: string | null
+          newsletter_reply_to_name?: string | null
           physical_address_country?: string | null
           physical_address_line1?: string | null
           physical_address_line2?: string | null
