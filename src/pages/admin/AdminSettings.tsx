@@ -7,14 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Webhook, Mail, Clock, Palette, Globe, Zap } from 'lucide-react';
+import { Save, Webhook, Mail, Clock, Palette, Globe } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { AvailabilitySettings } from '@/components/admin/availability';
 import { ColorPaletteEditor } from '@/components/admin/theme';
 import { EmailSettingsTab } from '@/components/admin/email-settings';
 import { SeoSettingsTab } from '@/components/admin/seo-settings';
-import { WorkflowsTab } from '@/components/admin/workflows';
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -92,10 +91,6 @@ export default function AdminSettings() {
               <Globe className="h-3.5 w-3.5 md:h-4 md:w-4" />
               SEO & Branding
             </TabsTrigger>
-            <TabsTrigger value="workflows" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
-              <Zap className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              Workflows
-            </TabsTrigger>
             <TabsTrigger value="emails" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
               <Mail className="h-3.5 w-3.5 md:h-4 md:w-4" />
               E-Mails
@@ -112,10 +107,6 @@ export default function AdminSettings() {
 
           <TabsContent value="seo">
             <SeoSettingsTab />
-          </TabsContent>
-
-          <TabsContent value="workflows">
-            <WorkflowsTab />
           </TabsContent>
 
           <TabsContent value="emails">

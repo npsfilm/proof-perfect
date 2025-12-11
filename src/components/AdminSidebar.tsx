@@ -14,7 +14,8 @@ import {
   Calendar,
   CalendarCheck2,
   ChevronDown,
-  Package
+  Package,
+  Zap
 } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,6 +74,7 @@ const navGroups = [
     label: 'System',
     items: [
       { title: 'Services & Pakete', url: '/admin/services', icon: Package },
+      { title: 'Workflows', url: '/admin/workflows', icon: Zap },
       { title: 'Einstellungen', url: '/admin/settings', icon: Settings },
       { title: 'Webhook-Logs', url: '/admin/webhook-logs', icon: Activity },
     ],
