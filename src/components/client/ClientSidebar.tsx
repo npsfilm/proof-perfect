@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBranding } from '@/contexts/BrandingContext';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -146,6 +147,7 @@ function SidebarNavContent({ onItemClick, showLabels = true }: { onItemClick?: (
 export function MobileClientNav() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { siteName, logoIconUrl, supportEmail } = useBranding();
   const { data: profile } = useClientProfile(user?.email);
   const navigate = useNavigate();
 
@@ -183,11 +185,15 @@ export function MobileClientNav() {
         <div className="border-b border-border px-3 py-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-                <Camera className="h-4 w-4" />
-              </div>
+              {logoIconUrl ? (
+                <img src={logoIconUrl} alt={siteName} className="w-8 h-8 rounded-lg object-contain" />
+              ) : (
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+                  <Camera className="h-4 w-4" />
+                </div>
+              )}
               <div>
-                <p className="font-semibold text-sm leading-tight">immoonpoint</p>
+                <p className="font-semibold text-sm leading-tight">{siteName}</p>
                 <p className="text-[10px] text-muted-foreground leading-tight">Kundenportal</p>
               </div>
             </div>
@@ -224,7 +230,7 @@ export function MobileClientNav() {
               variant="ghost" 
               size="sm" 
               className="flex-1 justify-start text-muted-foreground h-8 text-xs"
-              onClick={() => window.open('mailto:support@immoonpoint.de', '_blank')}
+              onClick={() => window.open(`mailto:${supportEmail}`, '_blank')}
             >
               <HelpCircle className="h-3.5 w-3.5 mr-1.5" />
               Hilfe
@@ -248,6 +254,7 @@ export function MobileClientNav() {
 export function ClientSidebar() {
   const { open } = useSidebar();
   const { user, signOut } = useAuth();
+  const { siteName, logoIconUrl, supportEmail } = useBranding();
   const { data: profile } = useClientProfile(user?.email);
   const navigate = useNavigate();
 
@@ -279,12 +286,16 @@ export function ClientSidebar() {
         {/* Header with Logo */}
         <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground shrink-0">
-              <Camera className="h-4 w-4" />
-            </div>
+            {logoIconUrl ? (
+              <img src={logoIconUrl} alt={siteName} className="w-8 h-8 rounded-lg shrink-0 object-contain" />
+            ) : (
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground shrink-0">
+                <Camera className="h-4 w-4" />
+              </div>
+            )}
             {open && (
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-foreground truncate leading-tight">immoonpoint</p>
+                <p className="font-semibold text-sm text-foreground truncate leading-tight">{siteName}</p>
                 <p className="text-[10px] text-muted-foreground leading-tight">Kundenportal</p>
               </div>
             )}
@@ -316,12 +327,12 @@ export function ClientSidebar() {
             <div className="flex gap-1">
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                    onClick={() => window.open('mailto:support@immoonpoint.de', '_blank')}
-                  >
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      onClick={() => window.open(`mailto:${supportEmail}`, '_blank')}
+                    >
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>

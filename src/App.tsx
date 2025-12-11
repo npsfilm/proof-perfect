@@ -5,6 +5,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnspracheProvider } from "@/contexts/AnspracheContext";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -40,8 +41,9 @@ const App = () => (
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              <AnspracheProvider>
-                <Routes>
+              <BrandingProvider>
+                <AnspracheProvider>
+                  <Routes>
                   {/* Auth routes (no layout) */}
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/reset-password" element={<ResetPassword />} />
@@ -78,8 +80,9 @@ const App = () => (
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </AnspracheProvider>
+                  </Routes>
+                </AnspracheProvider>
+              </BrandingProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
