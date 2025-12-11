@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface MetaTagsSectionProps {
@@ -10,8 +12,47 @@ interface MetaTagsSectionProps {
 }
 
 export function MetaTagsSection({ settings, onUpdate }: MetaTagsSectionProps) {
-  const titleLength = (settings.meta_description || '').length;
-  const descriptionLength = (settings.meta_description || '').length;
+  const [localTitleSuffix, setLocalTitleSuffix] = useState(settings.meta_title_suffix || '');
+  const [localDescription, setLocalDescription] = useState(settings.meta_description || '');
+  const [localKeywords, setLocalKeywords] = useState(settings.meta_keywords || '');
+
+  const debouncedTitleSuffix = useDebounce(localTitleSuffix, 500);
+  const debouncedDescription = useDebounce(localDescription, 500);
+  const debouncedKeywords = useDebounce(localKeywords, 500);
+
+  // Sync local state when settings change from outside
+  useEffect(() => {
+    setLocalTitleSuffix(settings.meta_title_suffix || '');
+  }, [settings.meta_title_suffix]);
+
+  useEffect(() => {
+    setLocalDescription(settings.meta_description || '');
+  }, [settings.meta_description]);
+
+  useEffect(() => {
+    setLocalKeywords(settings.meta_keywords || '');
+  }, [settings.meta_keywords]);
+
+  // Save debounced values
+  useEffect(() => {
+    if (debouncedTitleSuffix !== (settings.meta_title_suffix || '')) {
+      onUpdate({ meta_title_suffix: debouncedTitleSuffix });
+    }
+  }, [debouncedTitleSuffix]);
+
+  useEffect(() => {
+    if (debouncedDescription !== (settings.meta_description || '')) {
+      onUpdate({ meta_description: debouncedDescription });
+    }
+  }, [debouncedDescription]);
+
+  useEffect(() => {
+    if (debouncedKeywords !== (settings.meta_keywords || '')) {
+      onUpdate({ meta_keywords: debouncedKeywords });
+    }
+  }, [debouncedKeywords]);
+
+  const descriptionLength = localDescription.length;
 
   return (
     <div className="space-y-6">
@@ -25,8 +66,8 @@ export function MetaTagsSection({ settings, onUpdate }: MetaTagsSectionProps) {
             <Label htmlFor="meta_title_suffix">Title-Suffix</Label>
             <Input
               id="meta_title_suffix"
-              value={settings.meta_title_suffix || ''}
-              onChange={(e) => onUpdate({ meta_title_suffix: e.target.value })}
+              value={localTitleSuffix}
+              onChange={(e) => setLocalTitleSuffix(e.target.value)}
               placeholder=" | ImmoOnPoint"
             />
             <p className="text-xs text-muted-foreground">
@@ -43,8 +84,8 @@ export function MetaTagsSection({ settings, onUpdate }: MetaTagsSectionProps) {
             </div>
             <Textarea
               id="meta_description"
-              value={settings.meta_description || ''}
-              onChange={(e) => onUpdate({ meta_description: e.target.value })}
+              value={localDescription}
+              onChange={(e) => setLocalDescription(e.target.value)}
               placeholder="Professionelle Immobilienfotografie für Makler..."
               rows={3}
             />
@@ -57,8 +98,8 @@ export function MetaTagsSection({ settings, onUpdate }: MetaTagsSectionProps) {
             <Label htmlFor="meta_keywords">Keywords</Label>
             <Input
               id="meta_keywords"
-              value={settings.meta_keywords || ''}
-              onChange={(e) => onUpdate({ meta_keywords: e.target.value })}
+              value={localKeywords}
+              onChange={(e) => setLocalKeywords(e.target.value)}
               placeholder="Immobilienfotografie, Makler, Augsburg, Drohne"
             />
             <p className="text-xs text-muted-foreground">
@@ -80,10 +121,10 @@ export function MetaTagsSection({ settings, onUpdate }: MetaTagsSectionProps) {
               app.immoonpoint.de
             </div>
             <div className="text-lg text-primary hover:underline cursor-pointer">
-              {settings.site_name || 'ImmoOnPoint'}{settings.meta_title_suffix || ''}
+              {settings.site_name || 'ImmoOnPoint'}{localTitleSuffix || ''}
             </div>
             <div className="text-sm text-muted-foreground line-clamp-2">
-              {settings.meta_description || 'Keine Beschreibung hinterlegt...'}
+              {localDescription || 'Keine Beschreibung hinterlegt...'}
             </div>
           </div>
         </CardContent>

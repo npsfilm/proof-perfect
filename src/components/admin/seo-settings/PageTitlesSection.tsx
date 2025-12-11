@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Globe, FileText, Home, Image, Settings, LayoutDashboard, Images } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface PageTitlesSectionProps {
@@ -70,10 +72,107 @@ function BrowserTabPreview({ title, favicon }: { title: string; favicon?: string
 }
 
 export function PageTitlesSection({ settings, onUpdate }: PageTitlesSectionProps) {
+  // Local state for all title fields
+  const [localDefaultTitle, setLocalDefaultTitle] = useState(settings.default_page_title || '');
+  const [localTitleSuffix, setLocalTitleSuffix] = useState(settings.meta_title_suffix || '');
+  const [localDashboard, setLocalDashboard] = useState(settings.page_title_dashboard || '');
+  const [localGallery, setLocalGallery] = useState(settings.page_title_gallery || '');
+  const [localVirtualEditing, setLocalVirtualEditing] = useState(settings.page_title_virtual_editing || '');
+  const [localStaging, setLocalStaging] = useState(settings.page_title_staging || '');
+  const [localSettings, setLocalSettings] = useState(settings.page_title_settings || '');
+  const [localAdminDashboard, setLocalAdminDashboard] = useState(settings.page_title_admin_dashboard || '');
+  const [localAdminGalleries, setLocalAdminGalleries] = useState(settings.page_title_admin_galleries || '');
+  const [localAdminSettings, setLocalAdminSettings] = useState(settings.page_title_admin_settings || '');
+
+  // Debounced values
+  const debouncedDefaultTitle = useDebounce(localDefaultTitle, 500);
+  const debouncedTitleSuffix = useDebounce(localTitleSuffix, 500);
+  const debouncedDashboard = useDebounce(localDashboard, 500);
+  const debouncedGallery = useDebounce(localGallery, 500);
+  const debouncedVirtualEditing = useDebounce(localVirtualEditing, 500);
+  const debouncedStaging = useDebounce(localStaging, 500);
+  const debouncedSettings = useDebounce(localSettings, 500);
+  const debouncedAdminDashboard = useDebounce(localAdminDashboard, 500);
+  const debouncedAdminGalleries = useDebounce(localAdminGalleries, 500);
+  const debouncedAdminSettings = useDebounce(localAdminSettings, 500);
+
+  // Sync local state when settings change from outside
+  useEffect(() => { setLocalDefaultTitle(settings.default_page_title || ''); }, [settings.default_page_title]);
+  useEffect(() => { setLocalTitleSuffix(settings.meta_title_suffix || ''); }, [settings.meta_title_suffix]);
+  useEffect(() => { setLocalDashboard(settings.page_title_dashboard || ''); }, [settings.page_title_dashboard]);
+  useEffect(() => { setLocalGallery(settings.page_title_gallery || ''); }, [settings.page_title_gallery]);
+  useEffect(() => { setLocalVirtualEditing(settings.page_title_virtual_editing || ''); }, [settings.page_title_virtual_editing]);
+  useEffect(() => { setLocalStaging(settings.page_title_staging || ''); }, [settings.page_title_staging]);
+  useEffect(() => { setLocalSettings(settings.page_title_settings || ''); }, [settings.page_title_settings]);
+  useEffect(() => { setLocalAdminDashboard(settings.page_title_admin_dashboard || ''); }, [settings.page_title_admin_dashboard]);
+  useEffect(() => { setLocalAdminGalleries(settings.page_title_admin_galleries || ''); }, [settings.page_title_admin_galleries]);
+  useEffect(() => { setLocalAdminSettings(settings.page_title_admin_settings || ''); }, [settings.page_title_admin_settings]);
+
+  // Save debounced values
+  useEffect(() => {
+    if (debouncedDefaultTitle !== (settings.default_page_title || '')) {
+      onUpdate({ default_page_title: debouncedDefaultTitle });
+    }
+  }, [debouncedDefaultTitle]);
+
+  useEffect(() => {
+    if (debouncedTitleSuffix !== (settings.meta_title_suffix || '')) {
+      onUpdate({ meta_title_suffix: debouncedTitleSuffix });
+    }
+  }, [debouncedTitleSuffix]);
+
+  useEffect(() => {
+    if (debouncedDashboard !== (settings.page_title_dashboard || '')) {
+      onUpdate({ page_title_dashboard: debouncedDashboard });
+    }
+  }, [debouncedDashboard]);
+
+  useEffect(() => {
+    if (debouncedGallery !== (settings.page_title_gallery || '')) {
+      onUpdate({ page_title_gallery: debouncedGallery });
+    }
+  }, [debouncedGallery]);
+
+  useEffect(() => {
+    if (debouncedVirtualEditing !== (settings.page_title_virtual_editing || '')) {
+      onUpdate({ page_title_virtual_editing: debouncedVirtualEditing });
+    }
+  }, [debouncedVirtualEditing]);
+
+  useEffect(() => {
+    if (debouncedStaging !== (settings.page_title_staging || '')) {
+      onUpdate({ page_title_staging: debouncedStaging });
+    }
+  }, [debouncedStaging]);
+
+  useEffect(() => {
+    if (debouncedSettings !== (settings.page_title_settings || '')) {
+      onUpdate({ page_title_settings: debouncedSettings });
+    }
+  }, [debouncedSettings]);
+
+  useEffect(() => {
+    if (debouncedAdminDashboard !== (settings.page_title_admin_dashboard || '')) {
+      onUpdate({ page_title_admin_dashboard: debouncedAdminDashboard });
+    }
+  }, [debouncedAdminDashboard]);
+
+  useEffect(() => {
+    if (debouncedAdminGalleries !== (settings.page_title_admin_galleries || '')) {
+      onUpdate({ page_title_admin_galleries: debouncedAdminGalleries });
+    }
+  }, [debouncedAdminGalleries]);
+
+  useEffect(() => {
+    if (debouncedAdminSettings !== (settings.page_title_admin_settings || '')) {
+      onUpdate({ page_title_admin_settings: debouncedAdminSettings });
+    }
+  }, [debouncedAdminSettings]);
+
   const resolvePlaceholders = (template: string | null) => {
     if (!template) return '';
     return template
-      .replace('{suffix}', settings.meta_title_suffix || '')
+      .replace('{suffix}', localTitleSuffix || '')
       .replace('{gallery_name}', 'Musterstraße 123');
   };
 
@@ -87,7 +186,7 @@ export function PageTitlesSection({ settings, onUpdate }: PageTitlesSectionProps
         </CardHeader>
         <CardContent>
           <BrowserTabPreview 
-            title={resolvePlaceholders(settings.default_page_title)} 
+            title={resolvePlaceholders(localDefaultTitle)} 
             favicon={settings.favicon_url}
           />
         </CardContent>
@@ -103,16 +202,16 @@ export function PageTitlesSection({ settings, onUpdate }: PageTitlesSectionProps
           <TitleField
             label="Standard-Seitentitel (Startseite)"
             icon={<Home className="h-4 w-4" />}
-            value={settings.default_page_title || ''}
+            value={localDefaultTitle}
             placeholder="ImmoOnPoint - Professionelle Immobilienfotografie"
-            onChange={(value) => onUpdate({ default_page_title: value })}
+            onChange={setLocalDefaultTitle}
           />
           <TitleField
             label="Titel-Suffix"
             icon={<FileText className="h-4 w-4" />}
-            value={settings.meta_title_suffix || ''}
+            value={localTitleSuffix}
             placeholder=" | ImmoOnPoint"
-            onChange={(value) => onUpdate({ meta_title_suffix: value })}
+            onChange={setLocalTitleSuffix}
           />
         </CardContent>
       </Card>
@@ -127,41 +226,41 @@ export function PageTitlesSection({ settings, onUpdate }: PageTitlesSectionProps
           <TitleField
             label="Dashboard"
             icon={<LayoutDashboard className="h-4 w-4" />}
-            value={settings.page_title_dashboard || ''}
+            value={localDashboard}
             placeholder="Meine Galerien{suffix}"
-            onChange={(value) => onUpdate({ page_title_dashboard: value })}
+            onChange={setLocalDashboard}
             placeholders={['{suffix}']}
           />
           <TitleField
             label="Galerie-Ansicht"
             icon={<Images className="h-4 w-4" />}
-            value={settings.page_title_gallery || ''}
+            value={localGallery}
             placeholder="{gallery_name}{suffix}"
-            onChange={(value) => onUpdate({ page_title_gallery: value })}
+            onChange={setLocalGallery}
             placeholders={['{gallery_name}', '{suffix}']}
           />
           <TitleField
             label="Virtuelle Bearbeitung"
             icon={<Image className="h-4 w-4" />}
-            value={settings.page_title_virtual_editing || ''}
+            value={localVirtualEditing}
             placeholder="Virtuelle Bearbeitung{suffix}"
-            onChange={(value) => onUpdate({ page_title_virtual_editing: value })}
+            onChange={setLocalVirtualEditing}
             placeholders={['{suffix}']}
           />
           <TitleField
             label="Staging anfordern"
             icon={<Image className="h-4 w-4" />}
-            value={settings.page_title_staging || ''}
+            value={localStaging}
             placeholder="Staging anfordern{suffix}"
-            onChange={(value) => onUpdate({ page_title_staging: value })}
+            onChange={setLocalStaging}
             placeholders={['{suffix}']}
           />
           <TitleField
             label="Einstellungen"
             icon={<Settings className="h-4 w-4" />}
-            value={settings.page_title_settings || ''}
+            value={localSettings}
             placeholder="Einstellungen{suffix}"
-            onChange={(value) => onUpdate({ page_title_settings: value })}
+            onChange={setLocalSettings}
             placeholders={['{suffix}']}
           />
         </CardContent>
@@ -177,25 +276,25 @@ export function PageTitlesSection({ settings, onUpdate }: PageTitlesSectionProps
           <TitleField
             label="Admin Dashboard"
             icon={<LayoutDashboard className="h-4 w-4" />}
-            value={settings.page_title_admin_dashboard || ''}
+            value={localAdminDashboard}
             placeholder="Admin Dashboard{suffix}"
-            onChange={(value) => onUpdate({ page_title_admin_dashboard: value })}
+            onChange={setLocalAdminDashboard}
             placeholders={['{suffix}']}
           />
           <TitleField
             label="Galerien verwalten"
             icon={<Images className="h-4 w-4" />}
-            value={settings.page_title_admin_galleries || ''}
+            value={localAdminGalleries}
             placeholder="Galerien verwalten{suffix}"
-            onChange={(value) => onUpdate({ page_title_admin_galleries: value })}
+            onChange={setLocalAdminGalleries}
             placeholders={['{suffix}']}
           />
           <TitleField
             label="Admin Einstellungen"
             icon={<Settings className="h-4 w-4" />}
-            value={settings.page_title_admin_settings || ''}
+            value={localAdminSettings}
             placeholder="Admin Einstellungen{suffix}"
-            onChange={(value) => onUpdate({ page_title_admin_settings: value })}
+            onChange={setLocalAdminSettings}
             placeholders={['{suffix}']}
           />
         </CardContent>

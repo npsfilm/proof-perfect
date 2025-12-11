@@ -35,12 +35,8 @@ export function useSeoSettings() {
       if (error) throw error;
       return data as SeoSettings;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['seo-settings'] });
-      toast({
-        title: 'Einstellungen gespeichert',
-        description: 'Die SEO-Einstellungen wurden erfolgreich aktualisiert.',
-      });
+    onSuccess: (data) => {
+      queryClient.setQueryData(['seo-settings'], data);
     },
     onError: (error) => {
       toast({

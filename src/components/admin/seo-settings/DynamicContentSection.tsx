@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUploader } from './ImageUploader';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { SeoSettings, SeoSettingsUpdate } from './types';
 
 interface DynamicContentSectionProps {
@@ -12,6 +14,56 @@ interface DynamicContentSectionProps {
 }
 
 export function DynamicContentSection({ settings, onUpdate, onUploadImage }: DynamicContentSectionProps) {
+  const [localHeadline, setLocalHeadline] = useState(settings.hero_headline || '');
+  const [localSubheadline, setLocalSubheadline] = useState(settings.hero_subheadline || '');
+  const [localCtaPrimary, setLocalCtaPrimary] = useState(settings.cta_primary_text || '');
+  const [localCtaSecondary, setLocalCtaSecondary] = useState(settings.cta_secondary_text || '');
+  const [localFooterTagline, setLocalFooterTagline] = useState(settings.footer_tagline || '');
+
+  const debouncedHeadline = useDebounce(localHeadline, 500);
+  const debouncedSubheadline = useDebounce(localSubheadline, 500);
+  const debouncedCtaPrimary = useDebounce(localCtaPrimary, 500);
+  const debouncedCtaSecondary = useDebounce(localCtaSecondary, 500);
+  const debouncedFooterTagline = useDebounce(localFooterTagline, 500);
+
+  // Sync local state when settings change from outside
+  useEffect(() => { setLocalHeadline(settings.hero_headline || ''); }, [settings.hero_headline]);
+  useEffect(() => { setLocalSubheadline(settings.hero_subheadline || ''); }, [settings.hero_subheadline]);
+  useEffect(() => { setLocalCtaPrimary(settings.cta_primary_text || ''); }, [settings.cta_primary_text]);
+  useEffect(() => { setLocalCtaSecondary(settings.cta_secondary_text || ''); }, [settings.cta_secondary_text]);
+  useEffect(() => { setLocalFooterTagline(settings.footer_tagline || ''); }, [settings.footer_tagline]);
+
+  // Save debounced values
+  useEffect(() => {
+    if (debouncedHeadline !== (settings.hero_headline || '')) {
+      onUpdate({ hero_headline: debouncedHeadline });
+    }
+  }, [debouncedHeadline]);
+
+  useEffect(() => {
+    if (debouncedSubheadline !== (settings.hero_subheadline || '')) {
+      onUpdate({ hero_subheadline: debouncedSubheadline });
+    }
+  }, [debouncedSubheadline]);
+
+  useEffect(() => {
+    if (debouncedCtaPrimary !== (settings.cta_primary_text || '')) {
+      onUpdate({ cta_primary_text: debouncedCtaPrimary });
+    }
+  }, [debouncedCtaPrimary]);
+
+  useEffect(() => {
+    if (debouncedCtaSecondary !== (settings.cta_secondary_text || '')) {
+      onUpdate({ cta_secondary_text: debouncedCtaSecondary });
+    }
+  }, [debouncedCtaSecondary]);
+
+  useEffect(() => {
+    if (debouncedFooterTagline !== (settings.footer_tagline || '')) {
+      onUpdate({ footer_tagline: debouncedFooterTagline });
+    }
+  }, [debouncedFooterTagline]);
+
   const handleHeroImageUpload = async (file: File) => {
     const url = await onUploadImage(file, 'hero');
     if (url) onUpdate({ hero_image_url: url });
@@ -30,8 +82,8 @@ export function DynamicContentSection({ settings, onUpdate, onUploadImage }: Dyn
             <Label htmlFor="hero_headline">Headline</Label>
             <Input
               id="hero_headline"
-              value={settings.hero_headline || ''}
-              onChange={(e) => onUpdate({ hero_headline: e.target.value })}
+              value={localHeadline}
+              onChange={(e) => setLocalHeadline(e.target.value)}
               placeholder="Professionelle Immobilienfotografie"
             />
           </div>
@@ -40,8 +92,8 @@ export function DynamicContentSection({ settings, onUpdate, onUploadImage }: Dyn
             <Label htmlFor="hero_subheadline">Subheadline</Label>
             <Textarea
               id="hero_subheadline"
-              value={settings.hero_subheadline || ''}
-              onChange={(e) => onUpdate({ hero_subheadline: e.target.value })}
+              value={localSubheadline}
+              onChange={(e) => setLocalSubheadline(e.target.value)}
               placeholder="Hochwertige Fotos, die Ihre Immobilien zum Strahlen bringen"
               rows={2}
             />
@@ -69,8 +121,8 @@ export function DynamicContentSection({ settings, onUpdate, onUploadImage }: Dyn
               <Label htmlFor="cta_primary_text">Primärer Button</Label>
               <Input
                 id="cta_primary_text"
-                value={settings.cta_primary_text || ''}
-                onChange={(e) => onUpdate({ cta_primary_text: e.target.value })}
+                value={localCtaPrimary}
+                onChange={(e) => setLocalCtaPrimary(e.target.value)}
                 placeholder="Jetzt buchen"
               />
             </div>
@@ -79,8 +131,8 @@ export function DynamicContentSection({ settings, onUpdate, onUploadImage }: Dyn
               <Label htmlFor="cta_secondary_text">Sekundärer Button</Label>
               <Input
                 id="cta_secondary_text"
-                value={settings.cta_secondary_text || ''}
-                onChange={(e) => onUpdate({ cta_secondary_text: e.target.value })}
+                value={localCtaSecondary}
+                onChange={(e) => setLocalCtaSecondary(e.target.value)}
                 placeholder="Mehr erfahren"
               />
             </div>
@@ -98,8 +150,8 @@ export function DynamicContentSection({ settings, onUpdate, onUploadImage }: Dyn
             <Label htmlFor="footer_tagline">Tagline / Slogan</Label>
             <Input
               id="footer_tagline"
-              value={settings.footer_tagline || ''}
-              onChange={(e) => onUpdate({ footer_tagline: e.target.value })}
+              value={localFooterTagline}
+              onChange={(e) => setLocalFooterTagline(e.target.value)}
               placeholder="Immobilien ins beste Licht gerückt"
             />
           </div>
