@@ -18,8 +18,9 @@ import '@xyflow/react/dist/style.css';
 import { TriggerNode, ActionNode, DelayNode, ConditionNode, EndNode } from './nodes';
 import { WorkflowToolbar } from './WorkflowToolbar';
 import { NodeConfigPanel } from './NodeConfigPanel';
+import { WorkflowTestPanel } from './WorkflowTestPanel';
 import { Button } from '@/components/ui/button';
-import { Save, Play, ArrowLeft } from 'lucide-react';
+import { Save, Play, ArrowLeft, FlaskConical, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkflowWithNodes, useCreateNode, useUpdateNode, useDeleteNode, useCreateEdge, useDeleteEdge } from '@/hooks/useWorkflowNodes';
 import { useWorkflow, useUpdateWorkflow } from '@/hooks/useWorkflows';
@@ -76,6 +77,7 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [workflowName, setWorkflowName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [showTestPanel, setShowTestPanel] = useState(false);
 
   const { data: workflowData, isLoading } = useWorkflowWithNodes(workflowId);
   const { data: workflow } = useWorkflow(workflowId);
@@ -342,9 +344,16 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" disabled>
-            <Play className="h-4 w-4 mr-2" />
-            Test
+          <Button 
+            variant={showTestPanel ? "default" : "outline"} 
+            onClick={() => setShowTestPanel(!showTestPanel)}
+          >
+            {showTestPanel ? (
+              <X className="h-4 w-4 mr-2" />
+            ) : (
+              <FlaskConical className="h-4 w-4 mr-2" />
+            )}
+            {showTestPanel ? 'Schließen' : 'Testen'}
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
@@ -388,7 +397,7 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
         </div>
 
         {/* Config Panel */}
-        {selectedNode && (
+        {selectedNode && !showTestPanel && (
           <div className="w-[300px] border-l">
             <NodeConfigPanel
               node={selectedNode}
@@ -396,6 +405,19 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
               onUpdate={handleNodeUpdate}
               onDelete={handleNodeDelete}
               onClose={() => setSelectedNode(null)}
+            />
+          </div>
+        )}
+
+        {/* Test Panel */}
+        {showTestPanel && (
+          <div className="w-[350px] border-l">
+            <WorkflowTestPanel
+              workflowId={workflowId}
+              triggerEvent={triggerEvent}
+              triggerNodeId={triggerNode?.id}
+              onExecutionStart={() => {}}
+              onExecutionComplete={() => {}}
             />
           </div>
         )}

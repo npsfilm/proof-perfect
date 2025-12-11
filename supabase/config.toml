@@ -32,3 +32,21 @@ verify_jwt = false
 
 [functions.check-email-verified]
 verify_jwt = false
+
+[functions.execute-workflow]
+verify_jwt = true
+
+[functions.execute-workflow-step]
+verify_jwt = true
+
+[functions.process-scheduled-steps]
+verify_jwt = true
+
+[functions.booking-webhook]
+verify_jwt = false
+
+[functions.smart-availability]
+verify_jwt = false
+
+[functions.route-optimizer]
+verify_jwt = false
