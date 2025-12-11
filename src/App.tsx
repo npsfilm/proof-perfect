@@ -24,6 +24,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import StagingRequests from "./pages/admin/StagingRequests";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminServices from "./pages/admin/AdminServices";
 import ClientGallery from "./pages/client/ClientGallery";
 import VirtualEditing from "./pages/client/VirtualEditing";
 import Buchung from "./pages/Buchung";
@@ -70,6 +71,7 @@ const App = () => (
                     <Route path="staging-requests" element={<StagingRequests />} />
                     <Route path="calendar" element={<AdminCalendar />} />
                     <Route path="bookings" element={<AdminBookings />} />
+                    <Route path="services" element={<AdminServices />} />
                   </Route>
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
