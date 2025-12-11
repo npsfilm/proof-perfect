@@ -20,16 +20,33 @@ export function useClientDashboardData(
   const { data: stagingRequests } = useStagingRequests();
 
   const { data: stats, isLoading, refetch } = useQuery({
-    queryKey: ['client-gallery-stats'],
+    queryKey: ['client-gallery-stats', user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
+      // First get gallery IDs the user has explicit access to
+      const { data: accessEntries, error: accessError } = await supabase
+        .from('gallery_access')
+        .select('gallery_id')
+        .eq('user_id', user.id);
+      
+      if (accessError) throw accessError;
+      
+      const galleryIds = accessEntries?.map(g => g.gallery_id) || [];
+      
+      if (galleryIds.length === 0) return [];
+      
+      // Then fetch stats only for those galleries
       const { data, error } = await supabase
         .from('v_gallery_selection_stats')
         .select('*')
+        .in('gallery_id', galleryIds)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as GallerySelectionStats[];
     },
+    enabled: !!user?.id,
   });
 
   // Fetch cover photos for all galleries
