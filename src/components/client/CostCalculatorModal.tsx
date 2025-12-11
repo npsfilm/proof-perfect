@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { PACKAGES, ADDONS, STAGING_DISCOUNT } from '@/constants/pricing';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface CostCalculatorModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ interface CostCalculatorModalProps {
 }
 
 export function CostCalculatorModal({ open, onOpenChange }: CostCalculatorModalProps) {
+  const { t } = useAnsprache();
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState<string>(PACKAGES[1].id);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
@@ -68,7 +70,7 @@ export function CostCalculatorModal({ open, onOpenChange }: CostCalculatorModalP
             Kostenrechner
           </DialogTitle>
           <DialogDescription>
-            Berechnen Sie die Kosten für Ihr Shooting
+            {t('Berechne die Kosten für dein Shooting', 'Berechnen Sie die Kosten für Ihr Shooting')}
           </DialogDescription>
         </DialogHeader>
 
@@ -156,7 +158,7 @@ export function CostCalculatorModal({ open, onOpenChange }: CostCalculatorModalP
                     />
                     {stagingCount >= STAGING_DISCOUNT.threshold && (
                       <p className="text-xs text-secondary font-medium animate-fade-in">
-                        🎉 1 Raum gratis! Sie sparen 89€
+                        🎉 1 Raum gratis! {t('Du sparst 89€', 'Sie sparen 89€')}
                       </p>
                     )}
                   </div>

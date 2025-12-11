@@ -1,12 +1,21 @@
 import { useMemo } from 'react';
 import { Sparkles, Camera } from 'lucide-react';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface DashboardHeroProps {
   clientName?: string;
   anrede?: string | null;
 }
 
-const MOTIVATIONAL_QUOTES = [
+const MOTIVATIONAL_QUOTES_DU = [
+  'Bereit für großartige Fotos?',
+  'Deine Immobilie im besten Licht.',
+  'Perfekte Bilder für perfekte Verkäufe.',
+  'Qualität, die überzeugt.',
+  'Dein Erfolg ist unser Antrieb.',
+];
+
+const MOTIVATIONAL_QUOTES_SIE = [
   'Bereit für großartige Fotos?',
   'Ihre Immobilie im besten Licht.',
   'Perfekte Bilder für perfekte Verkäufe.',
@@ -15,6 +24,8 @@ const MOTIVATIONAL_QUOTES = [
 ];
 
 export function DashboardHero({ clientName, anrede }: DashboardHeroProps) {
+  const { ansprache } = useAnsprache();
+  
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Guten Morgen';
@@ -23,8 +34,9 @@ export function DashboardHero({ clientName, anrede }: DashboardHeroProps) {
   }, []);
 
   const quote = useMemo(() => {
-    return MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-  }, []);
+    const quotes = ansprache === 'Du' ? MOTIVATIONAL_QUOTES_DU : MOTIVATIONAL_QUOTES_SIE;
+    return quotes[Math.floor(Math.random() * quotes.length)];
+  }, [ansprache]);
 
   const displayName = clientName ? `${anrede || ''} ${clientName}`.trim() : '';
 

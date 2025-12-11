@@ -2,6 +2,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Photo } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface FinalizeStepFeedbackProps {
   selectedPhotos: Photo[];
@@ -20,6 +21,8 @@ export function FinalizeStepFeedback({
   onFeedbackChange,
   isMobile,
 }: FinalizeStepFeedbackProps) {
+  const { t } = useAnsprache();
+  
   return (
     <div className="py-6 space-y-8">
       {/* Selected Photos Overview */}
@@ -55,13 +58,13 @@ export function FinalizeStepFeedback({
       {/* Feedback Textarea */}
       <div className="space-y-3">
         <Label htmlFor="feedback" className="text-base font-semibold">
-          Ihr Feedback <span className="text-muted-foreground font-normal">(Optional)</span>
+          {t('Dein Feedback', 'Ihr Feedback')} <span className="text-muted-foreground font-normal">(Optional)</span>
         </Label>
         <Textarea
           id="feedback"
           value={feedback}
           onChange={(e) => onFeedbackChange(e.target.value)}
-          placeholder="Ihr Feedback hilft uns, zukünftige Shootings zu verbessern..."
+          placeholder={t('Dein Feedback hilft uns, zukünftige Shootings zu verbessern...', 'Ihr Feedback hilft uns, zukünftige Shootings zu verbessern...')}
           rows={4}
           className="resize-none shadow-neu-pressed rounded-2xl"
         />

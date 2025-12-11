@@ -18,6 +18,7 @@ import { LightboxNavigation } from './lightbox/LightboxNavigation';
 import { StagingControls } from './lightbox/StagingControls';
 import { KeyboardShortcuts } from './lightbox/KeyboardShortcuts';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface PhotoLightboxProps {
   photo: Photo;
@@ -29,6 +30,7 @@ interface PhotoLightboxProps {
 }
 
 export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, signedUrls }: PhotoLightboxProps) {
+  const { t } = useAnsprache();
   const signedUrl = signedUrls[photo.id] || photo.storage_url;
   const [comment, setComment] = useState(photo.client_comment || '');
   const [stagingRequested, setStagingRequested] = useState(photo.staging_requested);
@@ -485,7 +487,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
             <div className="space-y-2">
               <Label className="text-base">Anmerkung hinzufügen</Label>
               <p className="text-xs text-muted-foreground">
-                Klicken Sie auf das Bild, um eine Anmerkung zu platzieren
+                {t('Klicke auf das Bild, um eine Anmerkung zu platzieren', 'Klicken Sie auf das Bild, um eine Anmerkung zu platzieren')}
               </p>
             </div>
             <Button

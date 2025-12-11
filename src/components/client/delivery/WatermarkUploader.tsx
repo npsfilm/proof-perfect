@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, X } from 'lucide-react';
 import { useUploadWatermark } from '@/hooks/useClientWatermark';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface WatermarkUploaderProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface WatermarkUploaderProps {
 }
 
 export function WatermarkUploader({ open, onOpenChange }: WatermarkUploaderProps) {
+  const { t } = useAnsprache();
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -93,7 +95,10 @@ export function WatermarkUploader({ open, onOpenChange }: WatermarkUploaderProps
         <DialogHeader>
           <DialogTitle>Wasserzeichen hochladen</DialogTitle>
           <DialogDescription>
-            Laden Sie Ihr Logo als PNG oder WebP hoch. Transparente Hintergründe werden unterstützt.
+            {t(
+              'Lade dein Logo als PNG oder WebP hoch. Transparente Hintergründe werden unterstützt.',
+              'Laden Sie Ihr Logo als PNG oder WebP hoch. Transparente Hintergründe werden unterstützt.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -110,7 +115,7 @@ export function WatermarkUploader({ open, onOpenChange }: WatermarkUploaderProps
             >
               <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground mb-2">
-                Ziehen Sie Ihre Datei hierher oder
+                {t('Ziehe deine Datei hierher oder', 'Ziehen Sie Ihre Datei hierher oder')}
               </p>
               <Button
                 type="button"

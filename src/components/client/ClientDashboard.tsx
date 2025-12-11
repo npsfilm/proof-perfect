@@ -5,6 +5,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardHero } from '@/components/client/DashboardHero';
 import { QuickActionsGrid } from '@/components/client/QuickActionsGrid';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 import {
   ReopenModalState,
   useClientDashboardData,
@@ -15,6 +16,7 @@ import {
 } from './dashboard';
 
 export function ClientDashboard() {
+  const { t } = useAnsprache();
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [downloadsOpen, setDownloadsOpen] = useState(false);
   const [reopenModal, setReopenModal] = useState<ReopenModalState>({
@@ -78,7 +80,10 @@ export function ClientDashboard() {
           <EmptyState
             icon={FolderOpen}
             title="Keine Galerien zugewiesen"
-            description="Ihnen wurden noch keine Galerien zugewiesen. Buchen Sie jetzt Ihr erstes Shooting!"
+            description={t(
+              'Dir wurden noch keine Galerien zugewiesen. Buche jetzt dein erstes Shooting!',
+              'Ihnen wurden noch keine Galerien zugewiesen. Buchen Sie jetzt Ihr erstes Shooting!'
+            )}
           />
         ) : (
           <>

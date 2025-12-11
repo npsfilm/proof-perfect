@@ -10,8 +10,10 @@ import { StagingStyleSelector } from './StagingStyleSelector';
 import { StagingPricingSummary } from './StagingPricingSummary';
 import { ReferenceImageUploader } from './ReferenceImageUploader';
 import { useCreateStagingRequest } from '@/hooks/useStagingRequests';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 export function StagingRequestFlow() {
+  const { t } = useAnsprache();
   const [step, setStep] = useState(1);
   const [selectedGalleryId, setSelectedGalleryId] = useState<string>('');
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
@@ -121,7 +123,10 @@ export function StagingRequestFlow() {
                 Referenzbilder (optional)
               </Label>
               <p className="text-sm text-muted-foreground mb-3">
-                Laden Sie bis zu 5 Bilder hoch, um Ihren gewünschten Möbelstil zu zeigen
+                {t(
+                  'Lade bis zu 5 Bilder hoch, um deinen gewünschten Möbelstil zu zeigen',
+                  'Laden Sie bis zu 5 Bilder hoch, um Ihren gewünschten Möbelstil zu zeigen'
+                )}
               </p>
               <ReferenceImageUploader
                 requestId="temp-upload"
@@ -143,7 +148,7 @@ export function StagingRequestFlow() {
               </p>
               <Textarea
                 id="notes"
-                placeholder="Ihre Anmerkungen..."
+                placeholder={t('Deine Anmerkungen...', 'Ihre Anmerkungen...')}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
