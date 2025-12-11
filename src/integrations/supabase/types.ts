@@ -868,6 +868,7 @@ export type Database = {
           cta_text_sie: string | null
           cta_url_placeholder: string | null
           description: string | null
+          from_email: string | null
           heading_du: string | null
           heading_sie: string | null
           html_content_du: string | null
@@ -895,6 +896,7 @@ export type Database = {
           cta_text_sie?: string | null
           cta_url_placeholder?: string | null
           description?: string | null
+          from_email?: string | null
           heading_du?: string | null
           heading_sie?: string | null
           html_content_du?: string | null
@@ -922,6 +924,7 @@ export type Database = {
           cta_text_sie?: string | null
           cta_url_placeholder?: string | null
           description?: string | null
+          from_email?: string | null
           heading_du?: string | null
           heading_sie?: string | null
           html_content_du?: string | null

@@ -12,6 +12,7 @@ const transformDbTemplate = (t: any): EmailTemplate => ({
   content_type: t.content_type || 'simple',
   html_content_du: t.html_content_du || null,
   html_content_sie: t.html_content_sie || null,
+  from_email: t.from_email || null,
 });
 
 // Helper to transform our types to DB format

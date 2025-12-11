@@ -98,6 +98,7 @@ export interface EmailTemplate {
   sections: EmailTemplateSectionInstance[];
   html_content_du: string | null;
   html_content_sie: string | null;
+  from_email: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -199,6 +199,7 @@ export function EmailTemplateList({ category }: EmailTemplateListProps) {
               sections: [],
               html_content_du: null,
               html_content_sie: null,
+              from_email: null,
               created_at: '',
               updated_at: '',
             }}
