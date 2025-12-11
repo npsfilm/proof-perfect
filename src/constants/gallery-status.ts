@@ -2,31 +2,31 @@ export const GALLERY_STATUSES = {
   Planning: {
     label: 'Shooting in Planung',
     shortLabel: 'Planung',
-    color: 'bg-gray-100 text-gray-800',
+    color: 'bg-status-planning text-status-planning-foreground',
     icon: 'Calendar',
   },
   Open: {
     label: 'Vorschaugalerie offen',
     shortLabel: 'Offen',
-    color: 'bg-blue-100 text-blue-800',
+    color: 'bg-status-open text-status-open-foreground',
     icon: 'Eye',
   },
   Closed: {
     label: 'Vorschaugalerie geschlossen',
     shortLabel: 'Geschlossen',
-    color: 'bg-yellow-100 text-yellow-800',
+    color: 'bg-status-closed text-status-closed-foreground',
     icon: 'Lock',
   },
   Processing: {
     label: 'In Bearbeitung',
     shortLabel: 'Bearbeitung',
-    color: 'bg-orange-100 text-orange-800',
+    color: 'bg-status-processing text-status-processing-foreground',
     icon: 'Settings',
   },
   Delivered: {
     label: 'Geliefert',
     shortLabel: 'Geliefert',
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-status-delivered text-status-delivered-foreground',
     icon: 'CheckCircle',
   },
 } as const;

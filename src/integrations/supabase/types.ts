@@ -1262,6 +1262,42 @@ export type Database = {
         }
         Relationships: []
       }
+      theme_settings: {
+        Row: {
+          category: string
+          color_key: string
+          color_value_dark: string | null
+          color_value_light: string
+          created_at: string | null
+          id: string
+          label: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          color_key: string
+          color_value_dark?: string | null
+          color_value_light: string
+          created_at?: string | null
+          id?: string
+          label: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          color_key?: string
+          color_value_dark?: string | null
+          color_value_light?: string
+          created_at?: string | null
+          id?: string
+          label?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

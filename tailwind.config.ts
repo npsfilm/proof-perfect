@@ -57,6 +57,49 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Status colors
+        status: {
+          planning: {
+            DEFAULT: "hsl(var(--status-planning-bg))",
+            foreground: "hsl(var(--status-planning-text))",
+          },
+          open: {
+            DEFAULT: "hsl(var(--status-open-bg))",
+            foreground: "hsl(var(--status-open-text))",
+          },
+          closed: {
+            DEFAULT: "hsl(var(--status-closed-bg))",
+            foreground: "hsl(var(--status-closed-text))",
+          },
+          processing: {
+            DEFAULT: "hsl(var(--status-processing-bg))",
+            foreground: "hsl(var(--status-processing-text))",
+          },
+          delivered: {
+            DEFAULT: "hsl(var(--status-delivered-bg))",
+            foreground: "hsl(var(--status-delivered-text))",
+          },
+        },
+        // Service colors
+        service: {
+          express: "hsl(var(--service-express))",
+          staging: "hsl(var(--service-staging))",
+          bluehour: {
+            start: "hsl(var(--service-bluehour-start))",
+            end: "hsl(var(--service-bluehour-end))",
+          },
+        },
+        // Slot colors
+        slot: {
+          recommended: "hsl(var(--slot-recommended))",
+          cheapest: "hsl(var(--slot-cheapest))",
+          flexible: "hsl(var(--slot-flexible))",
+          weekend: "hsl(var(--slot-weekend))",
+        },
+        // Utility colors
+        info: "hsl(var(--info))",
+        warning: "hsl(var(--warning))",
+        success: "hsl(var(--success))",
       },
       boxShadow: {
         // ImmoOnPoint shadow system
