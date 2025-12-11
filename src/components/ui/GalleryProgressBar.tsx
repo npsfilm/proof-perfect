@@ -50,15 +50,16 @@ export function GalleryProgressBar({
                 {/* Icon circle */}
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
-                    isActive && "bg-primary text-primary-foreground shadow-neu-flat scale-110",
+                    "rounded-full flex items-center justify-center transition-all duration-300",
+                    compact ? "w-6 h-6" : "w-10 h-10",
+                    isActive && "bg-primary text-primary-foreground scale-110",
                     isCompleted && "bg-primary/20 text-primary",
-                    isPending && "bg-muted text-muted-foreground shadow-neu-pressed"
+                    isPending && "bg-muted text-muted-foreground"
                   )}
                 >
                   {(() => {
                     const StatusIcon = STATUS_ICONS[status];
-                    return <StatusIcon className="w-5 h-5" />;
+                    return <StatusIcon className={cn(compact ? "w-3 h-3" : "w-5 h-5")} />;
                   })()}
                 </div>
 
@@ -81,7 +82,8 @@ export function GalleryProgressBar({
               {index < GALLERY_STATUS_ORDER.length - 1 && (
                 <div
                   className={cn(
-                    "h-0.5 flex-1 mx-2 transition-all duration-300",
+                    "h-0.5 flex-1 transition-all duration-300",
+                    compact ? "mx-1" : "mx-2",
                     isCompleted ? "bg-primary" : "bg-muted"
                   )}
                 />
