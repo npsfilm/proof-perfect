@@ -18,6 +18,7 @@ export default function Auth() {
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [unverifiedUser, setUnverifiedUser] = useState<{ userId: string; email: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { signIn, signUp, resetPassword, resendVerificationEmail, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,6 +28,14 @@ export default function Auth() {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,30 +123,13 @@ export default function Auth() {
   };
 
   const handleResendVerification = async () => {
-    if (!unverifiedUser) return;
+    if (!unverifiedUser || resendCooldown > 0) return;
     
     setResendLoading(true);
     try {
-      const { error } = await resendVerificationEmail(unverifiedUser.userId, unverifiedUser.email);
-      
-      if (error) {
-        toast({
-          title: 'Fehler',
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'E-Mail gesendet',
-          description: 'Eine neue Bestätigungs-E-Mail wurde gesendet.',
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Fehler',
-        description: error.message,
-        variant: 'destructive',
-      });
+      await resendVerificationEmail(unverifiedUser.userId, unverifiedUser.email);
+      // Start 60 second cooldown regardless of result
+      setResendCooldown(60);
     } finally {
       setResendLoading(false);
     }
@@ -250,14 +242,21 @@ export default function Auth() {
               <Mail className="h-4 w-4" />
               <AlertDescription className="flex flex-col gap-2">
                 <span>Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleResendVerification}
-                  disabled={resendLoading}
-                >
-                  {resendLoading ? 'Wird gesendet...' : 'Bestätigungs-E-Mail erneut senden'}
-                </Button>
+                <div className="space-y-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleResendVerification}
+                    disabled={resendLoading || resendCooldown > 0}
+                  >
+                    {resendLoading ? 'Wird gesendet...' : 'Bestätigungs-E-Mail erneut senden'}
+                  </Button>
+                  {resendCooldown > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Erneut senden in {resendCooldown}s
+                    </p>
+                  )}
+                </div>
               </AlertDescription>
             </Alert>
           )}
