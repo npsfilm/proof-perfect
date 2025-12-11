@@ -9,16 +9,16 @@ interface AuthContextType {
   role: RoleType | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  resendVerificationEmail: (userId: string, email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * Helper function to fetch user role from database
- * Extracted to eliminate code duplication and improve maintainability
  */
 const fetchUserRole = async (userId: string): Promise<RoleType> => {
   const { data } = await supabase
@@ -28,6 +28,19 @@ const fetchUserRole = async (userId: string): Promise<RoleType> => {
     .single();
   
   return data?.role ?? 'client';
+};
+
+/**
+ * Helper function to check if user email is verified
+ */
+const checkEmailVerified = async (userId: string): Promise<boolean> => {
+  const { data } = await supabase
+    .from('profiles')
+    .select('email_verified')
+    .eq('id', userId)
+    .single();
+  
+  return data?.email_verified ?? false;
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -45,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         // Defer Supabase calls with setTimeout to prevent auth deadlock
-        // This is a Supabase best practice - do not remove
         if (session?.user) {
           setTimeout(() => {
             fetchUserRole(session.user.id).then(setRole);
@@ -75,22 +87,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // First, check if the email exists and is verified
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, email_verified')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (profile && !profile.email_verified) {
+      return { 
+        error: { 
+          message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Prüfen Sie Ihr Postfach.',
+          code: 'email_not_verified',
+          userId: profile.id,
+          email: normalizedEmail
+        } 
+      };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password,
     });
     return { error };
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email: email.toLowerCase().trim(),
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const { data, error } = await supabase.auth.signUp({
+      email: normalizedEmail,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-      },
     });
-    return { error };
+
+    if (error) {
+      return { error };
+    }
+
+    // If signup successful, send verification email via our custom system
+    if (data.user) {
+      const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
+        body: {
+          user_id: data.user.id,
+          email: normalizedEmail,
+        },
+      });
+
+      if (verificationError) {
+        console.error('Failed to send verification email:', verificationError);
+        // Don't fail the signup, just log the error
+      }
+
+      // Sign out the user immediately - they need to verify email first
+      await supabase.auth.signOut();
+      
+      return { error: null, needsVerification: true };
+    }
+
+    return { error: null };
   };
 
   const signOut = async () => {
@@ -101,35 +157,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth/reset-password`;
+    const normalizedEmail = email.toLowerCase().trim();
     
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email.toLowerCase().trim(),
-      {
-        redirectTo: redirectUrl,
-      }
-    );
+    const { data, error } = await supabase.functions.invoke('request-password-reset', {
+      body: { email: normalizedEmail },
+    });
 
-    // If successful, trigger webhook to notify via Zapier
-    if (!error) {
-      try {
-        await supabase.functions.invoke('webhook-password-reset', {
-          body: {
-            email: email.toLowerCase().trim(),
-            reset_link: redirectUrl,
-          }
-        });
-      } catch (webhookError) {
-        console.error('Failed to send password reset webhook:', webhookError);
-        // Don't fail the reset if webhook fails
-      }
+    if (error) {
+      return { error };
     }
 
-    return { error };
+    if (data?.error) {
+      return { error: { message: data.error } };
+    }
+
+    return { error: null };
+  };
+
+  const resendVerificationEmail = async (userId: string, email: string) => {
+    const { data, error } = await supabase.functions.invoke('send-verification-email', {
+      body: { user_id: userId, email },
+    });
+
+    if (error) {
+      return { error };
+    }
+
+    if (data?.error) {
+      return { error: { message: data.error } };
+    }
+
+    return { error: null };
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, loading, signIn, signUp, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      role, 
+      loading, 
+      signIn, 
+      signUp, 
+      signOut, 
+      resetPassword,
+      resendVerificationEmail 
+    }}>
       {children}
     </AuthContext.Provider>
   );
