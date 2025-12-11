@@ -1,4 +1,4 @@
-import { FolderOpen, Sofa, Sparkles, Calendar, Settings, Camera, Menu } from 'lucide-react';
+import { FolderOpen, Sofa, Sparkles, Settings, Camera, Menu } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -29,7 +29,6 @@ const navItems = [
   { title: 'Meine Galerien', url: '/', icon: FolderOpen, tab: 'galleries' },
   { title: 'Staging anfordern', url: '/?tab=staging', icon: Sofa, tab: 'staging' },
   { title: 'Virtuelle Bearbeitung', url: '/virtuelle-bearbeitung', icon: Sparkles },
-  { title: 'Shooting buchen', url: '/buchung', icon: Calendar },
   { title: 'Einstellungen', url: '/?tab=settings', icon: Settings, tab: 'settings' },
 ];
 
