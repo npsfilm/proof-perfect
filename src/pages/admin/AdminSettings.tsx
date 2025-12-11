@@ -7,31 +7,18 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { EmailTemplateEditor } from '@/components/admin/EmailTemplateEditor';
-import { EmailTemplates } from '@/types/email-templates';
 import { Save, Webhook, Mail, Clock, Palette } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { AvailabilitySettings } from '@/components/admin/availability';
 import { ColorPaletteEditor } from '@/components/admin/theme';
+import { EmailSettingsTab } from '@/components/admin/email-settings';
+
 export default function AdminSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [webhookSend, setWebhookSend] = useState('');
   const [webhookDeliver, setWebhookDeliver] = useState('');
-  
-  const [templates, setTemplates] = useState<EmailTemplates>({
-    du: {
-      send: { subject: '', body: '' },
-      review: { subject: '', body: '' },
-      deliver: { subject: '', body: '' },
-    },
-    sie: {
-      send: { subject: '', body: '' },
-      review: { subject: '', body: '' },
-      deliver: { subject: '', body: '' },
-    },
-  });
 
   const { data: settings } = useQuery({
     queryKey: ['system-settings'],
@@ -49,59 +36,16 @@ export default function AdminSettings() {
     if (settings) {
       setWebhookSend(settings.zapier_webhook_send || '');
       setWebhookDeliver(settings.zapier_webhook_deliver || '');
-      
-      setTemplates({
-        du: {
-          send: {
-            subject: settings.email_send_subject_du || '',
-            body: settings.email_send_body_du || '',
-          },
-          review: {
-            subject: settings.email_review_subject_du || '',
-            body: settings.email_review_body_du || '',
-          },
-          deliver: {
-            subject: settings.email_deliver_subject_du || '',
-            body: settings.email_deliver_body_du || '',
-          },
-        },
-        sie: {
-          send: {
-            subject: settings.email_send_subject_sie || '',
-            body: settings.email_send_body_sie || '',
-          },
-          review: {
-            subject: settings.email_review_subject_sie || '',
-            body: settings.email_review_body_sie || '',
-          },
-          deliver: {
-            subject: settings.email_deliver_subject_sie || '',
-            body: settings.email_deliver_body_sie || '',
-          },
-        },
-      });
     }
   }, [settings]);
 
-  const updateSettings = useMutation({
+  const updateWebhooks = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
         .from('system_settings')
         .update({
           zapier_webhook_send: webhookSend || null,
           zapier_webhook_deliver: webhookDeliver || null,
-          email_send_subject_du: templates.du.send.subject || null,
-          email_send_body_du: templates.du.send.body || null,
-          email_review_subject_du: templates.du.review.subject || null,
-          email_review_body_du: templates.du.review.body || null,
-          email_deliver_subject_du: templates.du.deliver.subject || null,
-          email_deliver_body_du: templates.du.deliver.body || null,
-          email_send_subject_sie: templates.sie.send.subject || null,
-          email_send_body_sie: templates.sie.send.body || null,
-          email_review_subject_sie: templates.sie.review.subject || null,
-          email_review_body_sie: templates.sie.review.body || null,
-          email_deliver_subject_sie: templates.sie.deliver.subject || null,
-          email_deliver_body_sie: templates.sie.deliver.body || null,
         })
         .eq('id', settings!.id);
 
@@ -110,8 +54,8 @@ export default function AdminSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-settings'] });
       toast({
-        title: 'Einstellungen gespeichert',
-        description: 'Webhook-URLs und E-Mail-Templates wurden erfolgreich aktualisiert.',
+        title: 'Gespeichert',
+        description: 'Webhook-URLs wurden aktualisiert.',
       });
     },
     onError: (error: any) => {
@@ -148,8 +92,7 @@ export default function AdminSettings() {
             </TabsTrigger>
             <TabsTrigger value="emails" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
               <Mail className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              <span className="hidden sm:inline">E-Mail-Templates</span>
-              <span className="sm:hidden">E-Mails</span>
+              E-Mails
             </TabsTrigger>
           </TabsList>
 
@@ -198,25 +141,16 @@ export default function AdminSettings() {
                   </p>
                 </div>
 
-                <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
+                <Button onClick={() => updateWebhooks.mutate()} disabled={updateWebhooks.isPending}>
                   <Save className="h-4 w-4 mr-2" />
-                  {updateSettings.isPending ? 'Wird gespeichert...' : 'Einstellungen speichern'}
+                  {updateWebhooks.isPending ? 'Wird gespeichert...' : 'Speichern'}
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="emails">
-            <EmailTemplateEditor
-              templates={templates}
-              onTemplatesChange={setTemplates}
-            />
-            <div className="mt-4">
-              <Button onClick={() => updateSettings.mutate()} disabled={updateSettings.isPending}>
-                <Save className="h-4 w-4 mr-2" />
-                {updateSettings.isPending ? 'Wird gespeichert...' : 'Templates speichern'}
-              </Button>
-            </div>
+            <EmailSettingsTab />
           </TabsContent>
         </Tabs>
       </div>
