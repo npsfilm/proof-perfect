@@ -114,6 +114,9 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
   };
 
   const handleResendToClient = async () => {
+    console.log('handleResendToClient called');
+    console.log('selectedClients:', selectedClients);
+    
     if (selectedClients.length === 0) {
       toast({
         title: 'Keine Kunden',
@@ -125,21 +128,22 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
 
     setSending(true);
     try {
-      const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
       const clientEmails = selectedClients.map(c => c.email);
 
-      const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
-          gallery_id: gallery.id,
-          client_emails: clientEmails,
-          new_passwords: {},
-          gallery_url: galleryUrl,
+          to: clientEmails,
+          subject: 'Test Resend',
+          html: 'Test Resend Email',
         },
       });
 
-      if (webhookError) {
-        throw new Error(webhookError.message || 'Webhook-Fehler');
+      if (emailError) {
+        console.error('Email error:', emailError);
+        throw new Error(emailError.message || 'E-Mail-Versand fehlgeschlagen');
       }
+
+      console.log('Email resent successfully:', emailData);
 
       toast({
         title: 'Galerie erneut gesendet!',
