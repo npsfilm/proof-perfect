@@ -55,6 +55,7 @@ export default function GalleryCreate() {
       const result = await createGalleryMutation.mutateAsync(submitData);
       
       if (result) {
+        // 1. Link clients to gallery (for metadata/display)
         const galleryClients = selectedClients.map(client => ({
           gallery_id: result.id,
           client_id: client.id,
@@ -66,11 +67,36 @@ export default function GalleryCreate() {
 
         if (linkError) {
           console.error('Error linking clients:', linkError);
-          toast({
-            title: 'Warnung',
-            description: 'Galerie erstellt, aber Kunden konnten nicht verknüpft werden.',
-            variant: 'destructive',
-          });
+        }
+
+        // 2. Create gallery_access entries for RLS (critical for client access)
+        const clientEmails = selectedClients.map(c => c.email);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('email', clientEmails);
+
+        if (profiles && profiles.length > 0) {
+          const galleryAccessEntries = profiles.map(profile => ({
+            gallery_id: result.id,
+            user_id: profile.id,
+          }));
+
+          const { error: accessError } = await supabase
+            .from('gallery_access')
+            .insert(galleryAccessEntries);
+
+          if (accessError) {
+            console.error('Error creating gallery access:', accessError);
+            toast({
+              title: 'Warnung',
+              description: 'Galerie erstellt, aber Zugriffsrechte konnten nicht vollständig eingerichtet werden.',
+              variant: 'destructive',
+            });
+          }
+        } else if (selectedClients.length > 0) {
+          // Clients exist but have no user accounts yet - this is expected for new clients
+          console.log('Selected clients have no user accounts yet - access will be granted on first login');
         }
 
         navigate(`/admin/galleries/${result.id}`);
