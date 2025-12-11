@@ -76,10 +76,12 @@ export function useUpdateNode() {
     mutationFn: async ({
       id,
       workflow_id,
+      skipInvalidation,
       ...updates
     }: {
       id: string;
       workflow_id: string;
+      skipInvalidation?: boolean;
       action_type?: ActionType | null;
       node_config?: Record<string, unknown>;
       position_x?: number;
@@ -99,10 +101,13 @@ export function useUpdateNode() {
         .single();
 
       if (error) throw error;
-      return { data, workflow_id };
+      return { data, workflow_id, skipInvalidation };
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-nodes', result.workflow_id] });
+      // Skip invalidation for position-only updates to prevent edge loss
+      if (!result.skipInvalidation) {
+        queryClient.invalidateQueries({ queryKey: ['workflow-nodes', result.workflow_id] });
+      }
     },
   });
 }
