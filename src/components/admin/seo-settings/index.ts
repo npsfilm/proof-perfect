@@ -5,5 +5,6 @@ export { SocialMediaSection } from './SocialMediaSection';
 export { StructuredDataSection } from './StructuredDataSection';
 export { AnalyticsSection } from './AnalyticsSection';
 export { DynamicContentSection } from './DynamicContentSection';
+export { PageTitlesSection } from './PageTitlesSection';
 export { ImageUploader } from './ImageUploader';
 export type { SeoSettings, SeoSettingsUpdate } from './types';
