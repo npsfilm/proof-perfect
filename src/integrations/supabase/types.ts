@@ -747,6 +747,7 @@ export type Database = {
           text_color: string
           text_muted_color: string
           updated_at: string
+          use_branding_logo: boolean | null
         }
         Insert: {
           background_color?: string
@@ -779,6 +780,7 @@ export type Database = {
           text_color?: string
           text_muted_color?: string
           updated_at?: string
+          use_branding_logo?: boolean | null
         }
         Update: {
           background_color?: string
@@ -811,6 +813,46 @@ export type Database = {
           text_color?: string
           text_muted_color?: string
           updated_at?: string
+          use_branding_logo?: boolean | null
+        }
+        Relationships: []
+      }
+      email_sections: {
+        Row: {
+          content_du: string | null
+          content_sie: string | null
+          created_at: string | null
+          id: string
+          is_preset: boolean | null
+          name: string
+          section_type: string
+          settings: Json | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_du?: string | null
+          content_sie?: string | null
+          created_at?: string | null
+          id?: string
+          is_preset?: boolean | null
+          name: string
+          section_type: string
+          settings?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_du?: string | null
+          content_sie?: string | null
+          created_at?: string | null
+          id?: string
+          is_preset?: boolean | null
+          name?: string
+          section_type?: string
+          settings?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -820,6 +862,7 @@ export type Database = {
           body_du: string
           body_sie: string
           category: string
+          content_type: string | null
           created_at: string
           cta_text_du: string | null
           cta_text_sie: string | null
@@ -827,12 +870,15 @@ export type Database = {
           description: string | null
           heading_du: string | null
           heading_sie: string | null
+          html_content_du: string | null
+          html_content_sie: string | null
           id: string
           is_active: boolean
           is_system_template: boolean
           name: string
           preheader_du: string | null
           preheader_sie: string | null
+          sections: Json | null
           subject_du: string
           subject_sie: string
           template_key: string
@@ -843,6 +889,7 @@ export type Database = {
           body_du: string
           body_sie: string
           category: string
+          content_type?: string | null
           created_at?: string
           cta_text_du?: string | null
           cta_text_sie?: string | null
@@ -850,12 +897,15 @@ export type Database = {
           description?: string | null
           heading_du?: string | null
           heading_sie?: string | null
+          html_content_du?: string | null
+          html_content_sie?: string | null
           id?: string
           is_active?: boolean
           is_system_template?: boolean
           name: string
           preheader_du?: string | null
           preheader_sie?: string | null
+          sections?: Json | null
           subject_du: string
           subject_sie: string
           template_key: string
@@ -866,6 +916,7 @@ export type Database = {
           body_du?: string
           body_sie?: string
           category?: string
+          content_type?: string | null
           created_at?: string
           cta_text_du?: string | null
           cta_text_sie?: string | null
@@ -873,12 +924,15 @@ export type Database = {
           description?: string | null
           heading_du?: string | null
           heading_sie?: string | null
+          html_content_du?: string | null
+          html_content_sie?: string | null
           id?: string
           is_active?: boolean
           is_system_template?: boolean
           name?: string
           preheader_du?: string | null
           preheader_sie?: string | null
+          sections?: Json | null
           subject_du?: string
           subject_sie?: string
           template_key?: string
