@@ -195,6 +195,10 @@ export function EmailTemplateList({ category }: EmailTemplateListProps) {
               available_placeholders: [],
               is_active: true,
               is_system_template: false,
+              content_type: 'simple',
+              sections: [],
+              html_content_du: null,
+              html_content_sie: null,
               created_at: '',
               updated_at: '',
             }}

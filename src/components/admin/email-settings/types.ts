@@ -27,6 +27,7 @@ export interface EmailDesignSettings {
   social_facebook: string | null;
   social_instagram: string | null;
   social_linkedin: string | null;
+  use_branding_logo: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +36,42 @@ export interface EmailPlaceholder {
   key: string;
   label: string;
   example: string;
+}
+
+export type EmailContentType = 'simple' | 'sections' | 'html';
+
+export interface EmailSectionSettings {
+  alignment?: 'left' | 'center' | 'right';
+  padding?: string;
+  backgroundColor?: string;
+  imageUrl?: string;
+  buttonUrl?: string;
+  maxWidth?: string;
+  color?: string;
+  width?: string;
+  height?: string;
+  columns?: number;
+}
+
+export interface EmailSection {
+  id: string;
+  name: string;
+  section_type: 'header' | 'text' | 'image' | 'cta' | 'divider' | 'columns' | 'spacer' | 'footer' | 'custom';
+  content_du: string | null;
+  content_sie: string | null;
+  settings: EmailSectionSettings;
+  is_preset: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailTemplateSectionInstance {
+  id: string;
+  section_type: EmailSection['section_type'];
+  content_du: string;
+  content_sie: string;
+  settings: EmailSectionSettings;
 }
 
 export interface EmailTemplate {
@@ -57,6 +94,10 @@ export interface EmailTemplate {
   available_placeholders: EmailPlaceholder[];
   is_active: boolean;
   is_system_template: boolean;
+  content_type: EmailContentType;
+  sections: EmailTemplateSectionInstance[];
+  html_content_du: string | null;
+  html_content_sie: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,4 +116,28 @@ export const CATEGORY_LABELS: Record<string, string> = {
   system: 'System-E-Mails',
   customer: 'Kunden-E-Mails',
   newsletter: 'Newsletter',
+};
+
+export const SECTION_TYPE_LABELS: Record<EmailSection['section_type'], string> = {
+  header: 'Header mit Logo',
+  text: 'Text-Block',
+  image: 'Bild',
+  cta: 'CTA-Button',
+  divider: 'Trennlinie',
+  columns: 'Zwei Spalten',
+  spacer: 'Abstand',
+  footer: 'Footer',
+  custom: 'Benutzerdefiniert',
+};
+
+export const SECTION_TYPE_ICONS: Record<EmailSection['section_type'], string> = {
+  header: '📋',
+  text: '📝',
+  image: '🖼️',
+  cta: '🔘',
+  divider: '➖',
+  columns: '⬛',
+  spacer: '↕️',
+  footer: '📄',
+  custom: '⭐',
 };
