@@ -2,6 +2,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -32,48 +33,50 @@ const queryClient = new QueryClient();
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              {/* Auth routes (no layout) */}
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/reset-password" element={<ResetPassword />} />
-              
-              {/* Public booking page (no layout) */}
-              <Route path="/buchen" element={<Buchung />} />
-              
-              {/* Client routes with ClientLayout */}
-              <Route element={<ClientLayout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/gallery/:slug" element={<ClientGallery />} />
-                <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
-              </Route>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <TooltipProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                {/* Auth routes (no layout) */}
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
+                
+                {/* Public booking page (no layout) */}
+                <Route path="/buchen" element={<Buchung />} />
+                
+                {/* Client routes with ClientLayout */}
+                <Route element={<ClientLayout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/gallery/:slug" element={<ClientGallery />} />
+                  <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
+                </Route>
 
-              {/* Admin routes with AdminLayout */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="galleries" element={<GalleriesList />} />
-                <Route path="galleries/new" element={<GalleryCreate />} />
-                <Route path="galleries/:id" element={<GalleryDetail />} />
-                <Route path="galleries/:id/review" element={<GalleryReview />} />
-                <Route path="companies" element={<CompaniesList />} />
-                <Route path="companies/:id" element={<CompanyDetail />} />
-                <Route path="users" element={<UsersList />} />
-                <Route path="webhook-logs" element={<WebhookLogs />} />
-                <Route path="analytics" element={<Analytics />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="staging-requests" element={<StagingRequests />} />
-                <Route path="calendar" element={<AdminCalendar />} />
-                <Route path="bookings" element={<AdminBookings />} />
-              </Route>
+                {/* Admin routes with AdminLayout */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="galleries" element={<GalleriesList />} />
+                  <Route path="galleries/new" element={<GalleryCreate />} />
+                  <Route path="galleries/:id" element={<GalleryDetail />} />
+                  <Route path="galleries/:id/review" element={<GalleryReview />} />
+                  <Route path="companies" element={<CompaniesList />} />
+                  <Route path="companies/:id" element={<CompanyDetail />} />
+                  <Route path="users" element={<UsersList />} />
+                  <Route path="webhook-logs" element={<WebhookLogs />} />
+                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="staging-requests" element={<StagingRequests />} />
+                  <Route path="calendar" element={<AdminCalendar />} />
+                  <Route path="bookings" element={<AdminBookings />} />
+                </Route>
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </HelmetProvider>
 );
