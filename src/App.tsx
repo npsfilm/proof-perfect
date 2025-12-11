@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnspracheProvider } from "@/contexts/AnspracheContext";
 import { BrandingProvider } from "@/contexts/BrandingContext";
+import { TrackingProvider } from "@/contexts/TrackingContext";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -43,9 +44,10 @@ const App = () => (
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              <BrandingProvider>
-                <AnspracheProvider>
-                  <Routes>
+              <TrackingProvider>
+                <BrandingProvider>
+                  <AnspracheProvider>
+                    <Routes>
                   {/* Auth routes (no layout) */}
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/reset-password" element={<ResetPassword />} />
@@ -84,9 +86,10 @@ const App = () => (
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AnspracheProvider>
-              </BrandingProvider>
+                    </Routes>
+                  </AnspracheProvider>
+                </BrandingProvider>
+              </TrackingProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
