@@ -29,17 +29,25 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
   }, [client?.ansprache]);
 
   const handleSave = async () => {
-    if (!client) return;
+    if (!client) {
+      toast({
+        title: 'Fehler',
+        description: 'Kein Client-Profil gefunden.',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsSaving(true);
     const { error } = await supabase
       .from('clients')
       .update({ ansprache })
-      .eq('id', client.id);
+      .eq('email', userEmail);
 
     setIsSaving(false);
 
     if (error) {
+      console.error('Save error:', error);
       toast({
         title: 'Fehler',
         description: 'Einstellungen konnten nicht gespeichert werden.',
