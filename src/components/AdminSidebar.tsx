@@ -10,7 +10,9 @@ import {
   Eye, 
   Sofa,
   LogOut,
-  HelpCircle
+  HelpCircle,
+  Calendar,
+  CalendarCheck2
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,6 +45,13 @@ const navGroups = [
       { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
       { title: 'Galerien', url: '/admin/galleries', icon: FolderOpen },
       { title: 'Staging-Anfragen', url: '/admin/staging-requests', icon: Sofa },
+    ],
+  },
+  {
+    label: 'Buchungen',
+    items: [
+      { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
+      { title: 'Alle Buchungen', url: '/admin/bookings', icon: CalendarCheck2 },
     ],
   },
   {
