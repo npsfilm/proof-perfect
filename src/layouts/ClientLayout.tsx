@@ -8,6 +8,7 @@ import { ThemeModeToggle } from '@/components/ui/theme-toggle';
 import { Shield } from 'lucide-react';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { SeoHead, PageType } from '@/components/SeoHead';
 
 export default function ClientLayout() {
   const { user, role, loading } = useAuth();
@@ -65,9 +66,22 @@ export default function ClientLayout() {
     return 'Meine Galerien';
   };
 
+  const getPageType = (): PageType => {
+    const path = location.pathname;
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+
+    if (path === '/virtuelle-bearbeitung') return 'virtual_editing';
+    if (path === '/' && tab === 'staging') return 'staging';
+    if (path === '/' && tab === 'settings') return 'settings';
+    return 'dashboard';
+  };
+
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-background">
+    <>
+      <SeoHead pageType={getPageType()} />
+      <SidebarProvider defaultOpen={!isMobile}>
+        <div className="min-h-screen flex w-full bg-background">
         <ClientSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-16 border-b border-border bg-background shadow-sm flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 backdrop-blur-sm bg-background/95">
@@ -108,6 +122,7 @@ export default function ClientLayout() {
           </main>
         </div>
       </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </>
   );
 }
