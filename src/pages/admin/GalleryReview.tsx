@@ -6,16 +6,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { TimeElapsed } from '@/components/admin/TimeElapsed';
-import { DeliveryUploadSection } from '@/components/admin/delivery/DeliveryUploadSection';
 import { DownloadHistoryCard } from '@/components/admin/delivery/DownloadHistoryCard';
 import {
   useGalleryReviewData,
   useDeliveryActions,
-  ReviewServicesCard,
-  ReviewStatsGrid,
-  ReviewFeedbackCard,
-  ReviewReferencesCard,
-  ReviewDeliveryMethodCard,
+  GalleryInfoSummary,
+  CollapsibleFeedbackCard,
+  CollapsibleReferencesCard,
+  CompactDeliverySection,
   ReviewActionsBar,
   ReviewPhotoGrid,
 } from '@/components/admin/review';
@@ -86,7 +84,7 @@ export default function GalleryReview() {
 
   return (
     <PageContainer size="xl">
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-3">
         <PageHeader
           title={gallery.status === 'Delivered' ? `Geliefert: ${gallery.name}` : `In Bearbeitung: ${gallery.name}`}
           description="Kundenauswahl und Feedback"
@@ -96,7 +94,7 @@ export default function GalleryReview() {
             { label: 'Überprüfung' }
           ]}
           actions={
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               {gallery.reviewed_at && (
                 <TimeElapsed 
                   startTime={gallery.reviewed_at} 
@@ -104,9 +102,6 @@ export default function GalleryReview() {
                   variant="secondary"
                 />
               )}
-              <Badge variant={gallery.status === 'Delivered' ? 'default' : 'secondary'} className="justify-center">
-                {STATUS_LABELS[gallery.status] || gallery.status}
-              </Badge>
               {gallery.status === 'Delivered' && (
                 <Button 
                   variant="outline" 
@@ -116,62 +111,59 @@ export default function GalleryReview() {
                   className="w-full sm:w-auto"
                 >
                   {resending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sende...
-                    </>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Erneut senden
-                    </>
+                    <Send className="h-4 w-4 mr-2" />
                   )}
+                  Erneut senden
                 </Button>
               )}
             </div>
           }
         />
 
-        <ReviewServicesCard
-          gallery={gallery}
-          stagingPhotos={stagingPhotos}
-          blueHourPhotos={blueHourPhotos}
-        />
-
-        {gallery.status !== 'Closed' && gallery.status !== 'Delivered' && (
-          <Alert>
-            <AlertDescription>
-              Diese Galerie wurde vom Kunden noch nicht überprüft. Ausgewählte Fotos erscheinen hier, sobald der Kunde seine Auswahl finalisiert hat.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <ReviewStatsGrid
+        {/* Compact Gallery Info Summary */}
+        <GalleryInfoSummary
           gallery={gallery}
           selectedPhotos={selectedPhotos || []}
           stagingPhotos={stagingPhotos}
           blueHourPhotos={blueHourPhotos}
           photosWithComments={photosWithComments}
           photosWithAnnotations={photosWithAnnotations}
+          companyName={gallery.companies?.name}
         />
 
-        <ReviewReferencesCard stagingReferences={stagingReferences || []} />
-
-        <ReviewFeedbackCard feedback={feedback || []} />
-
-        <DownloadHistoryCard galleryId={gallery.id} />
-
-        <DeliveryUploadSection galleryId={gallery.id} gallerySlug={gallery.slug} />
-
-        {gallery.status !== 'Delivered' && (
-          <ReviewDeliveryMethodCard
-            useExternalLink={useExternalLink}
-            setUseExternalLink={setUseExternalLink}
-            externalLink={externalLink}
-            setExternalLink={setExternalLink}
-          />
+        {gallery.status !== 'Closed' && gallery.status !== 'Delivered' && (
+          <Alert>
+            <AlertDescription className="text-sm">
+              Diese Galerie wurde vom Kunden noch nicht überprüft. Ausgewählte Fotos erscheinen hier, sobald der Kunde seine Auswahl finalisiert hat.
+            </AlertDescription>
+          </Alert>
         )}
 
+        {/* Collapsible sections for feedback and references */}
+        {(feedback?.length > 0 || stagingReferences?.length > 0) && (
+          <div className="space-y-2">
+            <CollapsibleFeedbackCard feedback={feedback || []} />
+            <CollapsibleReferencesCard stagingReferences={stagingReferences || []} />
+          </div>
+        )}
+
+        {/* Compact Download History */}
+        <DownloadHistoryCard galleryId={gallery.id} />
+
+        {/* Compact Delivery Section */}
+        <CompactDeliverySection
+          galleryId={gallery.id}
+          gallerySlug={gallery.slug}
+          useExternalLink={useExternalLink}
+          setUseExternalLink={setUseExternalLink}
+          externalLink={externalLink}
+          setExternalLink={setExternalLink}
+          isDelivered={gallery.status === 'Delivered'}
+        />
+
+        {/* Actions Bar */}
         <ReviewActionsBar
           gallery={gallery}
           selectedPhotos={selectedPhotos || []}
@@ -182,6 +174,7 @@ export default function GalleryReview() {
           onDeliver={handleDeliverFinalFiles}
         />
 
+        {/* Photo Grid */}
         <ReviewPhotoGrid
           selectedPhotos={selectedPhotos || []}
           allAnnotations={allAnnotations || []}

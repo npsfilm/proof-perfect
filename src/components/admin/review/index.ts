@@ -8,3 +8,7 @@ export * from './ReviewReferencesCard';
 export * from './ReviewDeliveryMethodCard';
 export * from './ReviewActionsBar';
 export * from './ReviewPhotoGrid';
+export * from './GalleryInfoSummary';
+export * from './CollapsibleFeedbackCard';
+export * from './CollapsibleReferencesCard';
+export * from './CompactDeliverySection';
