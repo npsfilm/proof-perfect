@@ -590,6 +590,59 @@ export type Database = {
           },
         ]
       }
+      discounts: {
+        Row: {
+          buy_quantity: number | null
+          created_at: string
+          discount_type: Database["public"]["Enums"]["discount_type_t"]
+          fixed_amount_cents: number | null
+          free_quantity: number | null
+          id: string
+          is_active: boolean | null
+          min_quantity: number | null
+          name: string
+          percentage: number | null
+          service_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          buy_quantity?: number | null
+          created_at?: string
+          discount_type?: Database["public"]["Enums"]["discount_type_t"]
+          fixed_amount_cents?: number | null
+          free_quantity?: number | null
+          id?: string
+          is_active?: boolean | null
+          min_quantity?: number | null
+          name: string
+          percentage?: number | null
+          service_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buy_quantity?: number | null
+          created_at?: string
+          discount_type?: Database["public"]["Enums"]["discount_type_t"]
+          fixed_amount_cents?: number | null
+          free_quantity?: number | null
+          id?: string
+          is_active?: boolean | null
+          min_quantity?: number | null
+          name?: string
+          percentage?: number | null
+          service_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discounts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       download_logs: {
         Row: {
           created_at: string
@@ -1253,6 +1306,149 @@ export type Database = {
           },
         ]
       }
+      room_types: {
+        Row: {
+          created_at: string
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          features: Json | null
+          gradient_class: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          name: string
+          price_cents: number
+          price_type: Database["public"]["Enums"]["price_type_t"]
+          requires_photo_selection: boolean | null
+          show_in_booking: boolean | null
+          show_in_finalize: boolean | null
+          show_in_virtual_editing: boolean | null
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          gradient_class?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name: string
+          price_cents?: number
+          price_type?: Database["public"]["Enums"]["price_type_t"]
+          requires_photo_selection?: boolean | null
+          show_in_booking?: boolean | null
+          show_in_finalize?: boolean | null
+          show_in_virtual_editing?: boolean | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          gradient_class?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name?: string
+          price_cents?: number
+          price_type?: Database["public"]["Enums"]["price_type_t"]
+          requires_photo_selection?: boolean | null
+          show_in_booking?: boolean | null
+          show_in_finalize?: boolean | null
+          show_in_virtual_editing?: boolean | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staging_references: {
         Row: {
           created_at: string
@@ -1388,6 +1584,42 @@ export type Database = {
             referencedColumns: ["gallery_id"]
           },
         ]
+      }
+      staging_styles: {
+        Row: {
+          color_class: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       system_settings: {
         Row: {
@@ -1791,12 +2023,14 @@ export type Database = {
     }
     Enums: {
       company_role_t: "owner" | "company_admin" | "employee"
+      discount_type_t: "percentage" | "fixed" | "buy_x_get_y"
       gallery_status_t:
         | "Planning"
         | "Open"
         | "Closed"
         | "Processing"
         | "Delivered"
+      price_type_t: "fixed" | "per_image" | "per_room"
       role_t: "admin" | "client"
       salutation_t: "Du" | "Sie"
     }
@@ -1927,6 +2161,7 @@ export const Constants = {
   public: {
     Enums: {
       company_role_t: ["owner", "company_admin", "employee"],
+      discount_type_t: ["percentage", "fixed", "buy_x_get_y"],
       gallery_status_t: [
         "Planning",
         "Open",
@@ -1934,6 +2169,7 @@ export const Constants = {
         "Processing",
         "Delivered",
       ],
+      price_type_t: ["fixed", "per_image", "per_room"],
       role_t: ["admin", "client"],
       salutation_t: ["Du", "Sie"],
     },
