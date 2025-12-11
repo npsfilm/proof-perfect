@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/database';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface ComparisonModeProps {
   photo1: Photo;
@@ -24,6 +25,7 @@ export function ComparisonMode({
   onNavigate,
   onToggleSelection 
 }: ComparisonModeProps) {
+  const { t } = useAnsprache();
   const { signedUrl: signedUrl1 } = useSignedPhotoUrl(photo1);
   const { signedUrl: signedUrl2 } = useSignedPhotoUrl(photo2);
   const [viewMode, setViewMode] = useState<'split' | 'slider'>('split');
@@ -367,7 +369,7 @@ export function ComparisonMode({
       {/* Instructions */}
       <div className="p-3 bg-black/50 text-center text-white/50 text-xs">
         {viewMode === 'slider' 
-          ? 'Ziehen Sie den Schieberegler, um die Fotos zu vergleichen • ESC zum Schließen'
+          ? t('Ziehe den Schieberegler, um die Fotos zu vergleichen • ESC zum Schließen', 'Ziehen Sie den Schieberegler, um die Fotos zu vergleichen • ESC zum Schließen')
           : 'ESC zum Schließen • ← → zum Navigieren'}
       </div>
     </div>

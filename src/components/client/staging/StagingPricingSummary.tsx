@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Euro } from 'lucide-react';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface StagingPricingSummaryProps {
   photoCount: number;
@@ -12,6 +13,7 @@ export function StagingPricingSummary({
   basePrice,
   totalPrice,
 }: StagingPricingSummaryProps) {
+  const { t } = useAnsprache();
   const hasBulkDiscount = photoCount >= 6;
   const freePhotos = Math.floor(photoCount / 6);
 
@@ -55,7 +57,7 @@ export function StagingPricingSummary({
 
           {hasBulkDiscount && (
             <p className="text-xs text-muted-foreground pt-2 border-t">
-              🎉 Sie sparen {freePhotos * basePrice}€ mit dem 5+1 Angebot!
+              🎉 {t(`Du sparst ${freePhotos * basePrice}€ mit dem 5+1 Angebot!`, `Sie sparen ${freePhotos * basePrice}€ mit dem 5+1 Angebot!`)}
             </p>
           )}
         </div>

@@ -1,3 +1,5 @@
+import { useAnsprache } from '@/contexts/AnspracheContext';
+
 interface FinalizePricingSummaryProps {
   expressDelivery: boolean;
   stagingCount: number;
@@ -9,6 +11,7 @@ export function FinalizePricingSummary({
   stagingCount, 
   blueHourCount 
 }: FinalizePricingSummaryProps) {
+  const { t } = useAnsprache();
   const hasAnyService = expressDelivery || stagingCount > 0 || blueHourCount > 0;
   
   if (!hasAnyService) return null;
@@ -61,7 +64,7 @@ export function FinalizePricingSummary({
         </div>
         {stagingDiscount > 0 && (
           <p className="text-xs text-center text-green-600 font-medium">
-            🎉 Sie sparen {stagingDiscount}€ mit dem 5+1 Rabatt!
+            🎉 {t(`Du sparst ${stagingDiscount}€ mit dem 5+1 Rabatt!`, `Sie sparen ${stagingDiscount}€ mit dem 5+1 Rabatt!`)}
           </p>
         )}
       </div>
