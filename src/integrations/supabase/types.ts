@@ -715,6 +715,177 @@ export type Database = {
           },
         ]
       }
+      email_design_settings: {
+        Row: {
+          background_color: string
+          body_font_size: number
+          border_color: string
+          button_bg_color: string
+          button_border_radius: number
+          button_padding_x: number
+          button_padding_y: number
+          button_text_color: string
+          company_name: string
+          container_bg_color: string
+          container_border_radius: number
+          container_max_width: number
+          content_padding: number
+          created_at: string
+          font_family: string
+          footer_text: string | null
+          heading_font_size: number
+          id: string
+          line_height: number
+          logo_url: string | null
+          logo_width: number
+          primary_color: string
+          secondary_color: string
+          show_social_links: boolean
+          social_facebook: string | null
+          social_instagram: string | null
+          social_linkedin: string | null
+          text_color: string
+          text_muted_color: string
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string
+          body_font_size?: number
+          border_color?: string
+          button_bg_color?: string
+          button_border_radius?: number
+          button_padding_x?: number
+          button_padding_y?: number
+          button_text_color?: string
+          company_name?: string
+          container_bg_color?: string
+          container_border_radius?: number
+          container_max_width?: number
+          content_padding?: number
+          created_at?: string
+          font_family?: string
+          footer_text?: string | null
+          heading_font_size?: number
+          id?: string
+          line_height?: number
+          logo_url?: string | null
+          logo_width?: number
+          primary_color?: string
+          secondary_color?: string
+          show_social_links?: boolean
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          text_color?: string
+          text_muted_color?: string
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string
+          body_font_size?: number
+          border_color?: string
+          button_bg_color?: string
+          button_border_radius?: number
+          button_padding_x?: number
+          button_padding_y?: number
+          button_text_color?: string
+          company_name?: string
+          container_bg_color?: string
+          container_border_radius?: number
+          container_max_width?: number
+          content_padding?: number
+          created_at?: string
+          font_family?: string
+          footer_text?: string | null
+          heading_font_size?: number
+          id?: string
+          line_height?: number
+          logo_url?: string | null
+          logo_width?: number
+          primary_color?: string
+          secondary_color?: string
+          show_social_links?: boolean
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          text_color?: string
+          text_muted_color?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          available_placeholders: Json
+          body_du: string
+          body_sie: string
+          category: string
+          created_at: string
+          cta_text_du: string | null
+          cta_text_sie: string | null
+          cta_url_placeholder: string | null
+          description: string | null
+          heading_du: string | null
+          heading_sie: string | null
+          id: string
+          is_active: boolean
+          is_system_template: boolean
+          name: string
+          preheader_du: string | null
+          preheader_sie: string | null
+          subject_du: string
+          subject_sie: string
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          available_placeholders?: Json
+          body_du: string
+          body_sie: string
+          category: string
+          created_at?: string
+          cta_text_du?: string | null
+          cta_text_sie?: string | null
+          cta_url_placeholder?: string | null
+          description?: string | null
+          heading_du?: string | null
+          heading_sie?: string | null
+          id?: string
+          is_active?: boolean
+          is_system_template?: boolean
+          name: string
+          preheader_du?: string | null
+          preheader_sie?: string | null
+          subject_du: string
+          subject_sie: string
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          available_placeholders?: Json
+          body_du?: string
+          body_sie?: string
+          category?: string
+          created_at?: string
+          cta_text_du?: string | null
+          cta_text_sie?: string | null
+          cta_url_placeholder?: string | null
+          description?: string | null
+          heading_du?: string | null
+          heading_sie?: string | null
+          id?: string
+          is_active?: boolean
+          is_system_template?: boolean
+          name?: string
+          preheader_du?: string | null
+          preheader_sie?: string | null
+          subject_du?: string
+          subject_sie?: string
+          template_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_verification_tokens: {
         Row: {
           created_at: string | null
