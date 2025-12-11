@@ -90,81 +90,81 @@
   }
 
   .dark {
-    /* Dark Mode - Harmonisiert mit #233c63 */
-    --background: 217 25% 8%;
-    --foreground: 0 0% 98%;
+    /* Dark Mode - Optimiert für Kontrast */
+    --background: 217 20% 10%;
+    --foreground: 210 15% 95%;
 
-    /* Brand color (lighter for dark mode) */
-    --primary: 217 48% 45%;
+    /* Brand color (heller für Dark Mode Sichtbarkeit) */
+    --primary: 217 55% 55%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Lighter blue */
-    --secondary: 217 40% 35%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Deutlich sichtbar */
+    --secondary: 217 35% 28%;
+    --secondary-foreground: 210 15% 95%;
 
-    /* Muted - Blau-Grau */
-    --muted: 217 15% 18%;
-    --muted-foreground: 217 15% 65%;
+    /* Muted - Sichtbare Unterscheidung */
+    --muted: 217 18% 16%;
+    --muted-foreground: 217 12% 70%;
 
-    /* Accent - Blau-Grau */
-    --accent: 217 15% 18%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent - Klare Trennung */
+    --accent: 217 20% 20%;
+    --accent-foreground: 210 15% 95%;
 
-    /* Destructive - Gedämpftes Rot */
-    --destructive: 0 45% 40%;
-    --destructive-foreground: 0 0% 98%;
+    /* Destructive - Gut sichtbar */
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Borders & Inputs - Blau-Grau */
-    --border: 217 15% 20%;
-    --input: 217 15% 20%;
-    --ring: 217 48% 45%;
+    /* Borders & Inputs - Sichtbare Linien */
+    --border: 217 15% 25%;
+    --input: 217 15% 22%;
+    --ring: 217 55% 55%;
 
-    /* Card */
-    --card: 217 25% 8%;
-    --card-foreground: 0 0% 98%;
+    /* Card - Leicht erhöht für Tiefe */
+    --card: 217 20% 13%;
+    --card-foreground: 210 15% 95%;
 
-    /* Popover */
-    --popover: 217 25% 8%;
-    --popover-foreground: 0 0% 98%;
+    /* Popover - Noch etwas heller */
+    --popover: 217 20% 15%;
+    --popover-foreground: 210 15% 95%;
 
-    /* Sidebar */
-    --sidebar-background: 217 20% 12%;
-    --sidebar-foreground: 217 10% 95%;
-    --sidebar-primary: 217 48% 45%;
+    /* Sidebar - Dezente Unterscheidung */
+    --sidebar-background: 217 22% 12%;
+    --sidebar-foreground: 210 12% 92%;
+    --sidebar-primary: 217 55% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 15% 18%;
-    --sidebar-accent-foreground: 217 10% 95%;
-    --sidebar-border: 217 15% 20%;
-    --sidebar-ring: 217 48% 45%;
+    --sidebar-accent: 217 20% 18%;
+    --sidebar-accent-foreground: 210 12% 92%;
+    --sidebar-border: 217 15% 22%;
+    --sidebar-ring: 217 55% 55%;
 
-    /* Status Colors - Dark Mode Gedämpft */
-    --status-planning-bg: 217 15% 20%;
-    --status-planning-text: 217 15% 75%;
-    --status-open-bg: 217 40% 22%;
-    --status-open-text: 217 50% 75%;
-    --status-closed-bg: 45 30% 22%;
-    --status-closed-text: 45 45% 75%;
-    --status-processing-bg: 217 25% 22%;
-    --status-processing-text: 217 30% 75%;
-    --status-delivered-bg: 142 30% 20%;
-    --status-delivered-text: 142 40% 70%;
+    /* Status Colors - Hoher Kontrast */
+    --status-planning-bg: 217 15% 22%;
+    --status-planning-text: 217 12% 80%;
+    --status-open-bg: 217 45% 28%;
+    --status-open-text: 217 60% 85%;
+    --status-closed-bg: 45 35% 25%;
+    --status-closed-text: 45 55% 80%;
+    --status-processing-bg: 270 30% 28%;
+    --status-processing-text: 270 40% 80%;
+    --status-delivered-bg: 142 35% 25%;
+    --status-delivered-text: 142 50% 75%;
 
-    /* Service Colors - Dark Mode Harmonisiert */
-    --service-express: 0 45% 50%;
-    --service-staging: 217 50% 55%;
-    --service-bluehour-start: 217 55% 55%;
-    --service-bluehour-end: 217 40% 65%;
+    /* Service Colors - Leuchtend */
+    --service-express: 0 60% 58%;
+    --service-staging: 217 55% 60%;
+    --service-bluehour-start: 217 60% 58%;
+    --service-bluehour-end: 217 45% 68%;
 
-    /* Slot Colors - Dark Mode Gedämpft */
-    --slot-recommended: 45 45% 55%;
-    --slot-cheapest: 142 40% 50%;
-    --slot-flexible: 217 50% 60%;
-    --slot-weekend: 217 30% 65%;
+    /* Slot Colors - Gut unterscheidbar */
+    --slot-recommended: 45 55% 58%;
+    --slot-cheapest: 142 50% 55%;
+    --slot-flexible: 217 55% 62%;
+    --slot-weekend: 270 40% 65%;
 
-    /* Utility Colors - Dark Mode Gedämpft */
-    --info: 217 55% 60%;
-    --warning: 40 45% 55%;
-    --success: 142 40% 50%;
+    /* Utility Colors - Klar sichtbar */
+    --info: 217 60% 65%;
+    --warning: 40 55% 60%;
+    --success: 142 50% 55%;
   }
 }
 
