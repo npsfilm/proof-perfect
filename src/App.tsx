@@ -33,6 +33,8 @@ import WorkflowEditorPage from "./pages/admin/WorkflowEditorPage";
 import ClientGallery from "./pages/client/ClientGallery";
 import VirtualEditing from "./pages/client/VirtualEditing";
 import Buchung from "./pages/Buchung";
+import FeatureRequest from "./pages/FeatureRequest";
+import FeatureRequests from "./pages/admin/FeatureRequests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +57,9 @@ const App = () => (
                   
                   {/* Public booking page (no layout) */}
                   <Route path="/buchen" element={<Buchung />} />
+                  
+                  {/* Feature Request page (no layout - own header) */}
+                  <Route path="/feature-anfrage" element={<FeatureRequest />} />
                   
                   {/* Client routes with ClientLayout */}
                   <Route element={<ClientLayout />}>
@@ -82,6 +87,7 @@ const App = () => (
                     <Route path="services" element={<AdminServices />} />
                     <Route path="workflows" element={<AdminWorkflows />} />
                     <Route path="workflows/:id" element={<WorkflowEditorPage />} />
+                    <Route path="feature-requests" element={<FeatureRequests />} />
                   </Route>
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

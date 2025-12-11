@@ -15,7 +15,9 @@ import {
   CalendarCheck2,
   ChevronDown,
   Package,
-  Zap
+  Zap,
+  Lightbulb,
+  MessageSquarePlus
 } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,6 +77,7 @@ const navGroups = [
     items: [
       { title: 'Services & Pakete', url: '/admin/services', icon: Package },
       { title: 'Workflows', url: '/admin/workflows', icon: Zap },
+      { title: 'Feature-Anfragen', url: '/admin/feature-requests', icon: MessageSquarePlus },
       { title: 'Einstellungen', url: '/admin/settings', icon: Settings },
       { title: 'Webhook-Logs', url: '/admin/webhook-logs', icon: Activity },
     ],
@@ -260,6 +263,31 @@ export function AdminSidebar() {
             )}
           </SidebarGroup>
         </SidebarContent>
+        
+        {/* Feature Request Button */}
+        <div className="border-t border-sidebar-border px-2 py-2">
+          {open ? (
+            <NavLink
+              to="/feature-anfrage"
+              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+            >
+              <Lightbulb className="h-4 w-4 shrink-0" />
+              <span className="text-xs">Dir fehlt etwas? Lass es uns wissen</span>
+            </NavLink>
+          ) : (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <NavLink
+                  to="/feature-anfrage"
+                  className="flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  <Lightbulb className="h-4 w-4" />
+                </NavLink>
+              </TooltipTrigger>
+              <TooltipContent side="right">Feature-Anfrage</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         
         {/* Footer with User Info */}
         <SidebarFooter className="border-t border-sidebar-border p-2">

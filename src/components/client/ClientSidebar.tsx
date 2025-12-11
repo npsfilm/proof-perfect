@@ -8,7 +8,8 @@ import {
   X,
   LogOut,
   HelpCircle,
-  Camera
+  Camera,
+  Lightbulb
 } from 'lucide-react';
 import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -223,6 +224,18 @@ export function MobileClientNav() {
           </TooltipProvider>
         </div>
         
+        {/* Feature Request */}
+        <div className="border-t border-border px-2 py-2">
+          <NavLink
+            to="/feature-anfrage"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+          >
+            <Lightbulb className="h-3.5 w-3.5 shrink-0" />
+            <span>Dir fehlt etwas? Lass es uns wissen</span>
+          </NavLink>
+        </div>
+        
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 border-t border-border p-2">
           <div className="flex gap-1">
@@ -320,6 +333,31 @@ export function ClientSidebar() {
         <SidebarContent className="px-2 py-1">
           <SidebarNavContent showLabels={open} />
         </SidebarContent>
+        
+        {/* Feature Request Button */}
+        <div className="border-t border-sidebar-border px-2 py-2">
+          {open ? (
+            <NavLink
+              to="/feature-anfrage"
+              className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+            >
+              <Lightbulb className="h-4 w-4 shrink-0" />
+              <span>Dir fehlt etwas? Lass es uns wissen</span>
+            </NavLink>
+          ) : (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <NavLink
+                  to="/feature-anfrage"
+                  className="flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  <Lightbulb className="h-4 w-4" />
+                </NavLink>
+              </TooltipTrigger>
+              <TooltipContent side="right">Feature-Anfrage</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         
         {/* Footer */}
         <SidebarFooter className="border-t border-sidebar-border p-2">
