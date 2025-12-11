@@ -2274,6 +2274,64 @@ export type Database = {
         }
         Relationships: []
       }
+      user_events: {
+        Row: {
+          created_at: string
+          event_category: string | null
+          event_type: string
+          gallery_id: string | null
+          id: string
+          metadata: Json | null
+          photo_id: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_category?: string | null
+          event_type: string
+          gallery_id?: string | null
+          id?: string
+          metadata?: Json | null
+          photo_id?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_category?: string | null
+          event_type?: string
+          gallery_id?: string | null
+          id?: string
+          metadata?: Json | null
+          photo_id?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_events_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "v_gallery_selection_stats"
+            referencedColumns: ["gallery_id"]
+          },
+          {
+            foreignKeyName: "user_events_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

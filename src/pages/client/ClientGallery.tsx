@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGalleryBySlug } from '@/hooks/useGallery';
@@ -17,6 +17,7 @@ import { usePhotoOrientations } from '@/hooks/usePhotoOrientations';
 import { useComparisonMode } from '@/hooks/useComparisonMode';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
+import { useEventTracking } from '@/hooks/useEventTracking';
 import { Button } from '@/components/ui/button';
 import {
   GalleryHeader,
@@ -43,6 +44,8 @@ export default function ClientGallery() {
   const { finalizeGallery, isSubmitting } = useGalleryFinalization(gallery, user?.id, slug);
   const { toggleSelection, isSaving, lastSaved } = usePhotoSelection(gallery?.id);
   const { orientations, detectOrientation } = usePhotoOrientations(photos);
+  const { trackGalleryView, trackPhotoClick, trackSelectionToggle, trackFinalizationStarted } = useEventTracking();
+  const galleryViewTracked = useRef(false);
 
   const {
     isComparisonMode,
@@ -93,6 +96,14 @@ export default function ClientGallery() {
     }
   }, [gallery]);
 
+  // Track gallery view once
+  useEffect(() => {
+    if (gallery && photos && !galleryViewTracked.current) {
+      trackGalleryView(gallery.id, photos.length);
+      galleryViewTracked.current = true;
+    }
+  }, [gallery, photos, trackGalleryView]);
+
   const handleWelcomeComplete = () => {
     localStorage.setItem('proofing_welcome_shown', 'true');
   };
@@ -116,6 +127,9 @@ export default function ClientGallery() {
   });
 
   const handlePhotoClick = (photoId: string) => {
+    if (gallery) {
+      trackPhotoClick(gallery.id, photoId, isComparisonMode ? 'comparison_add' : 'lightbox_open');
+    }
     handleComparisonPhotoClick(photoId, setSelectedPhotoId);
   };
 
@@ -124,6 +138,9 @@ export default function ClientGallery() {
   };
 
   const handleFinalize = () => {
+    if (gallery) {
+      trackFinalizationStarted(gallery.id, selectedPhotos.length);
+    }
     setShowFinalizeModals(true);
   };
 
