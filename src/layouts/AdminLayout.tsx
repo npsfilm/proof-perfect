@@ -1,14 +1,24 @@
 import { useEffect } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { PageTransition } from '@/components/admin/PageTransition';
 import { ThemeModeToggle } from '@/components/ui/theme-toggle';
+import { SeoHead, PageType } from '@/components/SeoHead';
 
 export default function AdminLayout() {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getPageType = (): PageType => {
+    const path = location.pathname;
+    if (path === '/admin' || path === '/admin/') return 'admin_dashboard';
+    if (path.includes('/admin/galleries')) return 'admin_galleries';
+    if (path.includes('/admin/settings')) return 'admin_settings';
+    return 'admin_dashboard';
+  };
 
   useEffect(() => {
     if (!loading && (!user || role !== 'admin')) {
@@ -29,8 +39,10 @@ export default function AdminLayout() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-muted/30">
+    <>
+      <SeoHead pageType={getPageType()} />
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-muted/30">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 md:h-16 border-b border-border bg-background flex items-center justify-between px-3 md:px-6 sticky top-0 z-10">
@@ -47,7 +59,8 @@ export default function AdminLayout() {
             </PageTransition>
           </main>
         </div>
-      </div>
-    </SidebarProvider>
+        </div>
+      </SidebarProvider>
+    </>
   );
 }

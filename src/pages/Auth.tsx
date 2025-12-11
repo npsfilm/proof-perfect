@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, CheckCircle2 } from 'lucide-react';
+import { SeoHead } from '@/components/SeoHead';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -138,6 +139,8 @@ export default function Auth() {
   // Show verification success message after signup
   if (showVerificationMessage) {
     return (
+      <>
+        <SeoHead title="E-Mail bestätigen" />
       <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
@@ -169,12 +172,15 @@ export default function Auth() {
           </CardContent>
         </Card>
       </div>
+      </>
     );
   }
 
   // Forgot Password View
   if (isForgotPassword) {
     return (
+      <>
+        <SeoHead title="Passwort zurücksetzen" />
       <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
@@ -219,12 +225,15 @@ export default function Auth() {
           </CardContent>
         </Card>
       </div>
+      </>
     );
   }
 
   // Login / Sign Up View
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+    <>
+      <SeoHead title={isLogin ? 'Anmelden' : 'Registrieren'} />
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
@@ -319,5 +328,6 @@ export default function Auth() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
