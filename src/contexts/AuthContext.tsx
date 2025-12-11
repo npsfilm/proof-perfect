@@ -114,22 +114,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     
-    // First, check if the email exists and is verified
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id, email_verified')
-      .eq('email', normalizedEmail)
-      .single();
+    // Check email verification via Edge Function (bypasses RLS)
+    try {
+      const { data: checkResult, error: checkError } = await supabase.functions.invoke('check-email-verified', {
+        body: { email: normalizedEmail },
+      });
 
-    if (profile && !profile.email_verified) {
-      return { 
-        error: { 
-          message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Prüfen Sie Ihr Postfach.',
-          code: 'email_not_verified',
-          userId: profile.id,
-          email: normalizedEmail
-        } 
-      };
+      if (!checkError && checkResult?.exists && !checkResult?.verified) {
+        return { 
+          error: { 
+            message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Prüfen Sie Ihr Postfach.',
+            code: 'email_not_verified',
+            userId: checkResult.userId,
+            email: normalizedEmail
+          } 
+        };
+      }
+    } catch (e) {
+      console.error('Error checking email verification:', e);
+      // Continue with login attempt if check fails
     }
 
     const { error } = await supabase.auth.signInWithPassword({
