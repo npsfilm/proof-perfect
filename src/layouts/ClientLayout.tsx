@@ -5,12 +5,12 @@ import { ClientSidebar, MobileClientNav } from '@/components/client/ClientSideba
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { ThemeModeToggle } from '@/components/ui/theme-toggle';
-import { Shield, LogOut } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ClientLayout() {
-  const { user, role, loading, signOut } = useAuth();
+  const { user, role, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: clientProfile } = useClientProfile(user?.email);
@@ -101,16 +101,6 @@ export default function ClientLayout() {
                   <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
-              <span className="text-sm text-muted-foreground hidden md:inline">{user.email}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={signOut}
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Abmelden</span>
-              </Button>
             </div>
           </header>
           <main className="flex-1 bg-background">
