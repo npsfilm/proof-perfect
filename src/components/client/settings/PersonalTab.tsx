@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface PersonalTabProps {
   userEmail: string;
@@ -17,6 +18,7 @@ interface PersonalTabProps {
 }
 
 export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
+  const { t } = useAnsprache();
   const { data: client } = useClientProfile(userEmail);
   const [ansprache, setAnsprache] = useState(client?.ansprache || 'Sie');
   const [isSaving, setIsSaving] = useState(false);
@@ -68,7 +70,7 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
         <CardHeader>
           <CardTitle>Persönliche Daten</CardTitle>
           <CardDescription>
-            Ihre Kontaktinformationen
+            {t('Deine Kontaktinformationen', 'Ihre Kontaktinformationen')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -103,7 +105,7 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
         <CardHeader>
           <CardTitle>Ansprache</CardTitle>
           <CardDescription>
-            Wählen Sie, wie wir Sie ansprechen sollen
+            {t('Wähle, wie wir dich ansprechen sollen', 'Wählen Sie, wie wir Sie ansprechen sollen')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

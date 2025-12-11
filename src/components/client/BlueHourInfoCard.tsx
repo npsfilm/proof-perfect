@@ -5,6 +5,7 @@ import blueHourBefore1 from "@/assets/blue-hour-before-1.jpg";
 import blueHourAfter1 from "@/assets/blue-hour-after-1.jpg";
 import blueHourBefore2 from "@/assets/blue-hour-before-2.jpg";
 import blueHourAfter2 from "@/assets/blue-hour-after-2.jpg";
+import { useAnsprache } from "@/contexts/AnspracheContext";
 
 interface BlueHourInfoCardProps {
   isExpanded: boolean;
@@ -12,6 +13,8 @@ interface BlueHourInfoCardProps {
 }
 
 export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps) => {
+  const { t } = useAnsprache();
+  
   if (!isExpanded) return null;
 
   return (
@@ -26,7 +29,7 @@ export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps
             Was ist die Blaue Stunde?
           </h4>
           <p className="text-sm text-muted-foreground mt-1">
-            Sehen Sie den Unterschied
+            {t('Sieh den Unterschied', 'Sehen Sie den Unterschied')}
           </p>
         </div>
         <Button
@@ -57,9 +60,10 @@ export const BlueHourInfoCard = ({ isExpanded, onToggle }: BlueHourInfoCardProps
       <div className="flex items-start gap-2 px-4 py-3 rounded-2xl bg-primary/5 mt-6">
         <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
-          Die blaue Stunde verleiht Ihren Außenaufnahmen eine warme, einladende 
-          Atmosphäre mit dramatischer Beleuchtung. Perfekt für Immobilien mit 
-          besonderer Architektur oder stimmungsvoller Außengestaltung.
+          {t(
+            'Die blaue Stunde verleiht deinen Außenaufnahmen eine warme, einladende Atmosphäre mit dramatischer Beleuchtung. Perfekt für Immobilien mit besonderer Architektur oder stimmungsvoller Außengestaltung.',
+            'Die blaue Stunde verleiht Ihren Außenaufnahmen eine warme, einladende Atmosphäre mit dramatischer Beleuchtung. Perfekt für Immobilien mit besonderer Architektur oder stimmungsvoller Außengestaltung.'
+          )}
         </p>
       </div>
     </div>

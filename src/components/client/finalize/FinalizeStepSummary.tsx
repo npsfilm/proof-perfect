@@ -1,5 +1,6 @@
 import { Camera, Clock, Home, Sunset, Check, Sparkles, Upload } from 'lucide-react';
 import { Photo } from '@/types/database';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface FinalizeStepSummaryProps {
   selectedPhotos: Photo[];
@@ -26,6 +27,7 @@ export function FinalizeStepSummary({
   referenceFile,
   stagingComment,
 }: FinalizeStepSummaryProps) {
+  const { t } = useAnsprache();
   const stagingDiscount = Math.floor(stagingCount / 6) * 89;
   const totalPrice = 
     (selectedServices.expressDelivery ? 99 : 0) + 
@@ -41,7 +43,7 @@ export function FinalizeStepSummary({
             <Camera className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Ausgewählte Fotos</p>
+            <p className="text-sm text-muted-foreground">{t('Ausgewählte Fotos', 'Ausgewählte Fotos')}</p>
             <p className="text-2xl font-bold text-primary">{selectedPhotos.length} Fotos</p>
           </div>
         </div>
@@ -49,11 +51,11 @@ export function FinalizeStepSummary({
 
       {/* Services Summary */}
       <div className="space-y-4">
-        <h3 className="font-bold text-lg">Gebuchte Zusatzleistungen</h3>
+        <h3 className="font-bold text-lg">{t('Gebuchte Zusatzleistungen', 'Gebuchte Zusatzleistungen')}</h3>
         
         {!selectedServices.expressDelivery && stagingCount === 0 && blueHourCount === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Keine Zusatzleistungen ausgewählt</p>
+            <p>{t('Keine Zusatzleistungen ausgewählt', 'Keine Zusatzleistungen ausgewählt')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -64,7 +66,9 @@ export function FinalizeStepSummary({
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold">24h Express-Lieferung</p>
-                  <p className="text-sm text-muted-foreground">Ihre Fotos in 24 Stunden</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('Deine Fotos in 24 Stunden', 'Ihre Fotos in 24 Stunden')}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-primary">+99€</p>
@@ -117,7 +121,7 @@ export function FinalizeStepSummary({
       {/* Feedback Preview */}
       {feedback && (
         <div className="space-y-3">
-          <h3 className="font-bold text-lg">Ihr Feedback</h3>
+          <h3 className="font-bold text-lg">{t('Dein Feedback', 'Ihr Feedback')}</h3>
           <div className="p-4 rounded-xl bg-muted/50 shadow-neu-pressed">
             <p className="text-sm leading-relaxed">{feedback}</p>
           </div>
@@ -167,7 +171,10 @@ export function FinalizeStepSummary({
           <div className="mt-4 pt-4 border-t border-primary/20">
             <p className="text-sm text-green-600 font-medium flex items-center gap-2">
               <Check className="h-4 w-4" />
-              Sie sparen {stagingDiscount}€ mit dem 5+1 Gratis-Angebot!
+              {t(
+                `Du sparst ${stagingDiscount}€ mit dem 5+1 Gratis-Angebot!`,
+                `Sie sparen ${stagingDiscount}€ mit dem 5+1 Gratis-Angebot!`
+              )}
             </p>
           </div>
         )}
@@ -176,7 +183,10 @@ export function FinalizeStepSummary({
       {/* Confirmation Message */}
       <div className="bg-muted/30 rounded-xl p-4 text-center">
         <p className="text-sm text-muted-foreground">
-          ✨ Fast geschafft! Mit einem Klick auf "Jetzt finalisieren" wird Ihre Auswahl an uns übermittelt.
+          {t(
+            '✨ Fast geschafft! Mit einem Klick auf "Jetzt finalisieren" wird deine Auswahl an uns übermittelt.',
+            '✨ Fast geschafft! Mit einem Klick auf "Jetzt finalisieren" wird Ihre Auswahl an uns übermittelt.'
+          )}
         </p>
       </div>
     </div>

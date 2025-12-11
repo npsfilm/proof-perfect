@@ -14,6 +14,7 @@ import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJob
 import { WatermarkEditor } from './WatermarkEditor';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 const ASYNC_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -22,6 +23,7 @@ interface DeliveryDownloadSectionProps {
 }
 
 export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProps) {
+  const { t } = useAnsprache();
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
     return (
       <Card className="shadow-neu-flat">
         <CardContent className="py-6">
-          <LoadingState message="Lädt Ihre Dateien..." />
+          <LoadingState message={t('Lädt deine Dateien...', 'Lädt Ihre Dateien...')} />
         </CardContent>
       </Card>
     );
@@ -218,7 +220,7 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
                 <Package className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle>Ihre Fotos sind bereit!</CardTitle>
+                <CardTitle>{t('Deine Fotos sind bereit!', 'Ihre Fotos sind bereit!')}</CardTitle>
                 <CardDescription>
                   {gallery.address || gallery.name} • Geliefert am{' '}
                   {gallery.delivered_at
@@ -231,7 +233,7 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
         </CardHeader>
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground mb-4">
-            Ihre Fotos wurden auf einem externen Service bereitgestellt
+            {t('Deine Fotos wurden auf einem externen Service bereitgestellt', 'Ihre Fotos wurden auf einem externen Service bereitgestellt')}
           </p>
           <Button
             size="lg"
@@ -258,7 +260,7 @@ export function DeliveryDownloadSection({ gallery }: DeliveryDownloadSectionProp
               <Package className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle>Ihre Fotos sind bereit!</CardTitle>
+              <CardTitle>{t('Deine Fotos sind bereit!', 'Ihre Fotos sind bereit!')}</CardTitle>
               <CardDescription>
                 {gallery.address || gallery.name} • Geliefert am{' '}
                 {gallery.delivered_at

@@ -6,12 +6,14 @@ import { Slider } from '@/components/ui/slider';
 import { Upload, Save, Trash2 } from 'lucide-react';
 import { useClientWatermark, useUpdateWatermarkSettings, useDeleteWatermark } from '@/hooks/useClientWatermark';
 import { WatermarkUploader } from './WatermarkUploader';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface WatermarkEditorProps {
   previewImageUrl?: string;
 }
 
 export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
+  const { t } = useAnsprache();
   const { data: watermark, isLoading } = useClientWatermark();
   const updateSettings = useUpdateWatermarkSettings();
   const deleteWatermark = useDeleteWatermark();
@@ -70,7 +72,7 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
   };
 
   const handleDelete = async () => {
-    if (confirm('Möchten Sie Ihr Wasserzeichen wirklich entfernen?')) {
+    if (confirm(t('Möchtest du dein Wasserzeichen wirklich entfernen?', 'Möchten Sie Ihr Wasserzeichen wirklich entfernen?'))) {
       await deleteWatermark.mutateAsync();
     }
   };
@@ -91,7 +93,7 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
             <div className="flex-1">
               <CardTitle>Wasserzeichen-Editor</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Positionieren Sie Ihr Logo und passen Sie die Größe an
+                {t('Positioniere dein Logo und passe die Größe an', 'Positionieren Sie Ihr Logo und passen Sie die Größe an')}
               </p>
             </div>
             {!watermark ? (
@@ -223,7 +225,7 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
               {/* Drag Hint */}
               {isDragging && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                  <p className="text-sm font-medium">Ziehen Sie, um zu positionieren</p>
+                  <p className="text-sm font-medium">{t('Ziehen, um zu positionieren', 'Ziehen Sie, um zu positionieren')}</p>
                 </div>
               )}
             </div>
@@ -234,7 +236,7 @@ export function WatermarkEditor({ previewImageUrl }: WatermarkEditorProps) {
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
               <p className="text-sm">
-                Laden Sie zuerst ein Logo hoch, um es zu positionieren
+                {t('Lade zuerst ein Logo hoch, um es zu positionieren', 'Laden Sie zuerst ein Logo hoch, um es zu positionieren')}
               </p>
             </div>
           </CardContent>
