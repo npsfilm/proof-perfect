@@ -7,7 +7,6 @@ import { useGallery } from '@/hooks/useGallery';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { useReopenRequests } from '@/hooks/useReopenRequests';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { GalleryDetailSkeleton } from '@/components/admin/skeletons/GalleryDetailSkeleton';
 import { GalleryProgressBar } from '@/components/ui/GalleryProgressBar';
@@ -79,8 +78,12 @@ export default function GalleryDetail() {
 
   return (
     <PageContainer size="full">
-      <div className="space-y-4 md:space-y-6">
-        <GalleryDetailHeader gallery={gallery} />
+      <div className="space-y-4">
+        {/* Header with integrated progress bar */}
+        <div className="space-y-3">
+          <GalleryDetailHeader gallery={gallery} />
+          <GalleryProgressBar currentStatus={gallery.status} />
+        </div>
 
         <ReopenRequestsAlert
           pendingRequests={pendingRequests}
@@ -89,14 +92,8 @@ export default function GalleryDetail() {
           isResolving={isResolving}
         />
 
-        <Card>
-          <CardContent className="pt-6">
-            <GalleryProgressBar currentStatus={gallery.status} />
-          </CardContent>
-        </Card>
-
         {isClosed ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <ClosedGalleryCard
               gallery={gallery}
               photos={photos}
@@ -112,8 +109,8 @@ export default function GalleryDetail() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2">
                 <EditableGalleryInfo
                   gallery={gallery}
                   companies={companies}
@@ -121,7 +118,7 @@ export default function GalleryDetail() {
                   isDraft={isDraft}
                 />
               </div>
-              <div className="space-y-4 md:space-y-6">
+              <div>
                 <GalleryClientsCard
                   selectedClients={selectedClients}
                   onClientsChange={setSelectedClients}

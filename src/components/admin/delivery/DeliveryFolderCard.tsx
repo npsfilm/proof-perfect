@@ -9,6 +9,7 @@ interface DeliveryFolderCardProps {
   files: DeliveryFile[];
   galleryId: string;
   gallerySlug: string;
+  compact?: boolean;
 }
 
 export function DeliveryFolderCard({
@@ -16,6 +17,7 @@ export function DeliveryFolderCard({
   files,
   galleryId,
   gallerySlug,
+  compact = false,
 }: DeliveryFolderCardProps) {
   const folder = DELIVERY_FOLDERS[folderType];
   const Icon = folder.icon;
@@ -26,8 +28,32 @@ export function DeliveryFolderCard({
     return `${mb.toFixed(1)} MB`;
   };
 
+  if (compact) {
+    return (
+      <Card className="hover:border-primary/30 transition-colors">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className={`p-1.5 rounded-md bg-muted/50 ${folder.color}`}>
+              <Icon className="h-4 w-4" />
+            </div>
+            <DeliveryFolderUploader
+              galleryId={galleryId}
+              gallerySlug={gallerySlug}
+              folderType={folderType}
+              compact
+            />
+          </div>
+          <h4 className="text-xs font-medium truncate">{folder.label}</h4>
+          <p className="text-[10px] text-muted-foreground">
+            {files.length > 0 ? `${files.length} Dateien` : 'Keine Dateien'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="shadow-neu-flat">
+    <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">

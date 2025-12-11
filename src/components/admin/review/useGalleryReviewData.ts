@@ -14,11 +14,11 @@ export function useGalleryReviewData(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('galleries')
-        .select('*')
+        .select('*, companies(name)')
         .eq('id', id!)
         .single();
       if (error) throw error;
-      return data as Gallery;
+      return data as Gallery & { companies?: { name: string } | null };
     },
     enabled: !!id,
   });
