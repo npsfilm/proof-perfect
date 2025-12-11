@@ -3,13 +3,11 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/admin/PageTransition';
 import { ThemeModeToggle } from '@/components/ui/theme-toggle';
-import { Eye } from 'lucide-react';
 
 export default function AdminLayout() {
-  const { user, role, loading, signOut } = useAuth();
+  const { user, role, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,26 +39,6 @@ export default function AdminLayout() {
             </div>
             <div className="flex items-center gap-2 md:gap-3">
               <ThemeModeToggle />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/')}
-                className="gap-1.5 md:gap-2"
-                title="Zur Kunden-Ansicht wechseln"
-              >
-                <Eye className="h-4 w-4" />
-                <span className="hidden sm:inline">Kunden-Ansicht</span>
-              </Button>
-              <span className="text-sm text-muted-foreground hidden md:inline truncate max-w-[150px]">{user.email}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={signOut}
-                className="px-2 md:px-3"
-              >
-                <span className="hidden sm:inline">Abmelden</span>
-                <span className="sm:hidden">×</span>
-              </Button>
             </div>
           </header>
           <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
