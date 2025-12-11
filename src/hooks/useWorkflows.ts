@@ -78,32 +78,6 @@ export function useCreateWorkflow() {
   });
 }
 
-// Workflow erstellen
-export function useCreateWorkflow() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (workflow: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('workflows')
-        .insert(workflow)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
-      toast({ title: 'Workflow erstellt' });
-    },
-    onError: (error) => {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
-    },
-  });
-}
-
 // Workflow aktualisieren
 export function useUpdateWorkflow() {
   const queryClient = useQueryClient();
