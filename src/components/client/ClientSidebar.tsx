@@ -51,24 +51,20 @@ function SidebarNavContent({ onItemClick }: { onItemClick?: () => void }) {
 
   return (
     <SidebarMenu>
-      {navItems.map((item, index) => (
-        <SidebarMenuItem 
-          key={item.title}
-          style={{ animationDelay: `${index * 30}ms` }}
-          className="animate-fade-in"
-        >
+      {navItems.map((item) => (
+        <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild>
             <NavLink
               to={item.url}
               end={item.url === '/' && !item.tab}
               onClick={onItemClick}
-              className={`group hover:bg-muted/50 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-                isActive(item) ? 'bg-muted text-primary font-medium shadow-neu-pressed' : ''
+              className={`group hover:bg-muted rounded-md transition-colors ${
+                isActive(item) ? 'bg-muted text-primary font-medium' : ''
               }`}
               activeClassName=""
             >
-              <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-opacity duration-200">{item.title}</span>
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
             </NavLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -90,9 +86,9 @@ export function MobileClientNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0">
-        <SheetHeader className="border-b border-border/50 px-4 py-4">
+        <SheetHeader className="border-b border-border px-4 py-4">
           <SheetTitle className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground">
               <Camera className="h-5 w-5" />
             </div>
             <div className="text-left">
@@ -102,10 +98,10 @@ export function MobileClientNav() {
           </SheetTitle>
         </SheetHeader>
         <div className="p-4">
-          <p className="text-xs text-muted-foreground mb-3 px-2">Navigation</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 px-2">Navigation</p>
           <SidebarNavContent onItemClick={() => setOpen(false)} />
         </div>
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 px-4 py-3">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border px-4 py-3">
           <p className="text-xs text-muted-foreground">© 2025 immoonpoint</p>
         </div>
       </SheetContent>
@@ -125,18 +121,18 @@ export function ClientSidebar() {
 
   return (
     <Sidebar 
-      className={`shadow-neu-float rounded-r-[2rem] transition-all duration-300 ease-in-out ${
+      className={`border-r border-border bg-background transition-all duration-200 ${
         open ? 'w-60' : 'w-14'
       }`} 
       collapsible="icon"
     >
-      <SidebarHeader className="border-b border-border/50 px-3 py-4">
+      <SidebarHeader className="border-b border-border px-3 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-neu-flat-sm transition-transform duration-200 hover:scale-110 active:scale-95">
-            <Camera className={`h-5 w-5 transition-transform duration-300 ${open ? 'rotate-0' : 'rotate-12'}`} />
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground">
+            <Camera className="h-5 w-5" />
           </div>
           {open && (
-            <div className="flex-1 min-w-0 animate-fade-in">
+            <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm text-foreground truncate">immoonpoint</p>
               <p className="text-xs text-muted-foreground">Kundenportal</p>
             </div>
@@ -146,17 +142,19 @@ export function ClientSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className={open ? 'animate-fade-in' : ''}>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+            {open ? 'Navigation' : ''}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarNavContent />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-border/50 px-3 py-3">
+      <SidebarFooter className="border-t border-border px-3 py-3">
         {open && (
-          <div className="text-xs text-muted-foreground animate-fade-in space-y-1">
-            <p className="transition-colors duration-200 hover:text-foreground">© 2025 immoonpoint</p>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>© 2025 immoonpoint</p>
           </div>
         )}
       </SidebarFooter>
