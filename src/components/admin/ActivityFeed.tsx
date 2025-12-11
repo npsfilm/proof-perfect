@@ -29,8 +29,8 @@ const activityConfig = {
   },
   gallery_delivered: {
     icon: Package,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
   },
   comment_added: {
     icon: MessageSquare,

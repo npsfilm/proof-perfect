@@ -144,8 +144,8 @@
     --status-open-text: 217 60% 85%;
     --status-closed-bg: 45 35% 25%;
     --status-closed-text: 45 55% 80%;
-    --status-processing-bg: 270 30% 28%;
-    --status-processing-text: 270 40% 80%;
+    --status-processing-bg: 217 30% 28%;
+    --status-processing-text: 217 40% 80%;
     --status-delivered-bg: 142 35% 25%;
     --status-delivered-text: 142 50% 75%;
 
@@ -159,7 +159,7 @@
     --slot-recommended: 45 55% 58%;
     --slot-cheapest: 142 50% 55%;
     --slot-flexible: 217 55% 62%;
-    --slot-weekend: 270 40% 65%;
+    --slot-weekend: 217 40% 65%;
 
     /* Utility Colors - Klar sichtbar */
     --info: 217 60% 65%;

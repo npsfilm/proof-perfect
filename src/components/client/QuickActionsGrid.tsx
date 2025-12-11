@@ -22,7 +22,7 @@ export function QuickActionsGrid({
         title="Virtuelle Bearbeitung"
         description="Blaue Stunde, Sommer-Winter"
         onClick={() => navigate('/virtuelle-bearbeitung')}
-        gradient="from-secondary/5 to-secondary/10"
+        gradient="from-primary/5 to-primary/10"
       />
 
       <QuickActionCard
@@ -32,7 +32,7 @@ export function QuickActionsGrid({
         badge={deliveredCount > 0 ? deliveredCount : undefined}
         badgeVariant="secondary"
         onClick={onOpenDownloads}
-        gradient="from-blue-500/5 to-blue-500/10"
+        gradient="from-primary/5 to-primary/10"
       />
 
       <QuickActionCard
@@ -42,7 +42,7 @@ export function QuickActionsGrid({
         badge={stagingRequestsCount > 0 ? `${stagingRequestsCount} offen` : undefined}
         badgeVariant="default"
         onClick={() => navigate('/dashboard?tab=staging')}
-        gradient="from-purple-500/5 to-purple-500/10"
+        gradient="from-primary/5 to-primary/10"
       />
     </div>
   );
