@@ -114,6 +114,86 @@ export function EmailGeneralSettings() {
         </CardContent>
       </Card>
 
+      {/* Newsletter Sender Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-secondary" />
+            <CardTitle className="text-lg">Newsletter-Absender</CardTitle>
+          </div>
+          <CardDescription>
+            Separate Absender-Einstellungen für Newsletter-E-Mails
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="newsletter_from_name">Absender-Name</Label>
+              <Input
+                id="newsletter_from_name"
+                value={settings.newsletter_from_name || ''}
+                onChange={(e) => handleChange('newsletter_from_name', e.target.value)}
+                placeholder="ImmoOnPoint Tipps"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newsletter_from_email">Absender-E-Mail</Label>
+              <Input
+                id="newsletter_from_email"
+                type="email"
+                value={settings.newsletter_from_email || ''}
+                onChange={(e) => handleChange('newsletter_from_email', e.target.value)}
+                placeholder="tipps@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Muss bei Resend verifiziert sein
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="newsletter_reply_to_email">Reply-To E-Mail (optional)</Label>
+              <Input
+                id="newsletter_reply_to_email"
+                type="email"
+                value={settings.newsletter_reply_to_email || ''}
+                onChange={(e) => handleChange('newsletter_reply_to_email', e.target.value)}
+                placeholder="tipps@immoonpoint.de"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newsletter_reply_to_name">Reply-To Name (optional)</Label>
+              <Input
+                id="newsletter_reply_to_name"
+                value={settings.newsletter_reply_to_name || ''}
+                onChange={(e) => handleChange('newsletter_reply_to_name', e.target.value)}
+                placeholder="ImmoOnPoint Tipps"
+              />
+            </div>
+          </div>
+
+          {/* Newsletter Preview */}
+          <div className="rounded-lg bg-muted p-4 font-mono text-sm">
+            <div className="text-muted-foreground">Newsletter-Vorschau:</div>
+            <div className="mt-2 space-y-1">
+              <div>
+                <span className="text-muted-foreground">From: </span>
+                {settings.newsletter_from_name || 'ImmoOnPoint Tipps'} &lt;{settings.newsletter_from_email || 'tipps@immoonpoint.de'}&gt;
+              </div>
+              {(settings.newsletter_reply_to_email || settings.reply_to_email) && (
+                <div>
+                  <span className="text-muted-foreground">Reply-To: </span>
+                  {settings.newsletter_reply_to_name || settings.newsletter_from_name || 'ImmoOnPoint Tipps'} &lt;{settings.newsletter_reply_to_email || settings.reply_to_email}&gt;
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Anti-Spam Settings */}
       <Card>
         <CardHeader>

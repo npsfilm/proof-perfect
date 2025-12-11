@@ -28,11 +28,17 @@ export interface EmailDesignSettings {
   social_instagram: string | null;
   social_linkedin: string | null;
   use_branding_logo: boolean;
-  // New anti-spam settings
+  // Sender settings
   default_from_name: string | null;
   default_from_email: string | null;
   reply_to_email: string | null;
   reply_to_name: string | null;
+  // Newsletter sender settings
+  newsletter_from_name: string | null;
+  newsletter_from_email: string | null;
+  newsletter_reply_to_email: string | null;
+  newsletter_reply_to_name: string | null;
+  // Anti-spam settings
   unsubscribe_email: string | null;
   unsubscribe_url: string | null;
   physical_address_line1: string | null;
