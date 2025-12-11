@@ -5,6 +5,7 @@ import { AdminSidebar } from '@/components/AdminSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/admin/PageTransition';
+import { ThemeModeToggle } from '@/components/ui/theme-toggle';
 import { Eye } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -39,6 +40,7 @@ export default function AdminLayout() {
               <SidebarTrigger className="transition-colors hover:bg-muted" />
             </div>
             <div className="flex items-center gap-2 md:gap-3">
+              <ThemeModeToggle />
               <Button
                 variant="outline"
                 size="sm"

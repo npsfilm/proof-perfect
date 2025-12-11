@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ClientSidebar, MobileClientNav } from '@/components/client/ClientSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { ThemeModeToggle } from '@/components/ui/theme-toggle';
 import { Shield, LogOut } from 'lucide-react';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -87,12 +88,13 @@ export default function ClientLayout() {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
+              <ThemeModeToggle />
               {role === 'admin' && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/admin')}
-                  className="gap-2 rounded-full shadow-neu-flat-sm hover:shadow-neu-pressed transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="gap-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
                   title="Zur Admin-Ansicht wechseln"
                 >
                   <Shield className="h-4 w-4" />
