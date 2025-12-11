@@ -71,22 +71,23 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
 
       if (updateError) throw updateError;
 
-      // Send webhook notification
-      const galleryUrl = `${window.location.origin}/gallery/${gallery.slug}`;
+      // Send email notification via Resend
       const clientEmails = selectedClients.map(c => c.email);
 
-      const { error: webhookError } = await supabase.functions.invoke('webhook-send', {
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
-          gallery_id: gallery.id,
-          client_emails: clientEmails,
-          new_passwords: {},
-          gallery_url: galleryUrl,
+          to: clientEmails,
+          subject: 'Test',
+          html: 'Test',
         },
       });
 
-      if (webhookError) {
-        console.error('Webhook error:', webhookError);
+      if (emailError) {
+        console.error('Email error:', emailError);
+        throw new Error(emailError.message || 'E-Mail-Versand fehlgeschlagen');
       }
+
+      console.log('Email sent successfully:', emailData);
 
       toast({
         title: 'Galerie gesendet!',
