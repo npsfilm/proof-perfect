@@ -19,10 +19,8 @@ import WebhookLogs from "./pages/admin/WebhookLogs";
 import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
 import StagingRequests from "./pages/admin/StagingRequests";
-import AdminCalendar from "./pages/admin/AdminCalendar";
 import ClientGallery from "./pages/client/ClientGallery";
 import VirtualEditing from "./pages/client/VirtualEditing";
-import Buchung from "./pages/Buchung";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +40,6 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/gallery/:slug" element={<ClientGallery />} />
               <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
-              <Route path="/buchung" element={<Buchung />} />
             </Route>
 
             {/* Admin routes with AdminLayout */}
@@ -59,7 +56,6 @@ const App = () => (
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="staging-requests" element={<StagingRequests />} />
-              <Route path="calendar" element={<AdminCalendar />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

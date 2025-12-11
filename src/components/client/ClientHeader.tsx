@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, FolderOpen, Home, Settings, Calendar } from 'lucide-react';
+import { LogOut, FolderOpen, Home, Settings } from 'lucide-react';
 import { Client } from '@/types/database';
-import { Link } from 'react-router-dom';
 
 interface ClientHeaderProps {
   client: Client | null;
@@ -74,16 +73,6 @@ export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: Clie
           )}
           
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              asChild
-            >
-              <Link to="/buchung">
-                <Calendar className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Buchung</span>
-              </Link>
-            </Button>
             <Button 
               variant="ghost" 
               size="sm" 
