@@ -154,11 +154,12 @@ export default function GalleriesList() {
               {filteredGalleries.map((gallery) => (
                 <Card
                   key={gallery.id}
-                  className={`cursor-pointer transition-all duration-300 hover:border-primary/50 ${
+                  className={`transition-all duration-300 hover:border-primary/50 ${
                     selectedGalleries.has(gallery.id) ? 'ring-2 ring-primary' : ''
                   }`}
                 >
-                  <CardHeader>
+                  <CardHeader className="pb-2">
+                    {/* Header: Checkbox + Name + Badges */}
                     <div className="flex items-start gap-3">
                       <Checkbox
                         id={`gallery-${gallery.id}`}
@@ -172,86 +173,97 @@ export default function GalleriesList() {
                           className="cursor-pointer"
                         >
                           <div className="flex items-center gap-2 flex-wrap">
-                            <CardTitle>{gallery.name}</CardTitle>
+                            <CardTitle className="text-base">{gallery.name}</CardTitle>
                             {gallery.express_delivery_requested && (
-                              <Badge className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                              <Badge variant="destructive" className="animate-pulse text-xs">
                                 24H
                               </Badge>
                             )}
-                            {gallery.status === 'Closed' && gallery.reviewed_at && (
-                              <TimeElapsed 
-                                startTime={gallery.reviewed_at}
-                                variant="secondary"
-                              />
-                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1 truncate">
-                            {gallery.slug}
+                          <p className="text-sm text-muted-foreground mt-0.5 truncate">
+                            {gallery.address || gallery.slug}
                           </p>
                         </label>
                       </div>
-                      <div className="mt-3">
-                        <GalleryProgressBar currentStatus={gallery.status} compact />
-                      </div>
+                      {/* Status Badge */}
+                      <Badge 
+                        variant="outline" 
+                        className="shrink-0 text-xs"
+                      >
+                        {gallery.status}
+                      </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">Ziel: </span>
-                        <span className="font-medium">{gallery.package_target_count} Fotos</span>
-                      </div>
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">Anrede: </span>
-                        <span className="font-medium">{gallery.salutation_type}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ansehen
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(`/gallery/${gallery.slug}`, '_blank');
-                          }}
-                          title="Kunden-Ansicht öffnen"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Galerie löschen?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Dies wird "{gallery.name}" und alle zugehörigen Fotos dauerhaft löschen.
-                                Diese Aktion kann nicht rückgängig gemacht werden.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteGalleryMutation.mutate(gallery.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Löschen
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+
+                  <CardContent className="space-y-3">
+                    {/* Progress Bar - eigene Zeile */}
+                    <div className="py-2 px-1 bg-muted/30 rounded-lg">
+                      <GalleryProgressBar currentStatus={gallery.status} compact />
+                    </div>
+
+                    {/* Meta Info als Badges */}
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="text-xs font-normal">
+                        🎯 {gallery.package_target_count} Fotos
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs font-normal">
+                        👤 {gallery.salutation_type}
+                      </Badge>
+                      {gallery.status === 'Closed' && gallery.reviewed_at && (
+                        <TimeElapsed 
+                          startTime={gallery.reviewed_at}
+                          variant="secondary"
+                        />
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-1">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => navigate(`/admin/galleries/${gallery.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-1.5" />
+                        Öffnen
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(`/gallery/${gallery.slug}`, '_blank');
+                        }}
+                        title="Kunden-Ansicht öffnen"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Galerie löschen?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Dies wird "{gallery.name}" und alle zugehörigen Fotos dauerhaft löschen.
+                              Diese Aktion kann nicht rückgängig gemacht werden.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteGalleryMutation.mutate(gallery.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Löschen
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>
