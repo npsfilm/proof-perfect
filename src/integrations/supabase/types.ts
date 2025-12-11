@@ -715,6 +715,36 @@ export type Database = {
           },
         ]
       }
+      email_verification_tokens: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           calendar_source: string | null
@@ -1108,6 +1138,36 @@ export type Database = {
           },
         ]
       }
+      password_reset_tokens: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       photo_annotations: {
         Row: {
           author_user_id: string
@@ -1213,18 +1273,21 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          email_verified: boolean | null
           id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
+          email_verified?: boolean | null
           id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
+          email_verified?: boolean | null
           id?: string
           updated_at?: string
         }
