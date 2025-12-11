@@ -128,7 +128,7 @@ export function ClientPhotoGrid({
                 </div>
               )}
               {photo.staging_requested && (
-                <div className="absolute bottom-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
                   Staging
                 </div>
               )}

@@ -18,7 +18,7 @@ export function ReviewReferencesCard({ stagingReferences }: ReviewReferencesCard
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {stagingReferences.map((ref) => (
             <div key={ref.id} className="space-y-1">
-              <div className="aspect-square rounded-md overflow-hidden border border-purple-500">
+              <div className="aspect-square rounded-md overflow-hidden border border-primary">
                 <img
                   src={ref.file_url}
                   alt="Staging Referenz"

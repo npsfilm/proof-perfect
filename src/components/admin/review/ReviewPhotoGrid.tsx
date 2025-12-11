@@ -25,7 +25,7 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations }: ReviewPhotoG
             
             let borderClass = 'border border-muted';
             if (photo.staging_requested) {
-              borderClass = 'border-2 border-purple-500';
+              borderClass = 'border-2 border-primary';
             } else if (photo.blue_hour_requested) {
               borderClass = 'border-2 border-transparent bg-gradient-to-br from-blue-500 to-orange-500 p-0.5';
             }
@@ -83,7 +83,7 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations }: ReviewPhotoG
                   
                   <div className="flex flex-wrap gap-1">
                     {photo.staging_requested && (
-                      <Badge className="bg-purple-100 text-purple-700 text-[9px] px-1 py-0">
+                      <Badge className="bg-primary/10 text-primary text-[9px] px-1 py-0">
                         <Wand2 className="h-2 w-2 mr-0.5" />
                         {photo.staging_style || 'Modern'}
                       </Badge>
