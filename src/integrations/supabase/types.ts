@@ -1588,6 +1588,7 @@ export type Database = {
           created_at: string
           cta_primary_text: string | null
           cta_secondary_text: string | null
+          default_page_title: string | null
           facebook_pixel_id: string | null
           favicon_url: string | null
           footer_tagline: string | null
@@ -1606,6 +1607,14 @@ export type Database = {
           og_image_url: string | null
           og_locale: string | null
           og_type: string | null
+          page_title_admin_dashboard: string | null
+          page_title_admin_galleries: string | null
+          page_title_admin_settings: string | null
+          page_title_dashboard: string | null
+          page_title_gallery: string | null
+          page_title_settings: string | null
+          page_title_staging: string | null
+          page_title_virtual_editing: string | null
           schema_org_type: string | null
           site_name: string
           twitter_card_type: string | null
@@ -1626,6 +1635,7 @@ export type Database = {
           created_at?: string
           cta_primary_text?: string | null
           cta_secondary_text?: string | null
+          default_page_title?: string | null
           facebook_pixel_id?: string | null
           favicon_url?: string | null
           footer_tagline?: string | null
@@ -1644,6 +1654,14 @@ export type Database = {
           og_image_url?: string | null
           og_locale?: string | null
           og_type?: string | null
+          page_title_admin_dashboard?: string | null
+          page_title_admin_galleries?: string | null
+          page_title_admin_settings?: string | null
+          page_title_dashboard?: string | null
+          page_title_gallery?: string | null
+          page_title_settings?: string | null
+          page_title_staging?: string | null
+          page_title_virtual_editing?: string | null
           schema_org_type?: string | null
           site_name?: string
           twitter_card_type?: string | null
@@ -1664,6 +1682,7 @@ export type Database = {
           created_at?: string
           cta_primary_text?: string | null
           cta_secondary_text?: string | null
+          default_page_title?: string | null
           facebook_pixel_id?: string | null
           favicon_url?: string | null
           footer_tagline?: string | null
@@ -1682,6 +1701,14 @@ export type Database = {
           og_image_url?: string | null
           og_locale?: string | null
           og_type?: string | null
+          page_title_admin_dashboard?: string | null
+          page_title_admin_galleries?: string | null
+          page_title_admin_settings?: string | null
+          page_title_dashboard?: string | null
+          page_title_gallery?: string | null
+          page_title_settings?: string | null
+          page_title_staging?: string | null
+          page_title_virtual_editing?: string | null
           schema_org_type?: string | null
           site_name?: string
           twitter_card_type?: string | null

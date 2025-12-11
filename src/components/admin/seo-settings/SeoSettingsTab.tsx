@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Save, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useSeoSettings } from '@/hooks/useSeoSettings';
 import { BrandingSection } from './BrandingSection';
 import { MetaTagsSection } from './MetaTagsSection';
@@ -8,6 +7,7 @@ import { SocialMediaSection } from './SocialMediaSection';
 import { StructuredDataSection } from './StructuredDataSection';
 import { AnalyticsSection } from './AnalyticsSection';
 import { DynamicContentSection } from './DynamicContentSection';
+import { PageTitlesSection } from './PageTitlesSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SeoSettingsUpdate } from './types';
 
@@ -38,8 +38,9 @@ export function SeoSettingsTab() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="branding" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
           <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="titles">Seitentitel</TabsTrigger>
           <TabsTrigger value="meta">Meta-Tags</TabsTrigger>
           <TabsTrigger value="social">Social Media</TabsTrigger>
           <TabsTrigger value="schema">Schema.org</TabsTrigger>
@@ -53,6 +54,13 @@ export function SeoSettingsTab() {
               settings={settings}
               onUpdate={handleUpdate}
               onUploadImage={uploadImage}
+            />
+          </TabsContent>
+
+          <TabsContent value="titles">
+            <PageTitlesSection
+              settings={settings}
+              onUpdate={handleUpdate}
             />
           </TabsContent>
 

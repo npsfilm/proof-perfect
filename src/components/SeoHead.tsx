@@ -1,12 +1,25 @@
 import { Helmet } from 'react-helmet-async';
 import { useSeoSettings } from '@/hooks/useSeoSettings';
 
+export type PageType = 
+  | 'home'
+  | 'dashboard' 
+  | 'gallery' 
+  | 'virtual_editing' 
+  | 'staging' 
+  | 'settings'
+  | 'admin_dashboard'
+  | 'admin_galleries'
+  | 'admin_settings';
+
 interface SeoHeadProps {
   title?: string;
   description?: string;
   image?: string;
   type?: string;
   noIndex?: boolean;
+  pageType?: PageType;
+  dynamicValues?: Record<string, string>;
 }
 
 export function SeoHead({ 
@@ -14,14 +27,72 @@ export function SeoHead({
   description, 
   image, 
   type = 'website',
-  noIndex = false 
+  noIndex = false,
+  pageType,
+  dynamicValues = {}
 }: SeoHeadProps) {
   const { settings } = useSeoSettings();
 
-  const siteTitle = title 
-    ? `${title}${settings?.meta_title_suffix || ''}`
-    : settings?.site_name || 'ImmoOnPoint';
-  
+  // Generate page title based on pageType or custom title
+  const getPageTitle = () => {
+    // If custom title is provided, use it with suffix
+    if (title) {
+      return `${title}${settings?.meta_title_suffix || ''}`;
+    }
+
+    // If no settings, return fallback
+    if (!settings) return 'ImmoOnPoint';
+
+    // Get template based on pageType
+    let template: string | null = null;
+    switch (pageType) {
+      case 'home':
+        return settings.default_page_title || 'ImmoOnPoint';
+      case 'dashboard':
+        template = settings.page_title_dashboard;
+        break;
+      case 'gallery':
+        template = settings.page_title_gallery;
+        break;
+      case 'virtual_editing':
+        template = settings.page_title_virtual_editing;
+        break;
+      case 'staging':
+        template = settings.page_title_staging;
+        break;
+      case 'settings':
+        template = settings.page_title_settings;
+        break;
+      case 'admin_dashboard':
+        template = settings.page_title_admin_dashboard;
+        break;
+      case 'admin_galleries':
+        template = settings.page_title_admin_galleries;
+        break;
+      case 'admin_settings':
+        template = settings.page_title_admin_settings;
+        break;
+      default:
+        return settings.default_page_title || settings.site_name || 'ImmoOnPoint';
+    }
+
+    // Apply template with placeholders
+    if (template) {
+      let resolved = template;
+      resolved = resolved.replace('{suffix}', settings.meta_title_suffix || '');
+      
+      // Replace dynamic values
+      Object.entries(dynamicValues).forEach(([key, value]) => {
+        resolved = resolved.replace(`{${key}}`, value);
+      });
+      
+      return resolved;
+    }
+
+    return settings.site_name || 'ImmoOnPoint';
+  };
+
+  const siteTitle = getPageTitle();
   const metaDescription = description || settings?.meta_description || '';
   const ogImage = image || settings?.og_image_url || '';
   const ogType = type || settings?.og_type || 'website';

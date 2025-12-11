@@ -48,6 +48,17 @@ export interface SeoSettings {
   cta_secondary_text: string | null;
   footer_tagline: string | null;
   
+  // Page Titles
+  default_page_title: string | null;
+  page_title_dashboard: string | null;
+  page_title_gallery: string | null;
+  page_title_virtual_editing: string | null;
+  page_title_staging: string | null;
+  page_title_settings: string | null;
+  page_title_admin_dashboard: string | null;
+  page_title_admin_galleries: string | null;
+  page_title_admin_settings: string | null;
+  
   created_at: string;
   updated_at: string;
 }
