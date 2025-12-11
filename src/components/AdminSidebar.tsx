@@ -164,11 +164,11 @@ export function AdminSidebar() {
               <SidebarGroup key={group.label} className="py-0.5">
                 {open ? (
                   <Collapsible defaultOpen={groupActive}>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
+                    <CollapsibleTrigger className="group flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
                       <span>{group.label}</span>
-                      <ChevronDown className="h-3 w-3 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                      <ChevronDown className="h-3 w-3 transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="animate-accordion-down">
+                    <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                       <SidebarGroupContent>
                         <SidebarMenu className="space-y-0 mt-0.5">
                           {group.items.map((item) => (
@@ -217,11 +217,11 @@ export function AdminSidebar() {
           <SidebarGroup className="py-0.5 border-t border-sidebar-border mt-1">
             {open ? (
               <Collapsible defaultOpen>
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
+                <CollapsibleTrigger className="group flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
                   <span>Ansicht</span>
-                  <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+                  <ChevronDown className="h-3 w-3 transition-transform duration-300 ease-in-out group-data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="animate-accordion-down">
+                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                   <SidebarGroupContent>
                     <SidebarMenu className="mt-0.5">
                       {viewItems.map((item) => (
