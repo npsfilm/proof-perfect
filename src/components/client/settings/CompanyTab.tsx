@@ -9,12 +9,14 @@ import { toast } from '@/hooks/use-toast';
 import { useCompany, useUpdateCompany } from '@/hooks/useCompanies';
 import { useCompanyBilling, useUpsertCompanyBilling } from '@/hooks/useCompanyBilling';
 import { Loader2 } from 'lucide-react';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface CompanyTabProps {
   companyId: string;
 }
 
 export function CompanyTab({ companyId }: CompanyTabProps) {
+  const { t } = useAnsprache();
   const { data: company, isLoading: companyLoading } = useCompany(companyId);
   const { data: billing, isLoading: billingLoading } = useCompanyBilling(companyId);
   const updateCompany = useUpdateCompany();
@@ -127,7 +129,7 @@ export function CompanyTab({ companyId }: CompanyTabProps) {
         <CardHeader>
           <CardTitle>Firmendaten</CardTitle>
           <CardDescription>
-            Grundlegende Informationen zu Ihrer Firma
+            {t('Grundlegende Informationen zu deiner Firma', 'Grundlegende Informationen zu Ihrer Firma')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

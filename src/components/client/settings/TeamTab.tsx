@@ -13,12 +13,14 @@ import { COMPANY_ROLE_LABELS, CompanyRoleType, CompanyMemberExtended } from '@/t
 import { InviteMemberDialog } from './InviteMemberDialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface TeamTabProps {
   companyId: string;
 }
 
 export function TeamTab({ companyId }: TeamTabProps) {
+  const { t } = useAnsprache();
   const { data: team = [], isLoading: teamLoading } = useCompanyTeam(companyId);
   const { data: invitations = [], isLoading: invitationsLoading } = useTeamInvitations(companyId);
   const updateRole = useUpdateMemberRole();
@@ -97,7 +99,7 @@ export function TeamTab({ companyId }: TeamTabProps) {
           <div>
             <CardTitle>Teammitglieder</CardTitle>
             <CardDescription>
-              {team.length} {team.length === 1 ? 'Mitglied' : 'Mitglieder'} in Ihrem Team
+              {team.length} {team.length === 1 ? 'Mitglied' : 'Mitglieder'} {t('in deinem Team', 'in Ihrem Team')}
             </CardDescription>
           </div>
           <Button onClick={() => setInviteOpen(true)} size="sm">
@@ -229,8 +231,10 @@ export function TeamTab({ companyId }: TeamTabProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Mitglied entfernen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Möchten Sie {selectedMember?.profiles?.email} wirklich aus dem Team entfernen?
-              Diese Person verliert den Zugriff auf alle Firmendaten.
+              {t(
+                `Möchtest du ${selectedMember?.profiles?.email} wirklich aus dem Team entfernen? Diese Person verliert den Zugriff auf alle Firmendaten.`,
+                `Möchten Sie ${selectedMember?.profiles?.email} wirklich aus dem Team entfernen? Diese Person verliert den Zugriff auf alle Firmendaten.`
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

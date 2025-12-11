@@ -5,6 +5,7 @@ import { Photo } from '@/types/database';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 import {
   FinalizeStepIndicator,
@@ -20,18 +21,33 @@ import {
 
 export type { FinalizeModalsProps } from './finalize';
 
-function getStepInfo(step: string, selectedPhotosCount: number) {
+function getStepInfo(step: string, selectedPhotosCount: number, t: (du: string, sie: string) => string) {
   switch (step) {
     case 'feedback':
-      return { title: 'Teilen Sie Ihr Feedback', description: `Sie haben ${selectedPhotosCount} Fotos ausgewählt` };
+      return { 
+        title: t('Teile dein Feedback', 'Teilen Sie Ihr Feedback'), 
+        description: t(`Du hast ${selectedPhotosCount} Fotos ausgewählt`, `Sie haben ${selectedPhotosCount} Fotos ausgewählt`) 
+      };
     case 'services':
-      return { title: 'Zusatzleistungen wählen', description: 'Wählen Sie die gewünschten Zusatzleistungen für Ihre Fotos' };
+      return { 
+        title: 'Zusatzleistungen wählen', 
+        description: t('Wähle die gewünschten Zusatzleistungen für deine Fotos', 'Wählen Sie die gewünschten Zusatzleistungen für Ihre Fotos') 
+      };
     case 'staging':
-      return { title: 'Virtuelles Staging', description: 'Wählen Sie die Fotos für virtuelles Staging aus' };
+      return { 
+        title: 'Virtuelles Staging', 
+        description: t('Wähle die Fotos für virtuelles Staging aus', 'Wählen Sie die Fotos für virtuelles Staging aus') 
+      };
     case 'blueHour':
-      return { title: 'Virtuelle Blaue Stunde', description: 'Wählen Sie die Fotos für die virtuelle blaue Stunde aus' };
+      return { 
+        title: 'Virtuelle Blaue Stunde', 
+        description: t('Wähle die Fotos für die virtuelle blaue Stunde aus', 'Wählen Sie die Fotos für die virtuelle blaue Stunde aus') 
+      };
     case 'summary':
-      return { title: 'Zusammenfassung Ihrer Auswahl', description: 'Bitte überprüfen Sie Ihre Auswahl vor der Finalisierung' };
+      return { 
+        title: t('Zusammenfassung deiner Auswahl', 'Zusammenfassung Ihrer Auswahl'), 
+        description: t('Bitte überprüfe deine Auswahl vor der Finalisierung', 'Bitte überprüfen Sie Ihre Auswahl vor der Finalisierung') 
+      };
     default:
       return { title: '', description: '' };
   }
@@ -40,6 +56,7 @@ function getStepInfo(step: string, selectedPhotosCount: number) {
 export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: FinalizeModalsProps) {
   const isMobile = useIsMobile();
   const { signedUrls } = useSignedPhotoUrls(selectedPhotos);
+  const { t } = useAnsprache();
   
   const flow = useFinalizeFlow(selectedPhotos, onFinalize, onClose);
 
@@ -55,7 +72,7 @@ export function FinalizeModals({ isOpen, onClose, selectedPhotos, onFinalize }: 
   const stagingCount = Object.values(flow.stagingSelections).filter(v => v).length;
   const blueHourCount = Object.values(flow.blueHourSelections).filter(v => v).length;
 
-  const { title, description } = getStepInfo(flow.step, selectedPhotos.length);
+  const { title, description } = getStepInfo(flow.step, selectedPhotos.length, t);
 
   // Render step content
   const renderStepContent = () => {

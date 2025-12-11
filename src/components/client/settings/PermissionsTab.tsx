@@ -6,12 +6,14 @@ import { Loader2, Eye, Receipt, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useCompanyTeam, useUpdateMemberPermissions } from '@/hooks/useCompanyTeam';
 import { COMPANY_ROLE_LABELS } from '@/types/company';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface PermissionsTabProps {
   companyId: string;
 }
 
 export function PermissionsTab({ companyId }: PermissionsTabProps) {
+  const { t } = useAnsprache();
   const { data: team = [], isLoading } = useCompanyTeam(companyId);
   const updatePermissions = useUpdateMemberPermissions();
 
@@ -52,8 +54,10 @@ export function PermissionsTab({ companyId }: PermissionsTabProps) {
         <CardHeader>
           <CardTitle>Mitarbeiter-Berechtigungen</CardTitle>
           <CardDescription>
-            Legen Sie fest, welche Mitarbeiter auf sensible Daten zugreifen dürfen.
-            Geschäftsführer und Administratoren haben automatisch vollen Zugriff.
+            {t(
+              'Lege fest, welche Mitarbeiter auf sensible Daten zugreifen dürfen. Geschäftsführer und Administratoren haben automatisch vollen Zugriff.',
+              'Legen Sie fest, welche Mitarbeiter auf sensible Daten zugreifen dürfen. Geschäftsführer und Administratoren haben automatisch vollen Zugriff.'
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -61,7 +65,7 @@ export function PermissionsTab({ companyId }: PermissionsTabProps) {
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Keine Mitarbeiter zum Verwalten</p>
-              <p className="text-sm">Laden Sie Mitarbeiter im Team-Tab ein</p>
+              <p className="text-sm">{t('Lade Mitarbeiter im Team-Tab ein', 'Laden Sie Mitarbeiter im Team-Tab ein')}</p>
             </div>
           ) : (
             <div className="space-y-6">

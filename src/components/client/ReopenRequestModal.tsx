@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useCreateReopenRequest } from '@/hooks/useReopenRequests';
+import { useAnsprache } from '@/contexts/AnspracheContext';
 
 interface ReopenRequestModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function ReopenRequestModal({
 }: ReopenRequestModalProps) {
   const [message, setMessage] = useState('');
   const createRequest = useCreateReopenRequest();
+  const { t } = useAnsprache();
 
   const handleSubmit = () => {
     createRequest.mutate(
@@ -46,8 +48,10 @@ export function ReopenRequestModal({
         <DialogHeader>
           <DialogTitle>Galerie wiedereröffnen</DialogTitle>
           <DialogDescription>
-            Möchten Sie die Galerie "{galleryName}" wiedereröffnen lassen? 
-            Ihre Anfrage wird an das Team gesendet.
+            {t(
+              `Möchtest du die Galerie "${galleryName}" wiedereröffnen lassen? Deine Anfrage wird an das Team gesendet.`,
+              `Möchten Sie die Galerie "${galleryName}" wiedereröffnen lassen? Ihre Anfrage wird an das Team gesendet.`
+            )}
           </DialogDescription>
         </DialogHeader>
         
