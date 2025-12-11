@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { getEmailDesignSettings, getReplyTo, getEmailHeaders } from "../_shared/email-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +29,8 @@ serve(async (req) => {
       throw new Error("RESEND_API_KEY not configured");
     }
 
+    const resend = new Resend(RESEND_API_KEY);
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -35,6 +39,12 @@ serve(async (req) => {
           headers: { Authorization: req.headers.get("Authorization")! },
         },
       }
+    );
+
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
     // Verify user is authenticated
@@ -54,8 +64,17 @@ serve(async (req) => {
       .select("support_email")
       .single();
 
+    // Get email design settings for reply-to and headers
+    const designSettings = await getEmailDesignSettings(supabaseAdmin);
+    const headers = getEmailHeaders(designSettings);
+
     const supportEmail = seoSettings?.support_email || "support@immoonpoint.de";
     const frontendUrl = Deno.env.get("FRONTEND_URL") || "https://app.immoonpoint.de";
+
+    // Get from address from settings
+    const fromAddress = designSettings?.default_from_email && designSettings?.default_from_name
+      ? `${designSettings.default_from_name} <${designSettings.default_from_email}>`
+      : "ImmoOnPoint <noreply@immoonpoint.de>";
 
     const priorityLabels: Record<string, string> = {
       low: "Niedrig",
@@ -133,25 +152,32 @@ serve(async (req) => {
       </html>
     `;
 
-    // Send email via Resend REST API
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "ImmoOnPoint <noreply@immoonpoint.de>",
-        to: [supportEmail],
-        subject: `[Feature-Anfrage] ${request.title}`,
-        html,
-      }),
+    const text = `Neue Feature-Anfrage
+
+Von: ${request.user_name ? `${request.user_name} <${request.user_email}>` : request.user_email}
+Titel: ${request.title}
+Priorität: ${priorityLabels[request.priority] || request.priority}
+
+Beschreibung:
+${request.description}
+
+${request.image_url ? `Screenshot: ${request.image_url}` : ''}
+
+Im Dashboard ansehen: ${frontendUrl}/admin/feature-requests`;
+
+    // Send email via Resend
+    const emailResponse = await resend.emails.send({
+      from: fromAddress,
+      to: [supportEmail],
+      subject: `[Feature-Anfrage] ${request.title}`,
+      html,
+      text,
+      headers,
     });
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error("Email send error:", errorData);
-      throw new Error(errorData.message || "Failed to send email");
+    if (emailResponse.error) {
+      console.error("Email send error:", emailResponse.error);
+      throw new Error(emailResponse.error.message || "Failed to send email");
     }
 
     return new Response(

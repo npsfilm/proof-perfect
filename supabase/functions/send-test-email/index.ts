@@ -1,7 +1,16 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getEmailTemplate, getEmailDesignSettings, getFromAddress, buildEmailHtml, replacePlaceholders } from "../_shared/email-helpers.ts";
+import { 
+  getEmailTemplate, 
+  getEmailDesignSettings, 
+  getFromAddress, 
+  getReplyTo,
+  getEmailHeaders,
+  buildEmailHtml, 
+  buildEmailText,
+  replacePlaceholders 
+} from "../_shared/email-helpers.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -103,12 +112,24 @@ const handler = async (req: Request): Promise<Response> => {
     // Load design settings
     const designSettings = await getEmailDesignSettings(supabaseAdmin);
     
-    // Get from address from template
-    const fromAddress = getFromAddress(template);
+    // Get email configuration from settings
+    const fromAddress = getFromAddress(template, designSettings);
+    const replyTo = getReplyTo(designSettings);
+    const headers = getEmailHeaders(designSettings);
+    
     console.log(`Using from address: ${fromAddress}`);
+    if (replyTo) console.log(`Using reply-to: ${replyTo}`);
 
-    // Build email HTML with test placeholders
+    // Build email HTML and text with test placeholders
     const emailHtml = buildEmailHtml(
+      template,
+      designSettings,
+      salutation || "sie",
+      TEST_PLACEHOLDERS,
+      TEST_PLACEHOLDERS.action_url
+    );
+
+    const emailText = buildEmailText(
       template,
       designSettings,
       salutation || "sie",
@@ -123,8 +144,11 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: [to_email],
+      reply_to: replyTo,
       subject: emailSubject,
       html: emailHtml,
+      text: emailText,
+      headers,
     });
 
     console.log("Test email sent successfully:", emailResponse);

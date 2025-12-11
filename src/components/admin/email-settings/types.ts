@@ -28,6 +28,17 @@ export interface EmailDesignSettings {
   social_instagram: string | null;
   social_linkedin: string | null;
   use_branding_logo: boolean;
+  // New anti-spam settings
+  default_from_name: string | null;
+  default_from_email: string | null;
+  reply_to_email: string | null;
+  reply_to_name: string | null;
+  unsubscribe_email: string | null;
+  unsubscribe_url: string | null;
+  physical_address_line1: string | null;
+  physical_address_line2: string | null;
+  physical_address_country: string | null;
+  include_physical_address: boolean;
   created_at: string;
   updated_at: string;
 }

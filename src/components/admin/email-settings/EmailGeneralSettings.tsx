@@ -1,0 +1,251 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Mail, MapPin, Shield, AtSign, Building } from 'lucide-react';
+import { useEmailDesignSettings } from '@/hooks/useEmailDesignSettings';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export function EmailGeneralSettings() {
+  const { settings, isLoading, updateSettings } = useEmailDesignSettings();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-[300px]" />
+        <Skeleton className="h-[200px]" />
+        <Skeleton className="h-[200px]" />
+      </div>
+    );
+  }
+
+  if (!settings) return null;
+
+  const handleChange = (field: string, value: string | boolean) => {
+    updateSettings.mutate({ [field]: value });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Sender Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Absender-Einstellungen</CardTitle>
+          </div>
+          <CardDescription>
+            Konfigurieren Sie den Standard-Absender für alle ausgehenden E-Mails
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="default_from_name">Absender-Name</Label>
+              <Input
+                id="default_from_name"
+                value={settings.default_from_name || ''}
+                onChange={(e) => handleChange('default_from_name', e.target.value)}
+                placeholder="ImmoOnPoint"
+              />
+              <p className="text-xs text-muted-foreground">
+                Angezeigter Name in E-Mail-Clients
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="default_from_email">Absender-E-Mail</Label>
+              <Input
+                id="default_from_email"
+                type="email"
+                value={settings.default_from_email || ''}
+                onChange={(e) => handleChange('default_from_email', e.target.value)}
+                placeholder="noreply@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Muss bei Resend verifiziert sein
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="reply_to_email">Reply-To E-Mail</Label>
+              <Input
+                id="reply_to_email"
+                type="email"
+                value={settings.reply_to_email || ''}
+                onChange={(e) => handleChange('reply_to_email', e.target.value)}
+                placeholder="support@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Empfänger-Antworten gehen an diese Adresse
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reply_to_name">Reply-To Name (optional)</Label>
+              <Input
+                id="reply_to_name"
+                value={settings.reply_to_name || ''}
+                onChange={(e) => handleChange('reply_to_name', e.target.value)}
+                placeholder="ImmoOnPoint Support"
+              />
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="rounded-lg bg-muted p-4 font-mono text-sm">
+            <div className="text-muted-foreground">Vorschau:</div>
+            <div className="mt-2 space-y-1">
+              <div>
+                <span className="text-muted-foreground">From: </span>
+                {settings.default_from_name || 'ImmoOnPoint'} &lt;{settings.default_from_email || 'noreply@immoonpoint.de'}&gt;
+              </div>
+              {settings.reply_to_email && (
+                <div>
+                  <span className="text-muted-foreground">Reply-To: </span>
+                  {settings.reply_to_name || settings.default_from_name || 'ImmoOnPoint'} &lt;{settings.reply_to_email}&gt;
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Anti-Spam Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Anti-Spam Einstellungen</CardTitle>
+          </div>
+          <CardDescription>
+            Verbessern Sie die E-Mail-Zustellbarkeit mit korrekten Headers
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="unsubscribe_email">List-Unsubscribe E-Mail</Label>
+              <Input
+                id="unsubscribe_email"
+                type="email"
+                value={settings.unsubscribe_email || ''}
+                onChange={(e) => handleChange('unsubscribe_email', e.target.value)}
+                placeholder="unsubscribe@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Für den List-Unsubscribe Header
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="unsubscribe_url">List-Unsubscribe URL (optional)</Label>
+              <Input
+                id="unsubscribe_url"
+                type="url"
+                value={settings.unsubscribe_url || ''}
+                onChange={(e) => handleChange('unsubscribe_url', e.target.value)}
+                placeholder="https://app.immoonpoint.de/unsubscribe"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+            <div className="flex items-start gap-2">
+              <AtSign className="mt-0.5 h-4 w-4 text-primary" />
+              <div>
+                <div className="font-medium">Hinweis zur Zustellbarkeit</div>
+                <p className="mt-1 text-muted-foreground">
+                  Die List-Unsubscribe Header signalisieren E-Mail-Clients, dass dies legitime Transaktionsmails sind. 
+                  Dies reduziert die Wahrscheinlichkeit, dass E-Mails im Spam landen.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Physical Address */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Building className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Physische Adresse (CAN-SPAM/DSGVO)</CardTitle>
+          </div>
+          <CardDescription>
+            Eine physische Adresse im Footer verbessert Vertrauen und Zustellbarkeit
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Adresse im E-Mail-Footer anzeigen</Label>
+              <p className="text-sm text-muted-foreground">
+                Empfohlen für bessere Zustellbarkeit
+              </p>
+            </div>
+            <Switch
+              checked={settings.include_physical_address ?? true}
+              onCheckedChange={(checked) => handleChange('include_physical_address', checked)}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="physical_address_line1">Adresszeile 1</Label>
+              <Input
+                id="physical_address_line1"
+                value={settings.physical_address_line1 || ''}
+                onChange={(e) => handleChange('physical_address_line1', e.target.value)}
+                placeholder="Musterstraße 123"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="physical_address_line2">Adresszeile 2 (PLZ & Stadt)</Label>
+                <Input
+                  id="physical_address_line2"
+                  value={settings.physical_address_line2 || ''}
+                  onChange={(e) => handleChange('physical_address_line2', e.target.value)}
+                  placeholder="12345 Musterstadt"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="physical_address_country">Land</Label>
+                <Input
+                  id="physical_address_country"
+                  value={settings.physical_address_country || ''}
+                  onChange={(e) => handleChange('physical_address_country', e.target.value)}
+                  placeholder="Deutschland"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Address Preview */}
+          {settings.include_physical_address && (
+            <div className="rounded-lg bg-muted p-4 text-center text-sm">
+              <div className="text-muted-foreground">Footer-Vorschau:</div>
+              <div className="mt-2">
+                <span className="font-medium">{settings.company_name || 'ImmoOnPoint'}</span>
+                {settings.physical_address_line1 && (
+                  <span className="text-muted-foreground"> | {settings.physical_address_line1}</span>
+                )}
+                {settings.physical_address_line2 && (
+                  <span className="text-muted-foreground">, {settings.physical_address_line2}</span>
+                )}
+                {settings.physical_address_country && (
+                  <span className="text-muted-foreground">, {settings.physical_address_country}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
