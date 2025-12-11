@@ -222,6 +222,12 @@ export default function GalleryCreate() {
               <ClientPicker
                 selectedClients={selectedClients}
                 onClientsChange={setSelectedClients}
+                onCompanyAutoSelect={(companyId) => {
+                  // Only auto-select if no company is already selected
+                  if (!formData.company_id) {
+                    setFormData({ ...formData, company_id: companyId });
+                  }
+                }}
                 disabled={createGalleryMutation.isPending}
               />
               {selectedClients.length > 0 && (
