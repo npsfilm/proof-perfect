@@ -25,12 +25,12 @@ export default function UsersList() {
   const { data: users, isLoading } = useUserActivity();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'client'>('all');
-  const [sortField, setSortField] = useState<'email' | 'last_sign_in_at'>('email');
+  const [sortField, setSortField] = useState<'email' | 'last_activity'>('email');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editRoleUser, setEditRoleUser] = useState<UserActivity | null>(null);
   const [manageAccessUser, setManageAccessUser] = useState<UserActivity | null>(null);
 
-  const handleSort = (field: 'email' | 'last_sign_in_at') => {
+  const handleSort = (field: 'email' | 'last_activity') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -52,8 +52,8 @@ export default function UsersList() {
           ? a.email.localeCompare(b.email)
           : b.email.localeCompare(a.email);
       } else {
-        const aDate = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : 0;
-        const bDate = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : 0;
+        const aDate = a.last_activity ? new Date(a.last_activity).getTime() : 0;
+        const bDate = b.last_activity ? new Date(b.last_activity).getTime() : 0;
         return sortDirection === 'asc' ? aDate - bDate : bDate - aDate;
       }
     });
@@ -119,10 +119,10 @@ export default function UsersList() {
                 <TableHead>Rolle</TableHead>
                 <TableHead className="hidden md:table-cell">
                   <button
-                    onClick={() => handleSort('last_sign_in_at')}
+                    onClick={() => handleSort('last_activity')}
                     className="flex items-center gap-2 hover:text-foreground"
                   >
-                    Letzte Anmeldung
+                    Letzte Aktivität
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </TableHead>
@@ -149,8 +149,8 @@ export default function UsersList() {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {user.last_sign_in_at ? (
-                        format(new Date(user.last_sign_in_at), 'dd.MM.yyyy HH:mm')
+                      {user.last_activity ? (
+                        format(new Date(user.last_activity), 'dd.MM.yyyy HH:mm')
                       ) : (
                         <span className="text-muted-foreground">Nie</span>
                       )}
