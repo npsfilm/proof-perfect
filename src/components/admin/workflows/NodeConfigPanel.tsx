@@ -62,6 +62,15 @@ export function NodeConfigPanel({ node, triggerEvent, onUpdate, onDelete, onClos
     onUpdate(node.id, { ...nodeData, [key]: value });
   };
 
+  // Update both data and config in a single call to avoid race conditions
+  const updateTriggerEvent = (value: string) => {
+    onUpdate(node.id, {
+      ...nodeData,
+      trigger_event: value,
+      node_config: { ...nodeConfig, trigger_event: value },
+    });
+  };
+
   // Get available data fields from trigger
   const triggerDef = triggerEvent ? getTriggerDefinition(triggerEvent) : null;
   const availableFields = triggerDef?.availableData || [];
@@ -82,11 +91,7 @@ export function NodeConfigPanel({ node, triggerEvent, onUpdate, onDelete, onClos
               <Label className="text-xs">Trigger-Event</Label>
               <Select
                 value={(nodeData.trigger_event as string) || (nodeConfig.trigger_event as string) || ''}
-                onValueChange={(v) => {
-                  // Update both data.trigger_event AND node_config.trigger_event
-                  updateData('trigger_event', v);
-                  updateConfig('trigger_event', v);
-                }}
+                onValueChange={updateTriggerEvent}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Event auswählen" />
