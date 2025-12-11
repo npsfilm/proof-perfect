@@ -39,6 +39,7 @@ export default function GalleryReview() {
     deliveryFiles,
     allAnnotations,
     stagingReferences,
+    signedUrls,
   } = useGalleryReviewData(id);
 
   const {
@@ -178,6 +179,7 @@ export default function GalleryReview() {
         <ReviewPhotoGrid
           selectedPhotos={selectedPhotos || []}
           allAnnotations={allAnnotations || []}
+          signedUrls={signedUrls}
         />
       </div>
     </PageContainer>

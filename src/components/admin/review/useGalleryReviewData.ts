@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Gallery, Photo, StagingReference } from '@/types/database';
 import { useToast } from '@/hooks/use-toast';
 import { useDeliveryFiles } from '@/hooks/useDeliveryFiles';
+import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 
 export function useGalleryReviewData(id: string | undefined) {
   const { toast } = useToast();
@@ -132,6 +133,9 @@ export function useGalleryReviewData(id: string | undefined) {
     enabled: !!selectedPhotos && selectedPhotos.length > 0,
   });
 
+  // Generate signed URLs for selected photos
+  const { signedUrls, isLoading: signedUrlsLoading } = useSignedPhotoUrls(selectedPhotos);
+
   return {
     gallery,
     galleryLoading,
@@ -141,5 +145,7 @@ export function useGalleryReviewData(id: string | undefined) {
     deliveryFiles,
     allAnnotations,
     stagingReferences,
+    signedUrls,
+    signedUrlsLoading,
   };
 }

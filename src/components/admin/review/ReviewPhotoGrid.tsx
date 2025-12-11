@@ -7,9 +7,10 @@ import { Photo } from '@/types/database';
 interface ReviewPhotoGridProps {
   selectedPhotos: Photo[];
   allAnnotations: any[];
+  signedUrls: Record<string, string>;
 }
 
-export function ReviewPhotoGrid({ selectedPhotos, allAnnotations }: ReviewPhotoGridProps) {
+export function ReviewPhotoGrid({ selectedPhotos, allAnnotations, signedUrls }: ReviewPhotoGridProps) {
   if (!selectedPhotos || selectedPhotos.length === 0) return null;
 
   return (
@@ -35,7 +36,7 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations }: ReviewPhotoG
                 <div className={`aspect-[4/3] rounded-md overflow-hidden relative ${borderClass}`}>
                   <div className={photo.blue_hour_requested ? 'w-full h-full rounded-sm overflow-hidden' : ''}>
                     <img
-                      src={photo.storage_url}
+                      src={signedUrls[photo.id] || photo.storage_url}
                       alt={photo.filename}
                       className="w-full h-full object-contain bg-muted"
                     />
