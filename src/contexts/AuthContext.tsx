@@ -53,27 +53,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // Only synchronous state updates in the callback to prevent deadlock
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer Supabase calls with setTimeout to prevent auth deadlock
+        // Defer all Supabase calls with setTimeout to prevent auth deadlock
         if (session?.user) {
-          setTimeout(() => {
+          setTimeout(async () => {
+            // Check if email is verified BEFORE allowing login
+            const isVerified = await checkEmailVerified(session.user.id);
+            
+            if (!isVerified) {
+              // User hasn't verified email - don't allow login
+              await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              return;
+            }
+            
+            // Only set user state if email is verified
+            setSession(session);
+            setUser(session.user);
             fetchUserRole(session.user.id).then(setRole);
           }, 0);
         } else {
+          setSession(null);
+          setUser(null);
           setRole(null);
         }
       }
     );
 
     // Check for existing session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        // Check email verification status
+        const isVerified = await checkEmailVerified(session.user.id);
+        
+        if (!isVerified) {
+          // User hasn't verified email - sign them out
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setRole(null);
+          setLoading(false);
+          return;
+        }
+        
+        setSession(session);
+        setUser(session.user);
         fetchUserRole(session.user.id).then((userRole) => {
           setRole(userRole);
           setLoading(false);
