@@ -1,67 +1,44 @@
 import { Moon, Sun, CloudSun, Check } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BlueHourSlider } from '@/components/client/BlueHourSlider';
 import { useNavigate } from 'react-router-dom';
+import { useServices } from '@/hooks/useServices';
+import { useDiscounts } from '@/hooks/useDiscounts';
 import blueHourBefore1 from '@/assets/blue-hour-before-1.jpg';
 import blueHourAfter1 from '@/assets/blue-hour-after-1.jpg';
 import blueHourBefore2 from '@/assets/blue-hour-before-2.jpg';
 import blueHourAfter2 from '@/assets/blue-hour-after-2.jpg';
 
-const services = [
-  {
-    id: 'blue_hour',
-    title: 'Virtuelle Blaue Stunde',
-    icon: Moon,
-    description: 'Verwandeln Sie Ihre Immobilienfotos in stimmungsvolle Dämmerungsaufnahmen mit warmem Innenlicht.',
-    price: 49,
-    priceUnit: 'pro Bild',
-    features: [
-      'Realistische Dämmerungsstimmung',
-      'Warmes Innenlicht durch Fenster',
-      'Dramatischer Himmel',
-      'Professionelle Farbkorrektur',
-    ],
-    gradient: 'from-service-bluehour-start/20 via-service-bluehour-end/10 to-service-staging/20',
-    iconColor: 'text-info',
-  },
-  {
-    id: 'summer_winter',
-    title: 'Sommer-Winter Transformation',
-    icon: Sun,
-    description: 'Zeigen Sie Ihre Immobilie in der besten Jahreszeit – unabhängig davon, wann die Fotos aufgenommen wurden.',
-    price: 49,
-    priceUnit: 'pro Bild',
-    features: [
-      'Schnee zu grünem Rasen',
-      'Kahle zu belaubten Bäumen',
-      'Saisonale Anpassung',
-      'Natürliche Ergebnisse',
-    ],
-    gradient: 'from-success/20 via-warning/10 to-success/20',
-    iconColor: 'text-success',
-  },
-  {
-    id: 'rain_sun',
-    title: 'Regen-Sonne',
-    icon: CloudSun,
-    description: 'Verwandeln Sie Regentage in sonnige Aufnahmen – strahlend blauer Himmel statt grauer Wolken.',
-    price: 49,
-    priceUnit: 'pro Bild',
-    features: [
-      'Regenwetter zu Sonnenschein',
-      'Strahlend blauer Himmel',
-      'Natürliche Lichtstimmung',
-      'Trockene Straßen & Flächen',
-    ],
-    gradient: 'from-warning/20 via-service-bluehour-end/10 to-info/20',
-    iconColor: 'text-warning',
-  },
-];
+// Get icon component from name
+function getIconComponent(iconName: string | null): React.ComponentType<{ className?: string }> {
+  if (!iconName) return CloudSun;
+  const Icon = (LucideIcons as any)[iconName];
+  return Icon || CloudSun;
+}
+
+// Map service slugs to icon colors
+const ICON_COLORS: Record<string, string> = {
+  'virtuelle-blaue-stunde': 'text-info',
+  'blue-hour': 'text-info',
+  'sommer-winter': 'text-success',
+  'summer-winter': 'text-success',
+  'regen-sonne': 'text-warning',
+  'rain-sun': 'text-warning',
+};
 
 export default function VirtualEditing() {
   const navigate = useNavigate();
+  const { data: services, isLoading } = useServices({ showIn: 'virtual_editing' });
+  const { data: discounts } = useDiscounts();
+
+  // Find buy X get Y discount
+  const bulkDiscount = discounts?.find(d => 
+    d.discount_type === 'buy_x_get_y' && d.is_active
+  );
 
   return (
     <div className="container max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-8">
@@ -107,51 +84,88 @@ export default function VirtualEditing() {
 
       {/* Services Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-        {services.map((service, index) => (
-          <Card 
-            key={service.id} 
-            className={`relative overflow-hidden animate-fade-in bg-gradient-to-br ${service.gradient}`}
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <CardHeader>
-              <div className={`w-12 h-12 rounded-full bg-background/80 flex items-center justify-center mb-4`}>
-                <service.icon className={`h-6 w-6 ${service.iconColor}`} />
-              </div>
-              <CardTitle className="text-xl">{service.title}</CardTitle>
-              <CardDescription className="text-sm">
-                {service.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <span className="text-3xl font-bold text-foreground">{service.price}€</span>
-                <span className="text-muted-foreground ml-1">{service.priceUnit}</span>
-              </div>
-              <ul className="space-y-2">
-                {service.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-success flex-shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+        {isLoading ? (
+          // Loading skeletons
+          [1, 2, 3].map(i => (
+            <Card key={i} className="relative overflow-hidden">
+              <CardHeader>
+                <Skeleton className="w-12 h-12 rounded-full mb-4" />
+                <Skeleton className="h-6 w-40 mb-2" />
+                <Skeleton className="h-4 w-full" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-24 mb-4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          services?.map((service, index) => {
+            const Icon = getIconComponent(service.icon_name);
+            const iconColor = ICON_COLORS[service.slug] || 'text-primary';
+            const priceInEuros = service.price_cents / 100;
+            const features = Array.isArray(service.features) ? service.features : [];
+            const gradientClass = service.gradient_class || 'from-primary/20 via-primary/10 to-secondary/20';
+
+            return (
+              <Card 
+                key={service.id} 
+                className={`relative overflow-hidden animate-fade-in bg-gradient-to-br ${gradientClass}`}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-background/80 flex items-center justify-center mb-4">
+                    <Icon className={`h-6 w-6 ${iconColor}`} />
+                  </div>
+                  <CardTitle className="text-xl">{service.name}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {service.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold text-foreground">{priceInEuros}€</span>
+                    <span className="text-muted-foreground ml-1">
+                      {service.price_type === 'per_image' ? 'pro Bild' : 
+                       service.price_type === 'per_room' ? 'pro Raum' : ''}
+                    </span>
+                  </div>
+                  {features.length > 0 && (
+                    <ul className="space-y-2">
+                      {features.map((feature, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-success flex-shrink-0" />
+                          {String(feature)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {/* Pricing Info */}
-      <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in">
-        <CardContent className="p-4 md:p-8 text-center">
-          <h3 className="text-lg md:text-xl font-semibold mb-2">Mengenrabatt</h3>
-          <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
-            Bei 5 oder mehr Bildern erhalten Sie <span className="font-semibold text-primary">1 Bild gratis</span>!
-          </p>
-          <Button onClick={() => navigate('/?tab=staging')} size="default" className="w-full sm:w-auto">
-            Jetzt Staging anfordern
-          </Button>
-        </CardContent>
-      </Card>
+      {bulkDiscount && (
+        <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in">
+          <CardContent className="p-4 md:p-8 text-center">
+            <h3 className="text-lg md:text-xl font-semibold mb-2">Mengenrabatt</h3>
+            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
+              Bei {bulkDiscount.buy_quantity} oder mehr Bildern erhalten Sie{' '}
+              <span className="font-semibold text-primary">{bulkDiscount.free_quantity} Bild gratis</span>!
+            </p>
+            <Button onClick={() => navigate('/?tab=staging')} size="default" className="w-full sm:w-auto">
+              Jetzt Staging anfordern
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

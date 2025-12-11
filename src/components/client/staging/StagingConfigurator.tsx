@@ -12,24 +12,42 @@ import { useDeliveredGalleries } from '@/hooks/useDeliveredGalleries';
 import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useCreateStagingRequest } from '@/hooks/useStagingRequests';
-import { RoomType, StagingStyleOption, STAGING_STYLE_OPTIONS } from '@/constants/staging';
-import { Loader2, ImagePlus, ChevronLeft, ChevronRight, Wand2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { useServices } from '@/hooks/useServices';
+import { useDiscounts } from '@/hooks/useDiscounts';
+import { useStagingStyles } from '@/hooks/useStagingStyles';
+import { Loader2, ImagePlus, ChevronLeft, ChevronRight, Wand2, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
-const BASE_PRICE = 89;
-
 export function StagingConfigurator() {
   const { data: galleries, isLoading: galleriesLoading } = useDeliveredGalleries();
   const createStagingRequest = useCreateStagingRequest();
+  
+  // Load pricing from database
+  const { data: services } = useServices({ showIn: 'finalize' });
+  const { data: discounts } = useDiscounts();
+  const { data: stagingStyles } = useStagingStyles();
+
+  // Get staging service price from DB
+  const stagingService = services?.find(s => 
+    s.slug === 'virtuelles-staging' || s.slug === 'virtual-staging'
+  );
+  const basePrice = stagingService ? stagingService.price_cents / 100 : 89;
+
+  // Get discount info
+  const stagingDiscount = discounts?.find(d => 
+    d.discount_type === 'buy_x_get_y' && d.is_active
+  );
+  const buyQuantity = stagingDiscount?.buy_quantity || 5;
+  const freeQuantity = stagingDiscount?.free_quantity || 1;
 
   // Form state
   const [selectedGalleryId, setSelectedGalleryId] = useState<string>('');
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [roomType, setRoomType] = useState<RoomType | null>(null);
-  const [stagingStyle, setStagingStyle] = useState<StagingStyleOption | null>(null);
+  const [roomType, setRoomType] = useState<string | null>(null);
+  const [stagingStyle, setStagingStyle] = useState<string | null>(null);
   const [removeFurniture, setRemoveFurniture] = useState(false);
   const [addFurniture, setAddFurniture] = useState(true);
   const [enhancePhoto, setEnhancePhoto] = useState(true);
@@ -41,10 +59,12 @@ export function StagingConfigurator() {
   const { data: photos } = useGalleryPhotos(selectedGalleryId);
   const { signedUrls } = useSignedPhotoUrls(photos || []);
 
-  // Calculate pricing
+  // Calculate pricing with dynamic discount
   const photoCount = selectedPhotoIds.length;
-  const freePhotos = Math.floor(photoCount / 6);
-  const totalPrice = (photoCount - freePhotos) * BASE_PRICE;
+  const discountSets = Math.floor(photoCount / (buyQuantity + freeQuantity));
+  const remainingPhotos = photoCount % (buyQuantity + freeQuantity);
+  const freePhotos = discountSets * freeQuantity + (remainingPhotos > buyQuantity ? remainingPhotos - buyQuantity : 0);
+  const totalPrice = (photoCount - freePhotos) * basePrice;
 
   // Handle photo selection
   const togglePhotoSelection = (photoId: string) => {
@@ -57,8 +77,8 @@ export function StagingConfigurator() {
 
   // Get style label for API
   const getStyleLabel = () => {
-    const style = STAGING_STYLE_OPTIONS.find(s => s.id === stagingStyle);
-    return style?.label || 'Standard';
+    const style = stagingStyles?.find(s => s.slug === stagingStyle);
+    return style?.name || 'Standard';
   };
 
   // Handle reference image upload
@@ -414,7 +434,7 @@ export function StagingConfigurator() {
             {selectedPhotoIds.length > 0 && (
               <StagingPricingSummary
                 photoCount={photoCount}
-                basePrice={BASE_PRICE}
+                basePrice={basePrice}
                 totalPrice={totalPrice}
               />
             )}
