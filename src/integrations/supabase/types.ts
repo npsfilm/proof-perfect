@@ -371,23 +371,116 @@ export type Database = {
         }
         Relationships: []
       }
+      company_billing: {
+        Row: {
+          bank_name: string | null
+          bic: string | null
+          billing_city: string | null
+          billing_country: string | null
+          billing_email: string | null
+          billing_name: string | null
+          billing_street: string | null
+          billing_zip: string | null
+          company_id: string
+          created_at: string
+          iban: string | null
+          id: string
+          notes: string | null
+          payment_terms_days: number | null
+          tax_number: string | null
+          updated_at: string
+          vat_id: string | null
+        }
+        Insert: {
+          bank_name?: string | null
+          bic?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_street?: string | null
+          billing_zip?: string | null
+          company_id: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          notes?: string | null
+          payment_terms_days?: number | null
+          tax_number?: string | null
+          updated_at?: string
+          vat_id?: string | null
+        }
+        Update: {
+          bank_name?: string | null
+          bic?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_street?: string | null
+          billing_zip?: string | null
+          company_id?: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          notes?: string | null
+          payment_terms_days?: number | null
+          tax_number?: string | null
+          updated_at?: string
+          vat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_billing_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_billing_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       company_members: {
         Row: {
+          can_manage_team: boolean
+          can_view_invoices: boolean
+          can_view_prices: boolean
           company_id: string
           created_at: string
           id: string
+          invited_at: string | null
+          invited_by: string | null
+          role: Database["public"]["Enums"]["company_role_t"]
           user_id: string
         }
         Insert: {
+          can_manage_team?: boolean
+          can_view_invoices?: boolean
+          can_view_prices?: boolean
           company_id: string
           created_at?: string
           id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["company_role_t"]
           user_id: string
         }
         Update: {
+          can_manage_team?: boolean
+          can_view_invoices?: boolean
+          can_view_prices?: boolean
           company_id?: string
           created_at?: string
           id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["company_role_t"]
           user_id?: string
         }
         Relationships: [
@@ -404,6 +497,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_company_gallery_stats"
             referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "company_members_user_id_fkey"
@@ -868,6 +975,86 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          paid_at: string | null
+          pdf_url: string | null
+          status: string
+          tax_amount_cents: number | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          paid_at?: string | null
+          pdf_url?: string | null
+          status?: string
+          tax_amount_cents?: number | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          paid_at?: string | null
+          pdf_url?: string | null
+          status?: string
+          tax_amount_cents?: number | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "invoices_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       photo_annotations: {
         Row: {
           author_user_id: string
@@ -1262,6 +1449,71 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invitations: {
+        Row: {
+          accepted_at: string | null
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["company_role_t"]
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["company_role_t"]
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["company_role_t"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_gallery_stats"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "team_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       theme_settings: {
         Row: {
           category: string
@@ -1517,15 +1769,28 @@ export type Database = {
         Args: { p_company_id: string; p_gallery_id: string }
         Returns: undefined
       }
+      can_view_company_invoices: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
       generate_company_slug: { Args: { p_name: string }; Returns: string }
       generate_unique_slug: { Args: { p_name: string }; Returns: string }
       get_my_role: { Args: never; Returns: string }
+      has_company_role: {
+        Args: {
+          _company_id: string
+          _roles: Database["public"]["Enums"]["company_role_t"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["role_t"]; _user_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      company_role_t: "owner" | "company_admin" | "employee"
       gallery_status_t:
         | "Planning"
         | "Open"
@@ -1661,6 +1926,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      company_role_t: ["owner", "company_admin", "employee"],
       gallery_status_t: [
         "Planning",
         "Open",
