@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Save, X, Info, Layers, Code, FileText } from 'lucide-react';
+import { Loader2, Save, X, Info, Layers, Code, FileText, Mail } from 'lucide-react';
 import { EmailTemplate, SalutationType, EmailContentType, EmailTemplateSectionInstance, EmailSection } from './types';
 import { EmailPreview } from './EmailPreview';
 import { EmailSectionLibrary } from './EmailSectionLibrary';
@@ -114,6 +114,25 @@ export function EmailTemplateEditor({
               <Separator />
             </>
           )}
+
+          {/* Sender Email Address */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Absender-E-Mail (optional)
+            </Label>
+            <Input
+              value={localTemplate.from_email || ''}
+              onChange={(e) => handleChange('from_email', e.target.value || null)}
+              placeholder="z.B. Newsletter <newsletter@immoonpoint.de>"
+            />
+            <p className="text-xs text-muted-foreground">
+              Format: "Name &lt;email@domain.de&gt;" oder nur "email@domain.de". 
+              Leer = Standard-Adresse. Domain muss bei Resend verifiziert sein.
+            </p>
+          </div>
+
+          <Separator />
 
           {/* Salutation Tabs */}
           <Tabs defaultValue="sie" onValueChange={(v) => setPreviewSalutation(v as SalutationType)}>
