@@ -1021,6 +1021,51 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+          user_email: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_email: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       galleries: {
         Row: {
           address: string | null
