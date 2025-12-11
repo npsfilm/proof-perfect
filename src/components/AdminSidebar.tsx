@@ -12,9 +12,10 @@ import {
   LogOut,
   HelpCircle,
   Calendar,
-  CalendarCheck2
+  CalendarCheck2,
+  ChevronDown
 } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -25,12 +26,16 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -79,6 +84,7 @@ export function AdminSidebar() {
   const { open } = useSidebar();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -87,12 +93,21 @@ export function AdminSidebar() {
 
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'AD';
 
+  // Check if any item in a group is active
+  const isGroupActive = (items: typeof navGroups[0]['items']) => {
+    return items.some(item => 
+      item.url === '/admin' 
+        ? location.pathname === '/admin'
+        : location.pathname.startsWith(item.url)
+    );
+  };
+
   const NavItem = ({ item, isActive }: { item: typeof navGroups[0]['items'][0]; isActive: boolean }) => {
     const content = (
       <NavLink
         to={item.url}
         end={item.url === '/admin'}
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-md transition-all duration-200 ${
+        className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md transition-all duration-200 ${
           isActive 
             ? 'bg-primary/10 text-primary border-l-2 border-primary -ml-[2px] pl-[calc(0.75rem+2px)]' 
             : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
@@ -140,54 +155,99 @@ export function AdminSidebar() {
           </div>
         </SidebarHeader>
         
-        <SidebarContent className="px-2 py-1">
-          {/* Navigation Groups */}
-          {navGroups.map((group) => (
-            <SidebarGroup key={group.label} className="py-1">
-              {open && (
-                <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 px-3 mb-0.5">
-                  {group.label}
-                </SidebarGroupLabel>
-              )}
+        <SidebarContent className="px-2 py-1 overflow-y-auto">
+          {/* Navigation Groups - Collapsible */}
+          {navGroups.map((group) => {
+            const groupActive = isGroupActive(group.items);
+            
+            return (
+              <SidebarGroup key={group.label} className="py-0.5">
+                {open ? (
+                  <Collapsible defaultOpen={groupActive}>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
+                      <span>{group.label}</span>
+                      <ChevronDown className="h-3 w-3 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="animate-accordion-down">
+                      <SidebarGroupContent>
+                        <SidebarMenu className="space-y-0 mt-0.5">
+                          {group.items.map((item) => (
+                            <SidebarMenuItem key={item.title}>
+                              <SidebarMenuButton asChild className="p-0">
+                                <NavItem 
+                                  item={item} 
+                                  isActive={
+                                    item.url === '/admin' 
+                                      ? location.pathname === '/admin'
+                                      : location.pathname.startsWith(item.url)
+                                  } 
+                                />
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </SidebarGroupContent>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : (
+                  <SidebarGroupContent>
+                    <SidebarMenu className="space-y-0">
+                      {group.items.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild className="p-0">
+                            <NavItem 
+                              item={item} 
+                              isActive={
+                                item.url === '/admin' 
+                                  ? location.pathname === '/admin'
+                                  : location.pathname.startsWith(item.url)
+                              } 
+                            />
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                )}
+              </SidebarGroup>
+            );
+          })}
+
+          {/* View Switcher */}
+          <SidebarGroup className="py-0.5 border-t border-sidebar-border mt-1">
+            {open ? (
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors rounded-md hover:bg-muted/30">
+                  <span>Ansicht</span>
+                  <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="animate-accordion-down">
+                  <SidebarGroupContent>
+                    <SidebarMenu className="mt-0.5">
+                      {viewItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild className="p-0">
+                            <NavItem item={item} isActive={false} />
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
               <SidebarGroupContent>
-                <SidebarMenu className="space-y-0">
-                  {group.items.map((item) => (
+                <SidebarMenu>
+                  {viewItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="p-0">
-                        <NavItem 
-                          item={item} 
-                          isActive={
-                            item.url === '/admin' 
-                              ? location.pathname === '/admin'
-                              : location.pathname.startsWith(item.url)
-                          } 
-                        />
+                        <NavItem item={item} isActive={false} />
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
-
-          {/* View Switcher */}
-          <SidebarGroup className="py-1 border-t border-sidebar-border mt-1">
-            {open && (
-              <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 px-3 mb-0.5">
-                Ansicht
-              </SidebarGroupLabel>
             )}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {viewItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="p-0">
-                      <NavItem item={item} isActive={false} />
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
         
