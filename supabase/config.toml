@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.route-optimizer]
 verify_jwt = false
+
+[functions.send-test-email]
+verify_jwt = true

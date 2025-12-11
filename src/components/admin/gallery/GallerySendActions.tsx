@@ -54,7 +54,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
     if (updateError) throw updateError;
   };
 
-  const sendEmail = async (subject: string, html: string) => {
+  const sendEmail = async (subject: string, html: string, fromEmail?: string) => {
     const clientEmails = selectedClients.map(c => c.email);
     
     const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
@@ -62,6 +62,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
         to: clientEmails,
         subject,
         html,
+        from: fromEmail || undefined,
       },
     });
 
@@ -72,6 +73,17 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
 
     console.log('Email sent successfully:', emailData);
     return emailData;
+  };
+
+  const getTemplateFromEmail = async (templateKey: string): Promise<string | undefined> => {
+    const { data: template } = await supabase
+      .from('email_templates')
+      .select('from_email')
+      .eq('template_key', templateKey)
+      .eq('is_active', true)
+      .single();
+    
+    return template?.from_email || undefined;
   };
 
   const handleSendToClient = async () => {
@@ -91,10 +103,14 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
     try {
       await updateGalleryClientsAndStatus();
       
+      // Load template from_email
+      const fromEmail = await getTemplateFromEmail('gallery_send');
+      
       // Send with default template (simple for now)
       await sendEmail(
         `Ihre Fotos für "${gallery.name}" sind bereit`,
-        `<p>Ihre Fotos sind jetzt zur Auswahl bereit.</p><p><a href="${window.location.origin}/gallery/${gallery.slug}">Galerie öffnen</a></p>`
+        `<p>Ihre Fotos sind jetzt zur Auswahl bereit.</p><p><a href="${window.location.origin}/gallery/${gallery.slug}">Galerie öffnen</a></p>`,
+        fromEmail
       );
 
       toast({
@@ -129,6 +145,9 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
     try {
       await updateGalleryClientsAndStatus();
       
+      // Load template from_email
+      const fromEmail = await getTemplateFromEmail('gallery_send');
+      
       // Build HTML with custom message
       const greeting = salutationType === 'Sie' 
         ? 'Guten Tag' 
@@ -153,7 +172,7 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
         </div>
       `;
 
-      await sendEmail(subject, html);
+      await sendEmail(subject, html, fromEmail);
 
       toast({
         title: 'Galerie gesendet!',
@@ -186,9 +205,13 @@ export function GallerySendActions({ gallery, selectedClients, photos, galleryCl
 
     setSending(true);
     try {
+      // Load template from_email
+      const fromEmail = await getTemplateFromEmail('gallery_reminder');
+      
       await sendEmail(
         `Erinnerung: Ihre Fotos für "${gallery.name}"`,
-        `<p>Ihre Fotos warten noch auf Ihre Auswahl.</p><p><a href="${window.location.origin}/gallery/${gallery.slug}">Galerie öffnen</a></p>`
+        `<p>Ihre Fotos warten noch auf Ihre Auswahl.</p><p><a href="${window.location.origin}/gallery/${gallery.slug}">Galerie öffnen</a></p>`,
+        fromEmail
       );
 
       toast({

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getEmailTemplate, getEmailDesignSettings, getFromAddress, buildEmailHtml } from "../_shared/email-helpers.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -20,14 +21,12 @@ const generateToken = (): string => {
 };
 
 const getFrontendUrl = (req: Request): string => {
-  // 1. Priority: Origin header from request
   const origin = req.headers.get('origin');
   if (origin) {
     console.log(`Using origin from request header: ${origin}`);
     return origin;
   }
   
-  // 2. Priority: Referer header as fallback
   const referer = req.headers.get('referer');
   if (referer) {
     try {
@@ -37,14 +36,12 @@ const getFrontendUrl = (req: Request): string => {
     } catch {}
   }
   
-  // 3. Priority: Environment variable
   const envUrl = Deno.env.get("FRONTEND_URL");
   if (envUrl) {
     console.log(`Using FRONTEND_URL from env: ${envUrl}`);
     return envUrl;
   }
   
-  // 4. Fallback: Production URL
   console.log("Using fallback production URL");
   return "https://app.immoonpoint.de";
 };
@@ -73,6 +70,14 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
+
+    // Load email template and design settings from database
+    const template = await getEmailTemplate(supabaseAdmin, "password_reset");
+    const designSettings = await getEmailDesignSettings(supabaseAdmin);
+    
+    // Get from address from template or use default
+    const fromAddress = getFromAddress(template);
+    console.log(`Using from address: ${fromAddress}`);
 
     // Check if user exists (but don't reveal this to the client for security)
     const { data: profile } = await supabaseAdmin
@@ -117,11 +122,23 @@ const handler = async (req: Request): Promise<Response> => {
     const frontendUrl = getFrontendUrl(req);
     const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
 
-    const emailResponse = await resend.emails.send({
-      from: "ImmoOnPoint <noreply@immoonpoint.de>",
-      to: [normalizedEmail],
-      subject: "Passwort zurücksetzen – ImmoOnPoint",
-      html: `
+    // Build email HTML from template or use fallback
+    let emailHtml: string;
+    let emailSubject: string;
+
+    if (template) {
+      emailHtml = buildEmailHtml(
+        template,
+        designSettings,
+        "sie", // Default to formal
+        { action_url: resetLink },
+        resetLink
+      );
+      emailSubject = template.subject_sie;
+    } else {
+      // Fallback HTML if no template exists
+      emailSubject = "Passwort zurücksetzen – ImmoOnPoint";
+      emailHtml = `
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -133,51 +150,38 @@ const handler = async (req: Request): Promise<Response> => {
     <tr>
       <td style="padding: 40px 20px;">
         <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <!-- Header -->
           <tr>
             <td style="padding: 40px 40px 20px; text-align: center; border-bottom: 1px solid #e4e4e7;">
               <h1 style="margin: 0; color: #233c63; font-size: 28px; font-weight: 700;">ImmoOnPoint</h1>
             </td>
           </tr>
-          
-          <!-- Content -->
           <tr>
             <td style="padding: 40px;">
-              <h2 style="margin: 0 0 20px; color: #18181b; font-size: 24px; font-weight: 600;">
-                Passwort zurücksetzen
-              </h2>
-              
+              <h2 style="margin: 0 0 20px; color: #18181b; font-size: 24px; font-weight: 600;">Passwort zurücksetzen</h2>
               <p style="margin: 0 0 20px; color: #52525b; font-size: 16px; line-height: 1.6;">
                 Sie haben eine Anfrage zum Zurücksetzen Ihres Passworts gestellt. Klicken Sie auf den Button unten, um ein neues Passwort festzulegen.
               </p>
-              
-              <!-- CTA Button -->
               <table role="presentation" style="width: 100%;">
                 <tr>
                   <td style="text-align: center;">
-                    <a href="${resetLink}" 
-                       style="display: inline-block; padding: 16px 32px; background-color: #233c63; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
+                    <a href="${resetLink}" style="display: inline-block; padding: 16px 32px; background-color: #233c63; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
                       Neues Passwort festlegen
                     </a>
                   </td>
                 </tr>
               </table>
-              
               <p style="margin: 30px 0 0; color: #71717a; font-size: 14px; line-height: 1.6;">
                 <strong>Hinweis:</strong> Dieser Link ist aus Sicherheitsgründen nur <strong>1 Stunde</strong> gültig.
               </p>
-              
               <p style="margin: 15px 0 0; color: #71717a; font-size: 14px; line-height: 1.6;">
-                Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren. Ihr Passwort bleibt unverändert.
+                Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.
               </p>
             </td>
           </tr>
-          
-          <!-- Footer -->
           <tr>
             <td style="padding: 20px 40px 40px; border-top: 1px solid #e4e4e7;">
               <p style="margin: 0; color: #a1a1aa; font-size: 12px; text-align: center; line-height: 1.5;">
-                Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:<br>
+                Falls der Button nicht funktioniert, kopieren Sie diesen Link:<br>
                 <a href="${resetLink}" style="color: #233c63; word-break: break-all;">${resetLink}</a>
               </p>
               <p style="margin: 20px 0 0; color: #a1a1aa; font-size: 12px; text-align: center;">
@@ -191,7 +195,14 @@ const handler = async (req: Request): Promise<Response> => {
   </table>
 </body>
 </html>
-      `,
+      `;
+    }
+
+    const emailResponse = await resend.emails.send({
+      from: fromAddress,
+      to: [normalizedEmail],
+      subject: emailSubject,
+      html: emailHtml,
     });
 
     console.log("Password reset email sent successfully:", emailResponse);
