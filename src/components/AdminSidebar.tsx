@@ -1,4 +1,4 @@
-import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity, Camera, Eye, Sofa } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Settings, BarChart3, Building2, Users, Activity, Camera, Eye, Sofa, Calendar, ClipboardList } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -17,6 +17,8 @@ import {
 
 const items = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
+  { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
+  { title: 'Buchungen', url: '/admin/bookings', icon: ClipboardList },
   { title: 'Galerien', url: '/admin/galleries', icon: FolderOpen },
   { title: 'Unternehmen', url: '/admin/companies', icon: Building2 },
   { title: 'Benutzer', url: '/admin/users', icon: Users },
