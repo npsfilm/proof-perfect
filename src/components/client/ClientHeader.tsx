@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, FolderOpen, Home, Settings } from 'lucide-react';
 import { Client } from '@/types/database';
+import { useBranding } from '@/contexts/BrandingContext';
 
 interface ClientHeaderProps {
   client: Client | null;
@@ -11,6 +12,8 @@ interface ClientHeaderProps {
 }
 
 export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: ClientHeaderProps) {
+  const { siteName } = useBranding();
+  
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Guten Morgen';
@@ -34,7 +37,7 @@ export function ClientHeader({ client, onSignOut, activeTab, onTabChange }: Clie
       <div className="container mx-auto px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-foreground">immoonpoint</h1>
+            <h1 className="text-2xl font-bold text-foreground">{siteName}</h1>
             {client && (
               <p className="text-sm text-muted-foreground mt-1">
                 {getGreeting()}, {getClientName()}

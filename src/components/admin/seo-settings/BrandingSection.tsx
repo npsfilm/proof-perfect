@@ -35,6 +35,12 @@ export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingS
     return url;
   };
 
+  const handleWatermarkUpload = async (file: File) => {
+    const url = await onUploadImage(file, 'watermark');
+    if (url) onUpdate({ watermark_url: url });
+    return url;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -43,14 +49,29 @@ export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingS
           <CardDescription>Der Name Ihrer Marke, der überall angezeigt wird</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="site_name">Website-Name</Label>
-            <Input
-              id="site_name"
-              value={settings.site_name || ''}
-              onChange={(e) => onUpdate({ site_name: e.target.value })}
-              placeholder="ImmoOnPoint"
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="site_name">Website-Name</Label>
+              <Input
+                id="site_name"
+                value={settings.site_name || ''}
+                onChange={(e) => onUpdate({ site_name: e.target.value })}
+                placeholder="ImmoOnPoint"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="support_email">Support E-Mail</Label>
+              <Input
+                id="support_email"
+                type="email"
+                value={settings.support_email || ''}
+                onChange={(e) => onUpdate({ support_email: e.target.value })}
+                placeholder="support@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Diese E-Mail wird für Hilfe-Links und Kontaktanfragen verwendet
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -99,6 +120,23 @@ export function BrandingSection({ settings, onUpdate, onUploadImage }: BrandingS
               aspectRatio="aspect-square"
             />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Wasserzeichen</CardTitle>
+          <CardDescription>Standard-Wasserzeichen für Kundenvorschauen</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ImageUploader
+            label="Wasserzeichen"
+            description="PNG mit Transparenz empfohlen"
+            currentUrl={settings.watermark_url}
+            onUpload={handleWatermarkUpload}
+            onRemove={() => onUpdate({ watermark_url: null })}
+            aspectRatio="aspect-[3/1]"
+          />
         </CardContent>
       </Card>
     </div>

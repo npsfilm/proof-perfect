@@ -1617,9 +1617,11 @@ export type Database = {
           page_title_virtual_editing: string | null
           schema_org_type: string | null
           site_name: string
+          support_email: string | null
           twitter_card_type: string | null
           twitter_handle: string | null
           updated_at: string
+          watermark_url: string | null
         }
         Insert: {
           business_address_city?: string | null
@@ -1664,9 +1666,11 @@ export type Database = {
           page_title_virtual_editing?: string | null
           schema_org_type?: string | null
           site_name?: string
+          support_email?: string | null
           twitter_card_type?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          watermark_url?: string | null
         }
         Update: {
           business_address_city?: string | null
@@ -1711,9 +1715,11 @@ export type Database = {
           page_title_virtual_editing?: string | null
           schema_org_type?: string | null
           site_name?: string
+          support_email?: string | null
           twitter_card_type?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          watermark_url?: string | null
         }
         Relationships: []
       }

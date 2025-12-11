@@ -40,6 +40,10 @@ export interface SeoSettings {
   google_tag_manager_id: string | null;
   facebook_pixel_id: string | null;
   
+  // Support & Contact
+  support_email: string | null;
+  watermark_url: string | null;
+  
   // Dynamic Content
   hero_headline: string | null;
   hero_subheadline: string | null;

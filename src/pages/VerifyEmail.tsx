@@ -4,12 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { useBranding } from '@/contexts/BrandingContext';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const { supportEmail } = useBranding();
   const token = searchParams.get('token');
 
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function VerifyEmail() {
               Zur Anmeldung
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              Falls Sie Probleme haben, kontaktieren Sie uns unter support@immoonpoint.de
+              Falls Sie Probleme haben, kontaktieren Sie uns unter {supportEmail}
             </p>
           </CardContent>
         </Card>
