@@ -78,6 +78,7 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
   const [workflowName, setWorkflowName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showTestPanel, setShowTestPanel] = useState(false);
+  const initialLoadedRef = useRef(false);
 
   const { data: workflowData, isLoading } = useWorkflowWithNodes(workflowId);
   const { data: workflow } = useWorkflow(workflowId);
@@ -91,9 +92,10 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Load initial data
+  // Load initial data - only on first load to prevent edge loss
   useEffect(() => {
-    if (workflowData) {
+    if (workflowData && !initialLoadedRef.current) {
+      initialLoadedRef.current = true;
       const flowNodes = dbNodesToFlowNodes(workflowData.nodes);
       const flowEdges = dbEdgesToFlowEdges(workflowData.edges);
 
@@ -131,32 +133,35 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
       // Determine edge label based on source handle
       const edgeLabel = params.sourceHandle === 'true' ? 'true' : params.sourceHandle === 'false' ? 'false' : 'default';
 
-      // If source node is temp, add edge locally
-      if (params.source.startsWith('temp-')) {
-        const newEdge: Edge = {
-          id: `temp-edge-${Date.now()}`,
-          source: params.source,
-          target: params.target,
-          sourceHandle: params.sourceHandle,
-          label: edgeLabel === 'true' ? 'Ja' : edgeLabel === 'false' ? 'Nein' : undefined,
-          style: {
-            stroke: edgeLabel === 'true' ? 'hsl(142 76% 36%)' : edgeLabel === 'false' ? 'hsl(0 84% 60%)' : undefined,
-          },
-        };
-        setEdges((eds) => addEdge(newEdge, eds));
-        return;
-      }
+      // Create temp edge immediately for visual feedback
+      const tempEdge: Edge = {
+        id: `temp-edge-${Date.now()}`,
+        source: params.source,
+        target: params.target,
+        sourceHandle: params.sourceHandle,
+        label: edgeLabel === 'true' ? 'Ja' : edgeLabel === 'false' ? 'Nein' : undefined,
+        style: {
+          stroke: edgeLabel === 'true' ? 'hsl(142 76% 36%)' : edgeLabel === 'false' ? 'hsl(0 84% 60%)' : undefined,
+        },
+      };
+      setEdges((eds) => addEdge(tempEdge, eds));
 
-      // Create edge in database
-      try {
-        await createEdge.mutateAsync({
-          workflow_id: workflowId,
-          source_node_id: params.source,
-          target_node_id: params.target,
-          edge_label: edgeLabel as 'default' | 'true' | 'false',
-        });
-      } catch (error) {
-        console.error('Failed to create edge:', error);
+      // If both nodes are not temp, save to database
+      if (!params.source.startsWith('temp-') && !params.target.startsWith('temp-')) {
+        try {
+          const dbEdge = await createEdge.mutateAsync({
+            workflow_id: workflowId,
+            source_node_id: params.source,
+            target_node_id: params.target,
+            edge_label: edgeLabel as 'default' | 'true' | 'false',
+          });
+          // Replace temp edge ID with DB ID
+          setEdges((eds) => eds.map((e) => (e.id === tempEdge.id ? { ...e, id: dbEdge.id } : e)));
+        } catch (error) {
+          console.error('Failed to create edge:', error);
+          // Remove temp edge on error
+          setEdges((eds) => eds.filter((e) => e.id !== tempEdge.id));
+        }
       }
     },
     [workflowId, createEdge, setEdges]
@@ -172,12 +177,12 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
       event.preventDefault();
 
       const type = event.dataTransfer.getData('application/reactflow') as NodeType;
-      if (!type || !reactFlowInstance || !reactFlowWrapper.current) return;
+      if (!type || !reactFlowInstance) return;
 
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      // Use absolute screen coordinates for correct positioning
       const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
+        x: event.clientX,
+        y: event.clientY,
       });
 
       // Create node in database
@@ -214,7 +219,7 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
     (changes: NodeChange[]) => {
       onNodesChange(changes);
 
-      // Handle position changes
+      // Handle position changes - skip invalidation to preserve edges
       changes.forEach(async (change) => {
         if (change.type === 'position' && change.position && !change.dragging) {
           const node = nodes.find((n) => n.id === change.id);
@@ -224,6 +229,7 @@ export function WorkflowCanvas({ workflowId }: WorkflowCanvasProps) {
               workflow_id: workflowId,
               position_x: Math.round(change.position.x),
               position_y: Math.round(change.position.y),
+              skipInvalidation: true, // Prevent re-fetch that loses local edges
             });
           }
         }
