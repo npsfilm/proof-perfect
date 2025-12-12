@@ -303,9 +303,9 @@ export default function Auth() {
               {!isLogin && (
                 <div className="mt-6 text-center text-xs text-muted-foreground">
                   Mit der Registrierung stimmen Sie unseren{' '}
-                  <Link to="/agb" className="text-primary hover:underline">AGB</Link>
+                  <a href="https://www.immoonpoint.de/agb/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AGB</a>
                   {' '}und der{' '}
-                  <Link to="/datenschutz" className="text-primary hover:underline">Datenschutzerklärung</Link>
+                  <a href="https://www.immoonpoint.de/datenschutz/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Datenschutzerklärung</a>
                   {' '}zu.
                 </div>
               )}
