@@ -53,3 +53,15 @@ verify_jwt = false
 
 [functions.send-test-email]
 verify_jwt = true
+
+[functions.process-email-sequences]
+verify_jwt = true
+
+[functions.enroll-sequence]
+verify_jwt = true
+
+[functions.send-campaign]
+verify_jwt = true
+
+[functions.process-scheduled-campaigns]
+verify_jwt = true
