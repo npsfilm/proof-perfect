@@ -7,33 +7,29 @@ const benefits = [
   {
     icon: Clock,
     title: 'Schnelle Lieferung',
-    description: 'Erhalten Sie Ihre bearbeiteten Immobilienbilder innerhalb von 24-48 Stunden.',
-    stat: '24-48h'
+    description: 'Ihre professionell bearbeiteten Immobilienbilder erhalten Sie zuverlässig innerhalb von 24–48 Stunden.'
   },
   {
     icon: Sparkles,
-    title: 'Professionelle Qualität',
-    description: 'HDR-Bildbearbeitung und virtuelle Möblierung auf höchstem Niveau.',
-    stat: '100%'
+    title: 'Konsistente Premium-Qualität',
+    description: 'Hochwertige Inhouse-Bearbeitung in Deutschland nach klaren Qualitätsstandards. Keine KI-Automatisierung, kein Outsourcing.'
   },
   {
     icon: Camera,
-    title: 'Einfache Bestellung',
-    description: 'Laden Sie Ihre Bilder hoch und erhalten Sie professionelle Ergebnisse.',
-    stat: '3 Schritte'
+    title: 'Einfacher Bestellprozess',
+    description: 'Online-Termin, Auswahl, Fertigstellung – Ihr Auftrag in nur drei klaren Schritten.'
   },
   {
     icon: Shield,
-    title: 'Faire Preise',
-    description: 'Transparente Preisgestaltung ohne versteckte Kosten.',
-    stat: 'ab 2,90€'
+    title: 'DSGVO-konform & sicher',
+    description: 'Der Schutz Ihrer Daten und Bilder hat für uns höchste Priorität. Die Verarbeitung erfolgt gemäß DSGVO und unseren Datenschutzrichtlinien.'
   }
 ];
 
 const trustBadges = [
-  { value: '500+', label: 'zufriedene Kunden' },
-  { value: '10.000+', label: 'bearbeitete Bilder' },
-  { value: '4.9/5', label: 'Bewertung' }
+  { value: '5,0 Sterne', label: 'bei Google' },
+  { value: '1.700+', label: 'Immobilien-Shootings' },
+  { value: 'Ø 40h', label: 'Lieferzeit' }
 ];
 
 export function BenefitsCarousel() {
