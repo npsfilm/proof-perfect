@@ -48,25 +48,25 @@ export function QuickActionCard({
         gradient
       )} />
 
-      <CardContent className="relative p-4 md:p-6">
-        <div className="flex items-start justify-between gap-2 md:gap-4">
-          <div className="space-y-2 md:space-y-3 min-w-0">
+      <CardContent className="relative p-3 sm:p-4 md:p-6">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1.5 sm:space-y-2 md:space-y-3 min-w-0">
             {/* Icon */}
             <div className={cn(
-              'inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl',
+              'inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl',
               'bg-primary/10 text-primary',
               'group-hover:bg-primary group-hover:text-primary-foreground',
               'transition-colors duration-300'
             )}>
-              <Icon className="h-5 w-5 md:h-6 md:w-6" />
+              <Icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </div>
 
             {/* Text */}
-            <div className="space-y-0.5 md:space-y-1">
-              <h3 className="font-semibold text-sm md:text-lg text-foreground group-hover:text-primary transition-colors leading-tight">
+            <div className="space-y-0.5">
+              <h3 className="font-semibold text-xs sm:text-sm md:text-lg text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
                 {title}
               </h3>
-              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
+              <p className="hidden sm:block text-xs md:text-sm text-muted-foreground line-clamp-1">
                 {description}
               </p>
             </div>

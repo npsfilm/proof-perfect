@@ -23,7 +23,7 @@ export function ActiveGalleriesSection({
         </h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {galleries.map((gallery) => {
           const buttonConfig = getButtonConfig(
             gallery.status || 'Planning',
@@ -48,6 +48,7 @@ export function ActiveGalleriesSection({
               buttonAction={buttonConfig.action}
               buttonDisabled={buttonConfig.disabled}
               buttonVariant={buttonConfig.variant}
+              size="mobile"
             />
           );
         })}

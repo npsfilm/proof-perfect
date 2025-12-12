@@ -16,7 +16,7 @@ export function QuickActionsGrid({
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4 animate-fade-in">
       <QuickActionCard
         icon={Sparkles}
         title="Virtuelle Bearbeitung"
