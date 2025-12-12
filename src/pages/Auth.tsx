@@ -217,19 +217,17 @@ export default function Auth() {
             />
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
+          <div className="w-full max-w-md relative z-10">
             <div className="bg-card/95 lg:bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8">
               {/* Header */}
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={isLogin ? 'login' : 'signup'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="text-center mb-8">
-                  <h1 className="text-3xl font-bold text-foreground mb-2">
-                    {isLogin ? 'Willkommen zurück' : 'Starten Sie jetzt'}
-                  </h1>
-                  <p className="text-muted-foreground">
-                    {isLogin ? 'Melden Sie sich an, um fortzufahren' : 'Erstellen Sie Ihr kostenloses Konto'}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-foreground mb-2">
+                  {isLogin ? 'Willkommen zurück' : 'Starten Sie jetzt'}
+                </h1>
+                <p className="text-muted-foreground">
+                  {isLogin ? 'Melden Sie sich an, um fortzufahren' : 'Erstellen Sie Ihr kostenloses Konto'}
+                </p>
+              </div>
 
               {/* Unverified User Alert */}
               {unverifiedEmail && (
@@ -331,7 +329,7 @@ export default function Auth() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Mobile: Trust Badges below form */}
           <div className="lg:hidden mt-6 flex items-center justify-center gap-3 text-white/80 text-xs relative z-10">
