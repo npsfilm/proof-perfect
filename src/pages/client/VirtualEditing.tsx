@@ -106,22 +106,22 @@ export default function VirtualEditing() {
       </Card>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
         {isLoading ? (
           // Loading skeletons
-          [1, 2, 3].map(i => (
+          [1, 2, 3, 4].map(i => (
             <Card key={i} className="relative overflow-hidden">
-              <CardHeader>
-                <Skeleton className="w-12 h-12 rounded-full mb-4" />
-                <Skeleton className="h-6 w-40 mb-2" />
-                <Skeleton className="h-4 w-full" />
+              <CardHeader className="p-4">
+                <Skeleton className="w-10 h-10 rounded-full mb-3" />
+                <Skeleton className="h-5 w-32 mb-2" />
+                <Skeleton className="h-3 w-full" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-24 mb-4" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
+              <CardContent className="p-4 pt-0">
+                <Skeleton className="h-6 w-20 mb-3" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
                 </div>
               </CardContent>
             </Card>
@@ -139,28 +139,28 @@ export default function VirtualEditing() {
                 className="relative overflow-hidden animate-fade-in bg-card hover:shadow-md transition-shadow"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Icon className={`h-6 w-6 ${iconColor}`} />
+                <CardHeader className="p-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                    <Icon className={`h-5 w-5 ${iconColor}`} />
                   </div>
-                  <CardTitle className="text-xl">{service.name}</CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardTitle className="text-base md:text-lg">{service.name}</CardTitle>
+                  <CardDescription className="text-xs">
                     {service.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold text-foreground">{priceInEuros}€</span>
-                    <span className="text-muted-foreground ml-1">
+                <CardContent className="p-4 pt-0">
+                  <div className="mb-3">
+                    <span className="text-2xl font-bold text-foreground">{priceInEuros}€</span>
+                    <span className="text-muted-foreground text-xs ml-1">
                       {service.price_type === 'per_image' ? 'pro Bild' : 
                        service.price_type === 'per_room' ? 'pro Raum' : ''}
                     </span>
                   </div>
                   {features.length > 0 && (
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                       {features.map((feature, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Check className="h-4 w-4 text-success flex-shrink-0" />
+                        <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Check className="h-3 w-3 text-success flex-shrink-0" />
                           {String(feature)}
                         </li>
                       ))}
