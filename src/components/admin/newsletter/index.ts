@@ -5,3 +5,6 @@ export { SequenceList } from './SequenceList';
 export { SequenceEditor } from './SequenceEditor';
 export { SequenceStepList } from './SequenceStepList';
 export { SequenceStepEditor } from './SequenceStepEditor';
+export { CampaignList } from './CampaignList';
+export { CampaignEditor } from './CampaignEditor';
+export { CampaignTagPicker } from './CampaignTagPicker';

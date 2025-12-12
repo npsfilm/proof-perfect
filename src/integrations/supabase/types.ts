@@ -1720,6 +1720,62 @@ export type Database = {
           },
         ]
       }
+      newsletter_campaigns: {
+        Row: {
+          click_count: number | null
+          created_at: string
+          exclude_tags: string[] | null
+          id: string
+          name: string
+          open_count: number | null
+          recipient_count: number | null
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          target_tags: string[] | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          click_count?: number | null
+          created_at?: string
+          exclude_tags?: string[] | null
+          id?: string
+          name: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          target_tags?: string[] | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          click_count?: number | null
+          created_at?: string
+          exclude_tags?: string[] | null
+          id?: string
+          name?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          target_tags?: string[] | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_segments: {
         Row: {
           created_at: string

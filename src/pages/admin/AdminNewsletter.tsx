@@ -2,11 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Newspaper, ListOrdered, Tags, FileText } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Send, Clock, Users } from 'lucide-react';
 import { EmailTemplateList } from '@/components/admin/email-settings/EmailTemplateList';
-import { TagList, SequenceList } from '@/components/admin/newsletter';
+import { TagList, SequenceList, CampaignList } from '@/components/admin/newsletter';
 
 export default function AdminNewsletter() {
   return (
@@ -39,37 +36,7 @@ export default function AdminNewsletter() {
           </TabsList>
 
           <TabsContent value="campaigns">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Newsletter-Kampagnen</CardTitle>
-                    <CardDescription>
-                      Erstelle und versende Newsletter an deine Kunden
-                    </CardDescription>
-                  </div>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Neue Kampagne
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="rounded-full bg-muted p-4 mb-4">
-                    <Newspaper className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Noch keine Kampagnen</h3>
-                  <p className="text-muted-foreground max-w-md mb-4">
-                    Erstelle deine erste Newsletter-Kampagne, um Kunden über Neuigkeiten und Angebote zu informieren.
-                  </p>
-                  <Button variant="outline" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Erste Kampagne erstellen
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <CampaignList />
           </TabsContent>
 
           <TabsContent value="sequences">
