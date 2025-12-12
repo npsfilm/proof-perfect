@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,6 +10,7 @@ import { SeoHead } from '@/components/SeoHead';
 import { BenefitsCarousel } from '@/components/auth/BenefitsCarousel';
 import { FloatingLabelInput } from '@/components/auth/FloatingLabelInput';
 import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
+import { PasswordStrengthBar } from '@/components/auth/PasswordStrengthBar';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -130,7 +131,7 @@ export default function Auth() {
           <div className="hidden lg:flex lg:w-2/5"><BenefitsCarousel /></div>
           <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
-              <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl p-6 sm:p-8 text-center">
+              <div className="bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8 text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                   <Mail className="h-10 w-10 text-primary" />
                 </div>
@@ -156,16 +157,16 @@ export default function Auth() {
           <div className="hidden lg:flex lg:w-2/5"><BenefitsCarousel /></div>
           <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
-              <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl p-6 sm:p-8">
+              <div className="bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8">
                 <div className="text-center mb-8">
                   <h1 className="text-2xl font-bold mb-2">Passwort zurücksetzen</h1>
                   <p className="text-muted-foreground">Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link.</p>
                 </div>
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <FloatingLabelInput type="email" label="E-Mail Adresse" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="w-5 h-5" />} required disabled={loading} />
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button type="submit" className="w-full h-12 text-base font-semibold relative overflow-hidden group" disabled={loading}>
-                      <span className="absolute inset-0 overflow-hidden rounded-lg"><span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-700" /></span>
+                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                    <Button type="submit" className="w-full h-12 text-base font-medium relative overflow-hidden group" disabled={loading}>
+                      <span className="absolute inset-0 overflow-hidden rounded-md"><span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000" /></span>
                       {loading ? 'Lädt...' : 'Reset-Link senden'}
                     </Button>
                   </motion.div>
@@ -196,15 +197,15 @@ export default function Auth() {
         {/* Right Side - Auth Form */}
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md">
-            <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl shadow-primary/5 p-6 sm:p-8">
+            <div className="bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8">
               {/* Header */}
               <AnimatePresence mode="wait">
-                <motion.div key={isLogin ? 'login' : 'signup'} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.3 }} className="text-center mb-8">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                    {isLogin ? 'Willkommen zurück' : 'Konto erstellen'}
+                <motion.div key={isLogin ? 'login' : 'signup'} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.3 }} className="text-center mb-8">
+                  <h1 className="text-3xl font-bold text-foreground mb-2">
+                    {isLogin ? 'Willkommen zurück' : 'Starten Sie jetzt'}
                   </h1>
                   <p className="text-muted-foreground">
-                    {isLogin ? 'Melden Sie sich an, um auf Ihre Galerien zuzugreifen' : 'Starten Sie mit Ihrer professionellen Immobilienfotografie'}
+                    {isLogin ? 'Melden Sie sich an, um fortzufahren' : 'Erstellen Sie Ihr kostenloses Konto'}
                   </p>
                 </motion.div>
               </AnimatePresence>
@@ -226,7 +227,7 @@ export default function Auth() {
               )}
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <FloatingLabelInput type="email" label="E-Mail Adresse" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="w-5 h-5" />} autoComplete="email" required disabled={loading} />
 
                 <div>
@@ -245,23 +246,28 @@ export default function Auth() {
                     autoComplete={isLogin ? 'current-password' : 'new-password'}
                     required
                     disabled={loading}
-                    minLength={6}
+                    minLength={8}
                   />
-                  {!isLogin && <PasswordRequirements password={password} show={showPasswordRequirements} />}
+                  {!isLogin && (
+                    <>
+                      <PasswordStrengthBar password={password} show={showPasswordRequirements} />
+                      <PasswordRequirements password={password} show={showPasswordRequirements} />
+                    </>
+                  )}
                 </div>
 
                 {isLogin && (
                   <div className="text-right">
-                    <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-primary hover:underline" disabled={loading}>
+                    <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-primary hover:text-primary/80 transition-colors" disabled={loading}>
                       Passwort vergessen?
                     </button>
                   </div>
                 )}
 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" className="w-full h-12 text-base font-semibold relative overflow-hidden group" disabled={loading}>
-                    <span className="absolute inset-0 overflow-hidden rounded-lg">
-                      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                  <Button type="submit" className="w-full h-12 text-base font-medium relative overflow-hidden group" disabled={loading}>
+                    <span className="absolute inset-0 overflow-hidden rounded-md">
+                      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
                     </span>
                     {loading ? (
                       <span className="flex items-center gap-2">
@@ -273,17 +279,36 @@ export default function Auth() {
                     )}
                   </Button>
                 </motion.div>
+
+                {/* Trust Indicator - Signup only */}
+                {!isLogin && (
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                    <Shield className="w-3 h-3" />
+                    <span>Ihre Daten sind sicher verschlüsselt</span>
+                  </div>
+                )}
               </form>
 
               {/* Mode Switch */}
-              <div className="mt-6 text-center">
+              <div className="mt-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  {isLogin ? 'Noch kein Konto?' : 'Bereits ein Konto?'}{' '}
-                  <button type="button" onClick={handleModeSwitch} className="text-primary font-medium hover:underline" disabled={loading}>
-                    {isLogin ? 'Jetzt registrieren' : 'Jetzt anmelden'}
+                  {isLogin ? 'Noch kein Konto?' : 'Bereits registriert?'}{' '}
+                  <button type="button" onClick={handleModeSwitch} className="text-primary font-semibold hover:text-primary/80 transition-colors" disabled={loading}>
+                    {isLogin ? 'Jetzt registrieren' : 'Anmelden'}
                   </button>
                 </p>
               </div>
+
+              {/* Legal Links - Signup only */}
+              {!isLogin && (
+                <div className="mt-6 text-center text-xs text-muted-foreground">
+                  Mit der Registrierung stimmen Sie unseren{' '}
+                  <Link to="/agb" className="text-primary hover:underline">AGB</Link>
+                  {' '}und der{' '}
+                  <Link to="/datenschutz" className="text-primary hover:underline">Datenschutzerklärung</Link>
+                  {' '}zu.
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
