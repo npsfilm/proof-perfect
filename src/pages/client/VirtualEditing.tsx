@@ -1,4 +1,4 @@
-import { Moon, Sun, CloudSun, Check } from 'lucide-react';
+import { Moon, CloudSun, Check, Sofa, Bed, ChefHat, Bath, Briefcase, UtensilsCrossed, Upload, Palette, Send, ImageDown, ArrowRight } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { BlueHourSlider } from '@/components/client/BlueHourSlider';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { useDiscounts } from '@/hooks/useDiscounts';
+import { useStagingStyles } from '@/hooks/useStagingStyles';
+import { useRoomTypes } from '@/hooks/useRoomTypes';
 import blueHourBefore1 from '@/assets/blue-hour-before-1.jpg';
 import blueHourAfter1 from '@/assets/blue-hour-after-1.jpg';
 import blueHourBefore2 from '@/assets/blue-hour-before-2.jpg';
@@ -28,12 +30,33 @@ const ICON_COLORS: Record<string, string> = {
   'summer-winter': 'text-success',
   'regen-sonne': 'text-warning',
   'rain-sun': 'text-warning',
+  'virtuelles-staging': 'text-primary',
 };
+
+// Room type icons
+const ROOM_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'wohnzimmer': Sofa,
+  'schlafzimmer': Bed,
+  'kueche': ChefHat,
+  'bad': Bath,
+  'home-office': Briefcase,
+  'esszimmer': UtensilsCrossed,
+};
+
+// Process steps
+const PROCESS_STEPS = [
+  { icon: Upload, title: 'Fotos auswählen', description: 'Wählen Sie die Bilder aus Ihrer Galerie' },
+  { icon: Palette, title: 'Stil wählen', description: 'Bestimmen Sie Raumtyp und Einrichtungsstil' },
+  { icon: Send, title: 'Anfrage senden', description: 'Wir bearbeiten Ihre Bestellung' },
+  { icon: ImageDown, title: 'Ergebnis erhalten', description: 'Fertige Bilder in 24-48h' },
+];
 
 export default function VirtualEditing() {
   const navigate = useNavigate();
   const { data: services, isLoading } = useServices({ showIn: 'virtual_editing' });
   const { data: discounts } = useDiscounts();
+  const { data: stagingStyles, isLoading: stylesLoading } = useStagingStyles();
+  const { data: roomTypes, isLoading: roomsLoading } = useRoomTypes();
 
   // Find buy X get Y discount
   const bulkDiscount = discounts?.find(d => 
@@ -151,21 +174,116 @@ export default function VirtualEditing() {
         )}
       </div>
 
+      {/* Staging Styles Section */}
+      <div className="mb-8 md:mb-12 animate-fade-in">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Einrichtungsstile</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Wählen Sie aus 8 professionellen Einrichtungsstilen
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+          {stylesLoading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-lg" />
+            ))
+          ) : (
+            stagingStyles?.map((style) => (
+              <Card key={style.id} className="p-3 md:p-4 text-center hover:shadow-md transition-shadow">
+                <div 
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full mx-auto mb-2 ${style.color_class || 'bg-primary'}`}
+                />
+                <p className="text-xs md:text-sm font-medium text-foreground">{style.name}</p>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Room Types Section */}
+      <div className="mb-8 md:mb-12 animate-fade-in">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Unterstützte Raumtypen</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Virtuelles Staging für alle Räume Ihrer Immobilie
+          </p>
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
+          {roomsLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-lg" />
+            ))
+          ) : (
+            roomTypes?.map((room) => {
+              const Icon = ROOM_TYPE_ICONS[room.slug] || Sofa;
+              return (
+                <Card key={room.id} className="p-3 md:p-4 text-center hover:shadow-md transition-shadow">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                  </div>
+                  <p className="text-xs md:text-sm font-medium text-foreground">{room.name}</p>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Process Section */}
+      <Card className="mb-8 md:mb-12 animate-fade-in">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-xl md:text-2xl">So funktioniert's</CardTitle>
+          <CardDescription>In 4 einfachen Schritten zu Ihren virtuell eingerichteten Bildern</CardDescription>
+        </CardHeader>
+        <CardContent className="p-4 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {PROCESS_STEPS.map((step, index) => (
+              <div key={index} className="text-center">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <step.icon className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+                </div>
+                <div className="text-xs md:text-sm font-semibold text-primary mb-1">Schritt {index + 1}</div>
+                <h4 className="text-sm md:text-base font-medium text-foreground mb-1">{step.title}</h4>
+                <p className="text-xs text-muted-foreground">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Pricing Info */}
       {bulkDiscount && (
-        <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in">
+        <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in mb-8 md:mb-12">
           <CardContent className="p-4 md:p-8 text-center">
             <h3 className="text-lg md:text-xl font-semibold mb-2">Mengenrabatt</h3>
             <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
               Bei {bulkDiscount.buy_quantity} oder mehr Bildern erhalten Sie{' '}
               <span className="font-semibold text-primary">{bulkDiscount.free_quantity} Bild gratis</span>!
             </p>
-            <Button onClick={() => navigate('/?tab=staging')} size="default" className="w-full sm:w-auto">
-              Jetzt Staging anfordern
-            </Button>
           </CardContent>
         </Card>
       )}
+
+      {/* CTA Section */}
+      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 animate-fade-in">
+        <CardContent className="p-6 md:p-10 text-center">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+            Bereit für beeindruckende Immobilienfotos?
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground mb-6">
+            Starten Sie jetzt mit der virtuellen Bearbeitung Ihrer Bilder
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={() => navigate('/?tab=staging')} size="lg" className="gap-2">
+              Jetzt Staging anfordern
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline" size="lg">
+              Meine Galerien
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
