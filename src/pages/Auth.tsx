@@ -195,9 +195,30 @@ export default function Auth() {
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md">
-            <div className="bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-[#1a2d4d] via-[#233c63] to-[#2d4a7d] lg:from-background lg:via-background lg:to-muted/30 relative overflow-hidden">
+          {/* Mobile: Plus-sign pattern overlay */}
+          <div className="absolute inset-0 lg:hidden opacity-[0.03]">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="mobile-plus-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M20 8v24M8 20h24" stroke="white" strokeWidth="1" fill="none" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#mobile-plus-pattern)" />
+            </svg>
+          </div>
+
+          {/* Mobile: Logo above form */}
+          <div className="lg:hidden mb-6 relative z-10">
+            <img 
+              src="https://ttepglsqnbevhtxrqayq.supabase.co/storage/v1/object/public/branding/logo-dark-1765489216433.png" 
+              alt="ImmoOnPoint" 
+              className="h-8 w-auto"
+            />
+          </div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
+            <div className="bg-card/95 lg:bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8">
               {/* Header */}
               <AnimatePresence mode="wait">
                 <motion.div key={isLogin ? 'login' : 'signup'} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.3 }} className="text-center mb-8">
@@ -311,6 +332,15 @@ export default function Auth() {
               )}
             </div>
           </motion.div>
+
+          {/* Mobile: Trust Badges below form */}
+          <div className="lg:hidden mt-6 flex items-center justify-center gap-3 text-white/80 text-xs relative z-10">
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-400">★</span> 5,0 bei Google
+            </span>
+            <span className="text-white/40">•</span>
+            <span>1.700+ Shootings</span>
+          </div>
         </div>
       </div>
     </>
