@@ -1,25 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, CheckCircle2 } from 'lucide-react';
 import { SeoHead } from '@/components/SeoHead';
+import { BenefitsCarousel } from '@/components/auth/BenefitsCarousel';
+import { FloatingLabelInput } from '@/components/auth/FloatingLabelInput';
+import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [unverifiedUser, setUnverifiedUser] = useState<{ userId: string; email: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const { signIn, signUp, resetPassword, resendVerificationEmail, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,7 +33,6 @@ export default function Auth() {
     }
   }, [user, navigate]);
 
-  // Countdown timer for resend button
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
@@ -47,54 +49,28 @@ export default function Auth() {
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
-        
         if (error) {
           if (error.code === 'email_not_verified') {
             setUnverifiedUser({ userId: error.userId, email: error.email });
-            setShowVerificationMessage(false);
           } else {
-            toast({
-              title: 'Fehler',
-              description: error.message,
-              variant: 'destructive',
-            });
+            toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
           }
         } else {
-          toast({
-            title: 'Willkommen zurück!',
-            description: 'Sie haben sich erfolgreich angemeldet.',
-          });
+          toast({ title: 'Willkommen zurück!', description: 'Sie haben sich erfolgreich angemeldet.' });
         }
       } else {
         const { error, needsVerification, loggedIn } = await signUp(email, password);
-        
         if (error) {
           if (error.code === 'invalid_password') {
-            // Benutzer existiert, aber Passwort ist falsch
-            setUnverifiedUser(null);
-            toast({
-              title: 'Passwort falsch',
-              description: 'Das eingegebene Passwort ist nicht korrekt.',
-              variant: 'destructive',
-            });
-            // Wechsle zur Login-Ansicht und zeige Passwort-vergessen Link
+            toast({ title: 'Passwort falsch', description: 'Das eingegebene Passwort ist nicht korrekt.', variant: 'destructive' });
             setIsLogin(true);
           } else if (error.code === 'email_not_verified') {
-            // Benutzer existiert aber E-Mail nicht verifiziert
             setUnverifiedUser({ userId: error.userId, email: error.email });
           } else {
-            toast({
-              title: 'Fehler',
-              description: error.message,
-              variant: 'destructive',
-            });
+            toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
           }
         } else if (loggedIn) {
-          // Benutzer wurde automatisch eingeloggt (existierte bereits mit korrektem Passwort)
-          toast({
-            title: 'Willkommen zurück!',
-            description: 'Sie wurden erfolgreich angemeldet.',
-          });
+          toast({ title: 'Willkommen zurück!', description: 'Sie wurden erfolgreich angemeldet.' });
         } else if (needsVerification) {
           setShowVerificationMessage(true);
           setEmail('');
@@ -102,11 +78,7 @@ export default function Auth() {
         }
       }
     } catch (error: any) {
-      toast({
-        title: 'Fehler',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -115,30 +87,17 @@ export default function Auth() {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { error } = await resetPassword(email);
-
       if (error) {
-        toast({
-          title: 'Fehler',
-          description: error.message,
-          variant: 'destructive',
-        });
+        toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
       } else {
-        toast({
-          title: 'E-Mail gesendet',
-          description: 'Falls ein Konto mit dieser E-Mail existiert, erhalten Sie einen Link zum Zurücksetzen.',
-        });
+        toast({ title: 'E-Mail gesendet', description: 'Falls ein Konto mit dieser E-Mail existiert, erhalten Sie einen Link zum Zurücksetzen.' });
         setIsForgotPassword(false);
         setEmail('');
       }
     } catch (error: any) {
-      toast({
-        title: 'Fehler',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -146,53 +105,44 @@ export default function Auth() {
 
   const handleResendVerification = async () => {
     if (!unverifiedUser || resendCooldown > 0) return;
-    
     setResendLoading(true);
     try {
       await resendVerificationEmail(unverifiedUser.userId, unverifiedUser.email);
-      // Start 60 second cooldown regardless of result
       setResendCooldown(60);
     } finally {
       setResendLoading(false);
     }
   };
 
-  // Show verification success message after signup
+  const handleModeSwitch = () => {
+    setIsLogin(!isLogin);
+    setUnverifiedUser(null);
+    setPassword('');
+    setShowPasswordRequirements(false);
+  };
+
+  // Verification Message View
   if (showVerificationMessage) {
     return (
       <>
         <SeoHead title="E-Mail bestätigen" />
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Mail className="h-10 w-10 text-primary" />
-            </div>
-            <CardTitle className="text-2xl">Bestätigen Sie Ihre E-Mail</CardTitle>
-            <CardDescription>
-              Wir haben Ihnen eine E-Mail mit einem Bestätigungslink gesendet. Bitte überprüfen Sie Ihr Postfach.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>
-                Der Link ist 24 Stunden gültig. Nach der Bestätigung können Sie sich anmelden.
-              </AlertDescription>
-            </Alert>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setShowVerificationMessage(false);
-                setIsLogin(true);
-              }}
-            >
-              Zurück zur Anmeldung
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="min-h-screen flex">
+          <div className="hidden lg:flex lg:w-2/5"><BenefitsCarousel /></div>
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
+              <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl p-6 sm:p-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <Mail className="h-10 w-10 text-primary" />
+                </div>
+                <h1 className="text-2xl font-bold mb-2">Bestätigen Sie Ihre E-Mail</h1>
+                <p className="text-muted-foreground mb-6">Wir haben Ihnen eine E-Mail mit einem Bestätigungslink gesendet.</p>
+                <Button variant="outline" className="w-full" onClick={() => { setShowVerificationMessage(false); setIsLogin(true); }}>
+                  Zurück zur Anmeldung
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </>
     );
   }
@@ -202,153 +152,142 @@ export default function Auth() {
     return (
       <>
         <SeoHead title="Passwort zurücksetzen" />
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">
-              Passwort zurücksetzen
-            </CardTitle>
-            <CardDescription>
-              Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordReset} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-Mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@beispiel.de"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+        <div className="min-h-screen flex">
+          <div className="hidden lg:flex lg:w-2/5"><BenefitsCarousel /></div>
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
+              <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl p-6 sm:p-8">
+                <div className="text-center mb-8">
+                  <h1 className="text-2xl font-bold mb-2">Passwort zurücksetzen</h1>
+                  <p className="text-muted-foreground">Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link.</p>
+                </div>
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <FloatingLabelInput type="email" label="E-Mail Adresse" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="w-5 h-5" />} required disabled={loading} />
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button type="submit" className="w-full h-12 text-base font-semibold relative overflow-hidden group" disabled={loading}>
+                      <span className="absolute inset-0 overflow-hidden rounded-lg"><span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-700" /></span>
+                      {loading ? 'Lädt...' : 'Reset-Link senden'}
+                    </Button>
+                  </motion.div>
+                </form>
+                <div className="mt-6 text-center">
+                  <button type="button" onClick={() => { setIsForgotPassword(false); setEmail(''); }} className="text-primary font-medium hover:underline text-sm">
+                    Zurück zur Anmeldung
+                  </button>
+                </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Lädt...' : 'Reset-Link senden'}
-              </Button>
-            </form>
-            <div className="mt-4 text-center text-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsForgotPassword(false);
-                  setEmail('');
-                }}
-                className="text-primary hover:underline"
-                disabled={loading}
-              >
-                Zurück zur Anmeldung
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </motion.div>
+          </div>
+        </div>
       </>
     );
   }
 
-  // Login / Sign Up View
+  // Main Login/Signup View
   return (
     <>
       <SeoHead title={isLogin ? 'Anmelden' : 'Registrieren'} />
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
-            {isLogin ? 'Anmelden' : 'Konto erstellen'}
-          </CardTitle>
-          <CardDescription>
-            {isLogin 
-              ? 'Geben Sie Ihre Zugangsdaten ein, um auf Ihr Konto zuzugreifen' 
-              : 'Geben Sie Ihre Daten ein, um ein neues Konto zu erstellen'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {unverifiedUser && (
-            <Alert className="mb-4">
-              <Mail className="h-4 w-4" />
-              <AlertDescription className="flex flex-col gap-2">
-                <span>Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.</span>
-                <div className="space-y-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleResendVerification}
-                    disabled={resendLoading || resendCooldown > 0}
-                  >
-                    {resendLoading ? 'Wird gesendet...' : 'Bestätigungs-E-Mail erneut senden'}
-                  </Button>
-                  {resendCooldown > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Erneut senden in {resendCooldown}s
-                    </p>
-                  )}
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-Mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@beispiel.de"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Passwort</Label>
-                {isLogin && (
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPassword(true)}
-                    className="text-xs text-primary hover:underline"
+      <div className="min-h-screen flex">
+        {/* Left Side - Benefits Carousel */}
+        <div className="hidden lg:flex lg:w-2/5">
+          <BenefitsCarousel />
+        </div>
+
+        {/* Right Side - Auth Form */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/30">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md">
+            <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl shadow-primary/5 p-6 sm:p-8">
+              {/* Header */}
+              <AnimatePresence mode="wait">
+                <motion.div key={isLogin ? 'login' : 'signup'} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.3 }} className="text-center mb-8">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                    {isLogin ? 'Willkommen zurück' : 'Konto erstellen'}
+                  </h1>
+                  <p className="text-muted-foreground">
+                    {isLogin ? 'Melden Sie sich an, um auf Ihre Galerien zuzugreifen' : 'Starten Sie mit Ihrer professionellen Immobilienfotografie'}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Unverified User Alert */}
+              {unverifiedUser && (
+                <Alert className="mb-4">
+                  <Mail className="h-4 w-4" />
+                  <AlertDescription className="flex flex-col gap-2">
+                    <span>Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.</span>
+                    <div className="space-y-1">
+                      <Button variant="outline" size="sm" onClick={handleResendVerification} disabled={resendLoading || resendCooldown > 0}>
+                        {resendLoading ? 'Wird gesendet...' : 'Bestätigungs-E-Mail erneut senden'}
+                      </Button>
+                      {resendCooldown > 0 && <p className="text-xs text-muted-foreground">Erneut senden in {resendCooldown}s</p>}
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <FloatingLabelInput type="email" label="E-Mail Adresse" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="w-5 h-5" />} autoComplete="email" required disabled={loading} />
+
+                <div>
+                  <FloatingLabelInput
+                    type={showPassword ? 'text' : 'password'}
+                    label="Passwort"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => !isLogin && setShowPasswordRequirements(true)}
+                    icon={<Lock className="w-5 h-5" />}
+                    rightIcon={
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground hover:text-foreground transition-colors">
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    }
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                    required
                     disabled={loading}
-                  >
-                    Passwort vergessen?
-                  </button>
+                    minLength={6}
+                  />
+                  {!isLogin && <PasswordRequirements password={password} show={showPasswordRequirements} />}
+                </div>
+
+                {isLogin && (
+                  <div className="text-right">
+                    <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-primary hover:underline" disabled={loading}>
+                      Passwort vergessen?
+                    </button>
+                  </div>
                 )}
+
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button type="submit" className="w-full h-12 text-base font-semibold relative overflow-hidden group" disabled={loading}>
+                    <span className="absolute inset-0 overflow-hidden rounded-lg">
+                      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+                    </span>
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" />
+                        Wird geladen...
+                      </span>
+                    ) : (
+                      isLogin ? 'Anmelden' : 'Registrieren'
+                    )}
+                  </Button>
+                </motion.div>
+              </form>
+
+              {/* Mode Switch */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  {isLogin ? 'Noch kein Konto?' : 'Bereits ein Konto?'}{' '}
+                  <button type="button" onClick={handleModeSwitch} className="text-primary font-medium hover:underline" disabled={loading}>
+                    {isLogin ? 'Jetzt registrieren' : 'Jetzt anmelden'}
+                  </button>
+                </p>
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Geben Sie Ihr Passwort ein"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-                minLength={6}
-              />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Lädt...' : (isLogin ? 'Anmelden' : 'Registrieren')}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setUnverifiedUser(null);
-              }}
-              className="text-primary hover:underline"
-              disabled={loading}
-            >
-              {isLogin ? "Noch kein Konto? Registrieren" : 'Bereits ein Konto? Anmelden'}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </motion.div>
+        </div>
+      </div>
     </>
   );
 }
