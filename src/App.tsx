@@ -60,14 +60,12 @@ const App = () => (
                   {/* Public booking page (no layout) */}
                   <Route path="/buchen" element={<Buchung />} />
                   
-                  {/* Feature Request page (no layout - own header) */}
-                  <Route path="/feature-anfrage" element={<FeatureRequest />} />
-                  
                   {/* Client routes with ClientLayout */}
                   <Route element={<ClientLayout />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/gallery/:slug" element={<ClientGallery />} />
                     <Route path="/virtuelle-bearbeitung" element={<VirtualEditing />} />
+                    <Route path="/feature-anfrage" element={<FeatureRequest />} />
                   </Route>
 
                   {/* Admin routes with AdminLayout */}

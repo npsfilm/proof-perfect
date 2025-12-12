@@ -9,7 +9,9 @@ import {
   LogOut,
   HelpCircle,
   Camera,
-  Lightbulb
+  Lightbulb,
+  ChevronRight,
+  Mail
 } from 'lucide-react';
 import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,6 +54,7 @@ const navGroups = [
     label: 'Konto',
     items: [
       { title: 'Einstellungen', url: '/', icon: Settings, tabParam: 'settings' },
+      { title: 'Feedback geben', url: '/feature-anfrage', icon: Lightbulb, tabParam: null },
     ],
   },
 ];
@@ -153,8 +156,14 @@ export function MobileClientNav() {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
+    setIsOpen(false);
     await signOut();
     navigate('/auth');
+  };
+
+  const handleNavigateToSettings = () => {
+    setIsOpen(false);
+    navigate('/?tab=settings');
   };
 
   const getDisplayName = () => {
@@ -176,15 +185,15 @@ export function MobileClientNav() {
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0">
+      <SheetContent side="left" className="w-72 p-0 flex flex-col">
         <VisuallyHidden>
           <SheetTitle>Navigation</SheetTitle>
           <SheetDescription>Hauptnavigation für die mobile Ansicht</SheetDescription>
         </VisuallyHidden>
         
         {/* Header */}
-        <div className="border-b border-border px-3 py-2">
-          <div className="flex items-center justify-between mb-2">
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               {logoIconUrl ? (
                 <img src={logoIconUrl} alt={siteName} className="w-8 h-8 rounded-lg object-contain" />
@@ -198,60 +207,55 @@ export function MobileClientNav() {
                 <p className="text-[10px] text-muted-foreground leading-tight">Kundenportal</p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsOpen(false)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
           </div>
           
-          {/* User Card */}
-          <div className="flex items-center gap-2 p-1.5 rounded-md bg-muted/30">
-            <Avatar className="h-7 w-7">
-              <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+          {/* User Card - Klickbar für Einstellungen */}
+          <button 
+            onClick={handleNavigateToSettings}
+            className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 w-full hover:bg-muted/60 transition-colors text-left group"
+          >
+            <Avatar className="h-9 w-9">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate leading-tight">{getDisplayName()}</p>
-              <p className="text-[10px] text-muted-foreground truncate leading-tight">{user?.email}</p>
+              <p className="text-sm font-medium truncate leading-tight">{getDisplayName()}</p>
+              <p className="text-[11px] text-muted-foreground truncate leading-tight">{user?.email}</p>
             </div>
-          </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </button>
         </div>
         
         {/* Navigation */}
-        <div className="px-2 py-2">
+        <div className="flex-1 px-3 py-3 overflow-y-auto">
           <TooltipProvider>
             <SidebarNavContent onItemClick={() => setIsOpen(false)} showLabels={true} />
           </TooltipProvider>
         </div>
         
-        {/* Feature Request */}
-        <div className="border-t border-border px-2 py-2">
-          <NavLink
-            to="/feature-anfrage"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-          >
-            <Lightbulb className="h-3.5 w-3.5 shrink-0" />
-            <span>Dir fehlt etwas? Lass es uns wissen</span>
-          </NavLink>
-        </div>
-        
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border p-2">
-          <div className="flex gap-1">
+        <div className="border-t border-border p-3 mt-auto">
+          <div className="flex gap-2">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="flex-1 justify-start text-muted-foreground h-8 text-xs"
-              onClick={() => window.open(`mailto:${supportEmail}`, '_blank')}
+              className="flex-1 justify-center h-9 text-xs"
+              onClick={() => {
+                setIsOpen(false);
+                window.open(`mailto:${supportEmail}`, '_blank');
+              }}
             >
-              <HelpCircle className="h-3.5 w-3.5 mr-1.5" />
+              <Mail className="h-3.5 w-3.5 mr-1.5" />
               Hilfe
             </Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="flex-1 justify-start text-muted-foreground hover:text-destructive h-8 text-xs"
+              className="flex-1 justify-center text-destructive hover:text-destructive hover:bg-destructive/10 h-9 text-xs"
               onClick={handleSignOut}
             >
               <LogOut className="h-3.5 w-3.5 mr-1.5" />
@@ -333,31 +337,6 @@ export function ClientSidebar() {
         <SidebarContent className="px-2 py-1">
           <SidebarNavContent showLabels={open} />
         </SidebarContent>
-        
-        {/* Feature Request Button */}
-        <div className="border-t border-sidebar-border px-2 py-2">
-          {open ? (
-            <NavLink
-              to="/feature-anfrage"
-              className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-            >
-              <Lightbulb className="h-4 w-4 shrink-0" />
-              <span>Dir fehlt etwas? Lass es uns wissen</span>
-            </NavLink>
-          ) : (
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <NavLink
-                  to="/feature-anfrage"
-                  className="flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                >
-                  <Lightbulb className="h-4 w-4" />
-                </NavLink>
-              </TooltipTrigger>
-              <TooltipContent side="right">Feature-Anfrage</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
         
         {/* Footer */}
         <SidebarFooter className="border-t border-sidebar-border p-2">

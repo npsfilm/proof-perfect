@@ -60,6 +60,7 @@ export default function ClientLayout() {
 
     if (path.startsWith('/gallery/')) return 'Galerie';
     if (path === '/virtuelle-bearbeitung') return 'Virtuelle Bearbeitung';
+    if (path === '/feature-anfrage') return 'Feedback geben';
     if (path === '/buchung') return 'Shooting buchen';
     if (path === '/' && tab === 'staging') return 'Staging anfordern';
     if (path === '/' && tab === 'settings') return 'Einstellungen';
