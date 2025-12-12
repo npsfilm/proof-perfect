@@ -257,6 +257,91 @@ export type Database = {
         }
         Relationships: []
       }
+      client_tag_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          client_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tag_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tag_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_metrics"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "client_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tags: {
+        Row: {
+          auto_conditions: Json | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          tag_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_conditions?: Json | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          tag_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_conditions?: Json | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          tag_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       client_watermarks: {
         Row: {
           created_at: string
@@ -1309,6 +1394,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_clients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_metrics"
+            referencedColumns: ["client_id"]
           },
           {
             foreignKeyName: "gallery_clients_gallery_id_fkey"
@@ -2863,6 +2955,20 @@ export type Database = {
       }
     }
     Views: {
+      v_client_metrics: {
+        Row: {
+          blue_hour_count: number | null
+          booking_count: number | null
+          client_id: string | null
+          days_since_last_booking: number | null
+          email: string | null
+          nachname: string | null
+          staging_count: number | null
+          total_revenue_cents: number | null
+          vorname: string | null
+        }
+        Relationships: []
+      }
       v_company_gallery_stats: {
         Row: {
           company_id: string | null
