@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Plus, Send, Clock, Users } from 'lucide-react';
 import { EmailTemplateList } from '@/components/admin/email-settings/EmailTemplateList';
-import { TagList } from '@/components/admin/newsletter';
+import { TagList, SequenceList } from '@/components/admin/newsletter';
 
 export default function AdminNewsletter() {
   return (
@@ -73,62 +73,7 @@ export default function AdminNewsletter() {
           </TabsContent>
 
           <TabsContent value="sequences">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>E-Mail-Sequenzen</CardTitle>
-                    <CardDescription>
-                      Automatisierte E-Mail-Abfolgen für verschiedene Auslöser
-                    </CardDescription>
-                  </div>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Neue Sequenz
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="rounded-full bg-muted p-4 mb-4">
-                    <ListOrdered className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Noch keine Sequenzen</h3>
-                  <p className="text-muted-foreground max-w-md mb-4">
-                    Erstelle automatische E-Mail-Sequenzen, die z.B. nach einer Registrierung oder Buchung gestartet werden.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 w-full max-w-2xl">
-                    <Card className="p-4 text-left">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-sm">Willkommen</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        E-Mail-Serie für neue Kunden
-                      </p>
-                    </Card>
-                    <Card className="p-4 text-left">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Send className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-sm">Nach Buchung</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Follow-up nach Aufträgen
-                      </p>
-                    </Card>
-                    <Card className="p-4 text-left">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-sm">Reaktivierung</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Inaktive Kunden ansprechen
-                      </p>
-                    </Card>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SequenceList />
           </TabsContent>
 
           <TabsContent value="segments">

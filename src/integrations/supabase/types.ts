@@ -1019,6 +1019,145 @@ export type Database = {
         }
         Relationships: []
       }
+      email_sequence_enrollments: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          current_step: number | null
+          id: string
+          next_send_at: string | null
+          sequence_id: string
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          current_step?: number | null
+          id?: string
+          next_send_at?: string | null
+          sequence_id: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          current_step?: number | null
+          id?: string
+          next_send_at?: string | null
+          sequence_id?: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sequence_enrollments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sequence_enrollments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_metrics"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "email_sequence_enrollments_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "email_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_sequence_steps: {
+        Row: {
+          created_at: string | null
+          delay_from_previous_minutes: number | null
+          id: string
+          sequence_id: string
+          skip_conditions: Json | null
+          step_order: number
+          subject_override: string | null
+          template_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          delay_from_previous_minutes?: number | null
+          id?: string
+          sequence_id: string
+          skip_conditions?: Json | null
+          step_order: number
+          subject_override?: string | null
+          template_id: string
+        }
+        Update: {
+          created_at?: string | null
+          delay_from_previous_minutes?: number | null
+          id?: string
+          sequence_id?: string
+          skip_conditions?: Json | null
+          step_order?: number
+          subject_override?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sequence_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "email_sequences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sequence_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_sequences: {
+        Row: {
+          created_at: string | null
+          delay_after_trigger_minutes: number | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_conditions: Json | null
+          trigger_event: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delay_after_trigger_minutes?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_conditions?: Json | null
+          trigger_event: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delay_after_trigger_minutes?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_conditions?: Json | null
+          trigger_event?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           available_placeholders: Json
