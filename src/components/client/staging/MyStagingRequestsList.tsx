@@ -12,17 +12,19 @@ const statusConfig = {
   pending: {
     label: 'Ausstehend',
     icon: Clock,
-    variant: 'default' as const,
+    variant: 'secondary' as const,
   },
   processing: {
     label: 'In Bearbeitung',
     icon: Settings,
-    variant: 'secondary' as const,
+    variant: 'outline' as const,
+    className: 'border-amber-500 text-amber-600 bg-amber-50',
   },
   delivered: {
     label: 'Geliefert',
     icon: CheckCircle2,
-    variant: 'default' as const,
+    variant: 'outline' as const,
+    className: 'border-green-500 text-green-600 bg-green-50',
   },
 };
 
@@ -47,11 +49,11 @@ export function MyStagingRequestsList() {
   return (
     <div className="space-y-3">
       {requests.map((request) => {
-        const config = statusConfig[request.status];
+        const config = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.pending;
         const Icon = config.icon;
 
         return (
-          <Card key={request.id} className="shadow-neu-flat hover:shadow-neu-float transition-shadow">
+          <Card key={request.id} className="shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
@@ -74,7 +76,10 @@ export function MyStagingRequestsList() {
                     )}
                   </div>
                 </div>
-                <Badge variant={config.variant} className="shrink-0">
+                <Badge 
+                  variant={config.variant} 
+                  className={('className' in config ? config.className : '') + ' shrink-0'}
+                >
                   {config.label}
                 </Badge>
               </div>

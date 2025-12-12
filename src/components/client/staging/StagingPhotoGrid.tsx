@@ -80,7 +80,7 @@ export function StagingPhotoGrid({
           return (
             <div
               key={photo.id}
-              className={`relative group cursor-pointer rounded-xl overflow-hidden shadow-neu-flat hover:shadow-neu-float transition-shadow ${
+              className={`relative group cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
                 isSelected ? 'ring-2 ring-primary' : ''
               }`}
               onClick={() => handleTogglePhoto(photo.id)}

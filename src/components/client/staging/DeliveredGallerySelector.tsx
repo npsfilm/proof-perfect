@@ -26,7 +26,7 @@ export function DeliveredGallerySelector({ value, onChange }: DeliveredGallerySe
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="shadow-neu-pressed">
+      <SelectTrigger>
         <SelectValue placeholder="Galerie auswählen..." />
       </SelectTrigger>
       <SelectContent>

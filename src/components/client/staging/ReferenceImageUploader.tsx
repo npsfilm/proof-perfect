@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,7 +105,7 @@ export function ReferenceImageUploader({
       <div
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="border-2 border-dashed border-border rounded-2xl p-6 text-center hover:border-primary transition-colors"
+        className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary transition-colors"
       >
         <input
           type="file"
@@ -137,7 +137,7 @@ export function ReferenceImageUploader({
       {previewUrls.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {previewUrls.map((url, index) => (
-            <div key={url} className="relative group rounded-xl overflow-hidden shadow-neu-flat aspect-[4/3]">
+            <div key={url} className="relative group rounded-xl overflow-hidden shadow-sm aspect-[4/3]">
               <img
                 src={url}
                 alt={`Referenzbild ${index + 1}`}
