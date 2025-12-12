@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Webhook, Mail, Clock, Palette, Globe } from 'lucide-react';
+import { Clock, Palette, Globe } from 'lucide-react';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageContainer } from '@/components/admin/PageContainer';
 import { AvailabilitySettings } from '@/components/admin/availability';
 import { ColorPaletteEditor } from '@/components/admin/theme';
-import { EmailSettingsTab } from '@/components/admin/email-settings';
 import { SeoSettingsTab } from '@/components/admin/seo-settings';
 
 export default function AdminSettings() {
@@ -91,10 +86,6 @@ export default function AdminSettings() {
               <Globe className="h-3.5 w-3.5 md:h-4 md:w-4" />
               SEO & Branding
             </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-3">
-              <Mail className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              E-Mails
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="availability">
@@ -107,10 +98,6 @@ export default function AdminSettings() {
 
           <TabsContent value="seo">
             <SeoSettingsTab />
-          </TabsContent>
-
-          <TabsContent value="emails">
-            <EmailSettingsTab />
           </TabsContent>
         </Tabs>
       </div>
