@@ -17,7 +17,9 @@ import {
   Package,
   Zap,
   Lightbulb,
-  MessageSquarePlus
+  MessageSquarePlus,
+  Mail,
+  Newspaper
 } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,6 +72,13 @@ const navGroups = [
       { title: 'Unternehmen', url: '/admin/companies', icon: Building2 },
       { title: 'Benutzer', url: '/admin/users', icon: Users },
       { title: 'Analytik', url: '/admin/analytics', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { title: 'E-Mails', url: '/admin/emails', icon: Mail },
+      { title: 'Newsletter', url: '/admin/newsletter', icon: Newspaper },
     ],
   },
   {

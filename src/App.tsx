@@ -24,6 +24,8 @@ import UsersList from "./pages/admin/UsersList";
 import WebhookLogs from "./pages/admin/WebhookLogs";
 import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminEmails from "./pages/admin/AdminEmails";
+import AdminNewsletter from "./pages/admin/AdminNewsletter";
 import StagingRequests from "./pages/admin/StagingRequests";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import AdminBookings from "./pages/admin/AdminBookings";
@@ -81,6 +83,8 @@ const App = () => (
                     <Route path="webhook-logs" element={<WebhookLogs />} />
                     <Route path="analytics" element={<Analytics />} />
                     <Route path="settings" element={<AdminSettings />} />
+                    <Route path="emails" element={<AdminEmails />} />
+                    <Route path="newsletter" element={<AdminNewsletter />} />
                     <Route path="staging-requests" element={<StagingRequests />} />
                     <Route path="calendar" element={<AdminCalendar />} />
                     <Route path="bookings" element={<AdminBookings />} />
