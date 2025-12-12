@@ -4,6 +4,7 @@ export interface EmailTemplate {
   id: string;
   template_key: string;
   name: string;
+  category: string;
   from_email: string | null;
   subject_du: string;
   subject_sie: string;
@@ -57,7 +58,19 @@ export interface EmailDesignSettings {
   physical_address_line2: string | null;
   physical_address_country: string | null;
   include_physical_address: boolean;
+  // Legal information
+  legal_company_name: string | null;
+  legal_register_info: string | null;
+  legal_vat_id: string | null;
+  // Confidentiality notice
+  include_confidentiality_notice: boolean;
+  confidentiality_notice: string | null;
+  // Email reason texts
+  reason_transactional: string | null;
+  reason_newsletter: string | null;
 }
+
+export type EmailType = 'transactional' | 'newsletter';
 
 const DEFAULT_FROM = "ImmoOnPoint <info@immoonpoint.de>";
 
@@ -220,7 +233,7 @@ function buildPhysicalAddress(settings: EmailDesignSettings): string {
     return "";
   }
   
-  const parts: string[] = [settings.company_name || "ImmoOnPoint"];
+  const parts: string[] = [];
   
   if (settings.physical_address_line1) {
     parts.push(settings.physical_address_line1);
@@ -236,6 +249,44 @@ function buildPhysicalAddress(settings: EmailDesignSettings): string {
 }
 
 /**
+ * Build legal company info string for footer
+ */
+function buildLegalInfo(settings: EmailDesignSettings): string {
+  const parts: string[] = [];
+  
+  if (settings.legal_company_name) {
+    parts.push(settings.legal_company_name);
+  }
+  if (settings.legal_register_info) {
+    parts.push(settings.legal_register_info);
+  }
+  if (settings.legal_vat_id) {
+    parts.push(`USt-IdNr.: ${settings.legal_vat_id}`);
+  }
+  
+  return parts.join(" | ");
+}
+
+/**
+ * Get email reason text based on email type
+ */
+function getEmailReason(settings: EmailDesignSettings, emailType: EmailType): string {
+  if (emailType === 'newsletter') {
+    return settings.reason_newsletter || 
+      'Sie erhalten diese E-Mail, weil Sie in der Vergangenheit eine Marketingdienstleistung von ImmoOnPoint in Anspruch genommen oder sich für den Newsletter angemeldet haben.';
+  }
+  return settings.reason_transactional || 
+    'Sie erhalten diese E-Mail, weil Sie eine Bestellung über ImmoOnPoint aufgegeben haben.';
+}
+
+/**
+ * Determine email type from template category
+ */
+export function getEmailTypeFromCategory(category: string): EmailType {
+  return category === 'newsletter' ? 'newsletter' : 'transactional';
+}
+
+/**
  * Convert HTML to plain text for multipart emails
  */
 export function buildEmailText(
@@ -243,15 +294,23 @@ export function buildEmailText(
   designSettings: EmailDesignSettings | null,
   salutation: "du" | "sie",
   placeholders: Record<string, string>,
-  actionUrl?: string
+  actionUrl?: string,
+  emailType: EmailType = 'transactional'
 ): string {
   const settings = designSettings || {
     company_name: "ImmoOnPoint",
     footer_text: `© {year} ImmoOnPoint. Alle Rechte vorbehalten.`,
-    include_physical_address: false,
-    physical_address_line1: null,
-    physical_address_line2: null,
-    physical_address_country: null,
+    include_physical_address: true,
+    physical_address_line1: "Klinkerberg 9",
+    physical_address_line2: "86152 Augsburg",
+    physical_address_country: "Deutschland",
+    legal_company_name: "NPS Media GmbH",
+    legal_register_info: "HRB 38388 Amtsgericht Augsburg",
+    legal_vat_id: "DE359733225",
+    include_confidentiality_notice: true,
+    confidentiality_notice: null,
+    reason_transactional: null,
+    reason_newsletter: null,
   } as EmailDesignSettings;
 
   const heading = salutation === "du" ? template.heading_du : template.heading_sie;
@@ -262,6 +321,8 @@ export function buildEmailText(
   const processedBody = replacePlaceholders(body, placeholders);
   const processedFooter = settings.footer_text ? replacePlaceholders(settings.footer_text, placeholders) : "";
   const physicalAddress = buildPhysicalAddress(settings);
+  const legalInfo = buildLegalInfo(settings);
+  const emailReason = getEmailReason(settings, emailType);
 
   let text = `${settings.company_name || "ImmoOnPoint"}\n\n`;
   
@@ -285,11 +346,28 @@ export function buildEmailText(
   text += "---\n";
   text += processedFooter;
   
+  // Legal info
+  if (legalInfo) {
+    text += `\n\n${legalInfo}`;
+  }
+  
+  // Physical address
   if (physicalAddress) {
     text += `\n${physicalAddress}`;
   }
   
+  // Email reason
+  text += `\n\n⚠️ Warum erhalten Sie diese E-Mail?\n${emailReason}`;
+  
+  // Email settings link
   text += "\n\nE-Mail-Einstellungen verwalten: https://app.immoonpoint.de/dashboard?tab=settings";
+  
+  // Confidentiality notice
+  if (settings.include_confidentiality_notice) {
+    const notice = settings.confidentiality_notice || 
+      'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.';
+    text += `\n\n---\n${notice}`;
+  }
   
   return text;
 }
@@ -302,7 +380,8 @@ export function buildEmailHtml(
   designSettings: EmailDesignSettings | null,
   salutation: "du" | "sie",
   placeholders: Record<string, string>,
-  actionUrl?: string
+  actionUrl?: string,
+  emailType: EmailType = 'transactional'
 ): string {
   const settings = designSettings || {
     company_name: "ImmoOnPoint",
@@ -327,10 +406,17 @@ export function buildEmailHtml(
     footer_text: `© {year} ImmoOnPoint. Alle Rechte vorbehalten.`,
     logo_url: null,
     secondary_color: "#4f7942",
-    include_physical_address: false,
-    physical_address_line1: null,
-    physical_address_line2: null,
-    physical_address_country: null,
+    include_physical_address: true,
+    physical_address_line1: "Klinkerberg 9",
+    physical_address_line2: "86152 Augsburg",
+    physical_address_country: "Deutschland",
+    legal_company_name: "NPS Media GmbH",
+    legal_register_info: "HRB 38388 Amtsgericht Augsburg",
+    legal_vat_id: "DE359733225",
+    include_confidentiality_notice: true,
+    confidentiality_notice: null,
+    reason_transactional: null,
+    reason_newsletter: null,
   } as EmailDesignSettings;
 
   const subject = salutation === "du" ? template.subject_du : template.subject_sie;
@@ -342,6 +428,8 @@ export function buildEmailHtml(
   const processedBody = replacePlaceholders(body, placeholders);
   const processedFooter = settings.footer_text ? replacePlaceholders(settings.footer_text, placeholders) : "";
   const physicalAddress = buildPhysicalAddress(settings);
+  const legalInfo = buildLegalInfo(settings);
+  const emailReason = getEmailReason(settings, emailType);
 
   const logoHtml = settings.logo_url
     ? `<img src="${settings.logo_url}" alt="${settings.company_name}" style="max-width: 150px; height: auto;" />`
@@ -362,8 +450,32 @@ export function buildEmailHtml(
     `
     : "";
 
+  // Build legal and address footer section
+  const legalHtml = legalInfo
+    ? `<p style="margin: 10px 0 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">${legalInfo}</p>`
+    : "";
+
   const physicalAddressHtml = physicalAddress
-    ? `<p style="margin: 10px 0 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">${physicalAddress}</p>`
+    ? `<p style="margin: 5px 0 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">${physicalAddress}</p>`
+    : "";
+
+  const emailReasonHtml = `
+    <div style="margin: 20px 0 0; padding: 15px; background-color: ${settings.background_color}; border-radius: 8px;">
+      <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">
+        <strong style="color: ${settings.text_color};">⚠️ Warum erhalten Sie diese E-Mail?</strong><br>
+        ${emailReason}
+      </p>
+    </div>
+  `;
+
+  const confidentialityHtml = settings.include_confidentiality_notice
+    ? `
+      <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid ${settings.border_color};">
+        <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 10px; text-align: justify; line-height: 1.4;">
+          ${settings.confidentiality_notice || 'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.'}
+        </p>
+      </div>
+    `
     : "";
 
   return `
@@ -410,13 +522,16 @@ export function buildEmailHtml(
               <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 12px; text-align: center;">
                 ${processedFooter}
               </p>
+              ${legalHtml}
               ${physicalAddressHtml}
+              ${emailReasonHtml}
               <p style="margin: 15px 0 0; text-align: center;">
                 <a href="https://app.immoonpoint.de/dashboard?tab=settings" 
                    style="color: ${settings.text_muted_color}; font-size: 11px; text-decoration: underline;">
                   E-Mail-Einstellungen verwalten
                 </a>
               </p>
+              ${confidentialityHtml}
             </td>
           </tr>
         </table>

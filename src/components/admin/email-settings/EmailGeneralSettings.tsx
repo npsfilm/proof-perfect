@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Mail, MapPin, Shield, AtSign, Building } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Mail, MapPin, Shield, AtSign, Building, Scale, FileText } from 'lucide-react';
 import { useEmailDesignSettings } from '@/hooks/useEmailDesignSettings';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -194,54 +195,59 @@ export function EmailGeneralSettings() {
         </CardContent>
       </Card>
 
-      {/* Anti-Spam Settings */}
+      {/* Legal Information */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Anti-Spam Einstellungen</CardTitle>
+            <Scale className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Rechtliche Angaben</CardTitle>
           </div>
           <CardDescription>
-            Verbessern Sie die E-Mail-Zustellbarkeit mit korrekten Headers
+            Firmendaten, die in jedem E-Mail-Footer angezeigt werden
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="legal_company_name">Firma (rechtlich)</Label>
+            <Input
+              id="legal_company_name"
+              value={settings.legal_company_name || ''}
+              onChange={(e) => handleChange('legal_company_name', e.target.value)}
+              placeholder="NPS Media GmbH"
+            />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="unsubscribe_email">List-Unsubscribe E-Mail</Label>
+              <Label htmlFor="legal_register_info">Handelsregister</Label>
               <Input
-                id="unsubscribe_email"
-                type="email"
-                value={settings.unsubscribe_email || ''}
-                onChange={(e) => handleChange('unsubscribe_email', e.target.value)}
-                placeholder="unsubscribe@immoonpoint.de"
+                id="legal_register_info"
+                value={settings.legal_register_info || ''}
+                onChange={(e) => handleChange('legal_register_info', e.target.value)}
+                placeholder="HRB 38388 Amtsgericht Augsburg"
               />
-              <p className="text-xs text-muted-foreground">
-                Für den List-Unsubscribe Header
-              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unsubscribe_url">List-Unsubscribe URL (optional)</Label>
+              <Label htmlFor="legal_vat_id">USt-IdNr.</Label>
               <Input
-                id="unsubscribe_url"
-                type="url"
-                value={settings.unsubscribe_url || ''}
-                onChange={(e) => handleChange('unsubscribe_url', e.target.value)}
-                placeholder="https://app.immoonpoint.de/unsubscribe"
+                id="legal_vat_id"
+                value={settings.legal_vat_id || ''}
+                onChange={(e) => handleChange('legal_vat_id', e.target.value)}
+                placeholder="DE359733225"
               />
             </div>
           </div>
 
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
-            <div className="flex items-start gap-2">
-              <AtSign className="mt-0.5 h-4 w-4 text-primary" />
-              <div>
-                <div className="font-medium">Hinweis zur Zustellbarkeit</div>
-                <p className="mt-1 text-muted-foreground">
-                  Die List-Unsubscribe Header signalisieren E-Mail-Clients, dass dies legitime Transaktionsmails sind. 
-                  Dies reduziert die Wahrscheinlichkeit, dass E-Mails im Spam landen.
-                </p>
-              </div>
+          {/* Legal Preview */}
+          <div className="rounded-lg bg-muted p-4 text-center text-sm">
+            <div className="text-muted-foreground">Footer-Vorschau:</div>
+            <div className="mt-2">
+              <span className="font-medium">{settings.legal_company_name || 'NPS Media GmbH'}</span>
+              {settings.legal_register_info && (
+                <span className="text-muted-foreground"> | {settings.legal_register_info}</span>
+              )}
+              {settings.legal_vat_id && (
+                <span className="text-muted-foreground"> | USt-IdNr.: {settings.legal_vat_id}</span>
+              )}
             </div>
           </div>
         </CardContent>
@@ -281,7 +287,7 @@ export function EmailGeneralSettings() {
                 id="physical_address_line1"
                 value={settings.physical_address_line1 || ''}
                 onChange={(e) => handleChange('physical_address_line1', e.target.value)}
-                placeholder="Musterstraße 123"
+                placeholder="Klinkerberg 9"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -291,7 +297,7 @@ export function EmailGeneralSettings() {
                   id="physical_address_line2"
                   value={settings.physical_address_line2 || ''}
                   onChange={(e) => handleChange('physical_address_line2', e.target.value)}
-                  placeholder="12345 Musterstadt"
+                  placeholder="86152 Augsburg"
                 />
               </div>
               <div className="space-y-2">
@@ -309,21 +315,160 @@ export function EmailGeneralSettings() {
           {/* Address Preview */}
           {settings.include_physical_address && (
             <div className="rounded-lg bg-muted p-4 text-center text-sm">
-              <div className="text-muted-foreground">Footer-Vorschau:</div>
+              <div className="text-muted-foreground">Adress-Vorschau:</div>
               <div className="mt-2">
-                <span className="font-medium">{settings.company_name || 'ImmoOnPoint'}</span>
                 {settings.physical_address_line1 && (
-                  <span className="text-muted-foreground"> | {settings.physical_address_line1}</span>
+                  <span>{settings.physical_address_line1}</span>
                 )}
                 {settings.physical_address_line2 && (
-                  <span className="text-muted-foreground">, {settings.physical_address_line2}</span>
+                  <span className="text-muted-foreground"> | {settings.physical_address_line2}</span>
                 )}
                 {settings.physical_address_country && (
-                  <span className="text-muted-foreground">, {settings.physical_address_country}</span>
+                  <span className="text-muted-foreground"> | {settings.physical_address_country}</span>
                 )}
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Email Reason Texts */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">E-Mail-Begründung</CardTitle>
+          </div>
+          <CardDescription>
+            Erklärt dem Empfänger, warum er diese E-Mail erhält
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="reason_transactional">Transaktions-E-Mails (System & Kunden)</Label>
+            <Textarea
+              id="reason_transactional"
+              value={settings.reason_transactional || ''}
+              onChange={(e) => handleChange('reason_transactional', e.target.value)}
+              placeholder="Sie erhalten diese E-Mail, weil Sie eine Bestellung über ImmoOnPoint aufgegeben haben."
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">
+              Wird bei Bestätigungen, Statusupdates und System-Mails angezeigt
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reason_newsletter">Newsletter</Label>
+            <Textarea
+              id="reason_newsletter"
+              value={settings.reason_newsletter || ''}
+              onChange={(e) => handleChange('reason_newsletter', e.target.value)}
+              placeholder="Sie erhalten diese E-Mail, weil Sie in der Vergangenheit eine Marketingdienstleistung von ImmoOnPoint in Anspruch genommen oder sich für den Newsletter angemeldet haben."
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">
+              Wird bei Marketing- und Newsletter-Mails angezeigt
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Confidentiality Notice */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Vertraulichkeitshinweis</CardTitle>
+          </div>
+          <CardDescription>
+            Rechtlicher Hinweis am Ende jeder E-Mail
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Vertraulichkeitshinweis anzeigen</Label>
+              <p className="text-sm text-muted-foreground">
+                Rechtlicher Disclaimer im E-Mail-Footer
+              </p>
+            </div>
+            <Switch
+              checked={settings.include_confidentiality_notice ?? true}
+              onCheckedChange={(checked) => handleChange('include_confidentiality_notice', checked)}
+            />
+          </div>
+
+          {settings.include_confidentiality_notice && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <Label htmlFor="confidentiality_notice">Hinweistext</Label>
+                <Textarea
+                  id="confidentiality_notice"
+                  value={settings.confidentiality_notice || ''}
+                  onChange={(e) => handleChange('confidentiality_notice', e.target.value)}
+                  placeholder="Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen..."
+                  rows={4}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leer lassen für Standardtext
+                </p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Anti-Spam Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <AtSign className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Anti-Spam Einstellungen</CardTitle>
+          </div>
+          <CardDescription>
+            Verbessern Sie die E-Mail-Zustellbarkeit mit korrekten Headers
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="unsubscribe_email">List-Unsubscribe E-Mail</Label>
+              <Input
+                id="unsubscribe_email"
+                type="email"
+                value={settings.unsubscribe_email || ''}
+                onChange={(e) => handleChange('unsubscribe_email', e.target.value)}
+                placeholder="unsubscribe@immoonpoint.de"
+              />
+              <p className="text-xs text-muted-foreground">
+                Für den List-Unsubscribe Header
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="unsubscribe_url">List-Unsubscribe URL (optional)</Label>
+              <Input
+                id="unsubscribe_url"
+                type="url"
+                value={settings.unsubscribe_url || ''}
+                onChange={(e) => handleChange('unsubscribe_url', e.target.value)}
+                placeholder="https://app.immoonpoint.de/unsubscribe"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+            <div className="flex items-start gap-2">
+              <Shield className="mt-0.5 h-4 w-4 text-primary" />
+              <div>
+                <div className="font-medium">Hinweis zur Zustellbarkeit</div>
+                <p className="mt-1 text-muted-foreground">
+                  Die List-Unsubscribe Header signalisieren E-Mail-Clients, dass dies legitime Transaktionsmails sind. 
+                  Dies reduziert die Wahrscheinlichkeit, dass E-Mails im Spam landen.
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

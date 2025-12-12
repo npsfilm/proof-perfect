@@ -738,6 +738,7 @@ export type Database = {
           button_padding_y: number
           button_text_color: string
           company_name: string
+          confidentiality_notice: string | null
           container_bg_color: string
           container_border_radius: number
           container_max_width: number
@@ -749,7 +750,11 @@ export type Database = {
           footer_text: string | null
           heading_font_size: number
           id: string
+          include_confidentiality_notice: boolean | null
           include_physical_address: boolean | null
+          legal_company_name: string | null
+          legal_register_info: string | null
+          legal_vat_id: string | null
           line_height: number
           logo_url: string | null
           logo_width: number
@@ -761,6 +766,8 @@ export type Database = {
           physical_address_line1: string | null
           physical_address_line2: string | null
           primary_color: string
+          reason_newsletter: string | null
+          reason_transactional: string | null
           reply_to_email: string | null
           reply_to_name: string | null
           secondary_color: string
@@ -785,6 +792,7 @@ export type Database = {
           button_padding_y?: number
           button_text_color?: string
           company_name?: string
+          confidentiality_notice?: string | null
           container_bg_color?: string
           container_border_radius?: number
           container_max_width?: number
@@ -796,7 +804,11 @@ export type Database = {
           footer_text?: string | null
           heading_font_size?: number
           id?: string
+          include_confidentiality_notice?: boolean | null
           include_physical_address?: boolean | null
+          legal_company_name?: string | null
+          legal_register_info?: string | null
+          legal_vat_id?: string | null
           line_height?: number
           logo_url?: string | null
           logo_width?: number
@@ -808,6 +820,8 @@ export type Database = {
           physical_address_line1?: string | null
           physical_address_line2?: string | null
           primary_color?: string
+          reason_newsletter?: string | null
+          reason_transactional?: string | null
           reply_to_email?: string | null
           reply_to_name?: string | null
           secondary_color?: string
@@ -832,6 +846,7 @@ export type Database = {
           button_padding_y?: number
           button_text_color?: string
           company_name?: string
+          confidentiality_notice?: string | null
           container_bg_color?: string
           container_border_radius?: number
           container_max_width?: number
@@ -843,7 +858,11 @@ export type Database = {
           footer_text?: string | null
           heading_font_size?: number
           id?: string
+          include_confidentiality_notice?: boolean | null
           include_physical_address?: boolean | null
+          legal_company_name?: string | null
+          legal_register_info?: string | null
+          legal_vat_id?: string | null
           line_height?: number
           logo_url?: string | null
           logo_width?: number
@@ -855,6 +874,8 @@ export type Database = {
           physical_address_line1?: string | null
           physical_address_line2?: string | null
           primary_color?: string
+          reason_newsletter?: string | null
+          reason_transactional?: string | null
           reply_to_email?: string | null
           reply_to_name?: string | null
           secondary_color?: string
