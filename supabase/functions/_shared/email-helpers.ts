@@ -68,6 +68,8 @@ export interface EmailDesignSettings {
   // Email reason texts
   reason_transactional: string | null;
   reason_newsletter: string | null;
+  // Brand trademark notice
+  brand_trademark_notice: string | null;
 }
 
 export type EmailType = 'transactional' | 'newsletter';
@@ -311,6 +313,7 @@ export function buildEmailText(
     confidentiality_notice: null,
     reason_transactional: null,
     reason_newsletter: null,
+    brand_trademark_notice: "ImmoOnPoint ist eine Marke der NPS Media GmbH",
   } as EmailDesignSettings;
 
   const heading = salutation === "du" ? template.heading_du : template.heading_sie;
@@ -345,6 +348,10 @@ export function buildEmailText(
   
   text += "---\n";
   text += processedFooter;
+  
+  // Brand trademark notice
+  const brandNotice = settings.brand_trademark_notice || "ImmoOnPoint ist eine Marke der NPS Media GmbH";
+  text += `\n\n${brandNotice}`;
   
   // Legal info
   if (legalInfo) {
@@ -417,6 +424,7 @@ export function buildEmailHtml(
     confidentiality_notice: null,
     reason_transactional: null,
     reason_newsletter: null,
+    brand_trademark_notice: "ImmoOnPoint ist eine Marke der NPS Media GmbH",
   } as EmailDesignSettings;
 
   const subject = salutation === "du" ? template.subject_du : template.subject_sie;
@@ -451,6 +459,9 @@ export function buildEmailHtml(
     : "";
 
   // Build legal and address footer section
+  const brandNotice = settings.brand_trademark_notice || "ImmoOnPoint ist eine Marke der NPS Media GmbH";
+  const brandHtml = `<p style="margin: 10px 0 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center; font-style: italic;">${brandNotice}</p>`;
+
   const legalHtml = legalInfo
     ? `<p style="margin: 10px 0 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">${legalInfo}</p>`
     : "";
@@ -522,6 +533,7 @@ export function buildEmailHtml(
               <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 12px; text-align: center;">
                 ${processedFooter}
               </p>
+              ${brandHtml}
               ${legalHtml}
               ${physicalAddressHtml}
               ${emailReasonHtml}
