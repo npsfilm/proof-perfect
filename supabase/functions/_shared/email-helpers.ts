@@ -289,6 +289,8 @@ export function buildEmailText(
     text += `\n${physicalAddress}`;
   }
   
+  text += "\n\nE-Mail-Einstellungen verwalten: https://app.immoonpoint.de/dashboard?tab=settings";
+  
   return text;
 }
 
@@ -409,6 +411,12 @@ export function buildEmailHtml(
                 ${processedFooter}
               </p>
               ${physicalAddressHtml}
+              <p style="margin: 15px 0 0; text-align: center;">
+                <a href="https://app.immoonpoint.de/dashboard?tab=settings" 
+                   style="color: ${settings.text_muted_color}; font-size: 11px; text-decoration: underline;">
+                  E-Mail-Einstellungen verwalten
+                </a>
+              </p>
             </td>
           </tr>
         </table>

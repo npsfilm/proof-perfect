@@ -300,6 +300,10 @@ export type Database = {
           company_id: string | null
           created_at: string
           email: string
+          email_general_info: boolean
+          email_newsletter_company: boolean
+          email_newsletter_marketing: boolean
+          email_order_notifications: boolean
           id: string
           nachname: string
           updated_at: string
@@ -311,6 +315,10 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           email: string
+          email_general_info?: boolean
+          email_newsletter_company?: boolean
+          email_newsletter_marketing?: boolean
+          email_order_notifications?: boolean
           id?: string
           nachname: string
           updated_at?: string
@@ -322,6 +330,10 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           email?: string
+          email_general_info?: boolean
+          email_newsletter_company?: boolean
+          email_newsletter_marketing?: boolean
+          email_order_notifications?: boolean
           id?: string
           nachname?: string
           updated_at?: string
@@ -1452,6 +1464,42 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      newsletter_segments: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       password_reset_tokens: {
         Row: {
