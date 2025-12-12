@@ -83,6 +83,19 @@ const handler = async (req: Request): Promise<Response> => {
     const template = await getEmailTemplate(supabaseAdmin, "password_reset");
     const designSettings = await getEmailDesignSettings(supabaseAdmin);
     
+    // Get branding logo from SEO settings if use_branding_logo is enabled
+    let brandingLogoUrl: string | undefined;
+    if (designSettings?.use_branding_logo) {
+      const { data: seoSettings } = await supabaseAdmin
+        .from("seo_settings")
+        .select("logo_dark_url, logo_url")
+        .limit(1)
+        .single();
+      
+      brandingLogoUrl = seoSettings?.logo_dark_url || seoSettings?.logo_url || undefined;
+      console.log(`Using branding logo: ${brandingLogoUrl}`);
+    }
+    
     // Get email configuration from settings
     const fromAddress = getFromAddress(template, designSettings);
     const replyTo = getReplyTo(designSettings);
@@ -146,7 +159,8 @@ const handler = async (req: Request): Promise<Response> => {
         "sie",
         { action_url: resetLink },
         resetLink,
-        'transactional'
+        'transactional',
+        brandingLogoUrl
       );
       emailText = buildEmailText(
         template,
