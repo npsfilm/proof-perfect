@@ -4,7 +4,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Building2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Building2, Mail, Bell, Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -24,11 +25,30 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
   const [isSaving, setIsSaving] = useState(false);
   const queryClient = useQueryClient();
 
+  // Email preferences state
+  const [emailPrefs, setEmailPrefs] = useState({
+    newsletter_company: true,
+    newsletter_marketing: true,
+    order_notifications: true,
+    general_info: true,
+  });
+
   useEffect(() => {
     if (client?.ansprache) {
       setAnsprache(client.ansprache);
     }
   }, [client?.ansprache]);
+
+  useEffect(() => {
+    if (client) {
+      setEmailPrefs({
+        newsletter_company: client.email_newsletter_company ?? true,
+        newsletter_marketing: client.email_newsletter_marketing ?? true,
+        order_notifications: client.email_order_notifications ?? true,
+        general_info: client.email_general_info ?? true,
+      });
+    }
+  }, [client]);
 
   const handleSave = async () => {
     if (!client) {
@@ -43,7 +63,13 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
     setIsSaving(true);
     const { error } = await supabase
       .from('clients')
-      .update({ ansprache })
+      .update({ 
+        ansprache,
+        email_newsletter_company: emailPrefs.newsletter_company,
+        email_newsletter_marketing: emailPrefs.newsletter_marketing,
+        email_order_notifications: emailPrefs.order_notifications,
+        email_general_info: emailPrefs.general_info,
+      })
       .eq('email', userEmail);
 
     setIsSaving(false);
@@ -63,6 +89,17 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
       queryClient.invalidateQueries({ queryKey: ['client-profile'] });
     }
   };
+
+  const handleEmailPrefChange = (key: keyof typeof emailPrefs, checked: boolean) => {
+    setEmailPrefs(prev => ({ ...prev, [key]: checked }));
+  };
+
+  const hasUnsavedChanges = 
+    ansprache !== client?.ansprache ||
+    emailPrefs.newsletter_company !== (client?.email_newsletter_company ?? true) ||
+    emailPrefs.newsletter_marketing !== (client?.email_newsletter_marketing ?? true) ||
+    emailPrefs.order_notifications !== (client?.email_order_notifications ?? true) ||
+    emailPrefs.general_info !== (client?.email_general_info ?? true);
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -129,7 +166,142 @@ export function PersonalTab({ userEmail, companyName }: PersonalTabProps) {
           
           <Button 
             onClick={handleSave} 
-            disabled={isSaving || ansprache === client?.ansprache}
+            disabled={isSaving || !hasUnsavedChanges}
+          >
+            {isSaving ? 'Wird gespeichert...' : 'Änderungen speichern'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Email Preferences */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            E-Mail-Benachrichtigungen
+          </CardTitle>
+          <CardDescription>
+            {t('Wähle aus, welche E-Mails du erhalten möchtest', 'Wählen Sie aus, welche E-Mails Sie erhalten möchten')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Newsletter Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              Newsletter
+            </h4>
+            
+            <div className="space-y-3 pl-6">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="newsletter_company"
+                  checked={emailPrefs.newsletter_company}
+                  onCheckedChange={(checked) => handleEmailPrefChange('newsletter_company', !!checked)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="newsletter_company" className="cursor-pointer font-medium">
+                    Firmenrelevante Themen
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Neuigkeiten und Updates zur Plattform
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="newsletter_marketing"
+                  checked={emailPrefs.newsletter_marketing}
+                  onCheckedChange={(checked) => handleEmailPrefChange('newsletter_marketing', !!checked)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="newsletter_marketing" className="cursor-pointer font-medium">
+                    Marketing & Tipps
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Tipps für bessere Immobilien-Fotografie
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Notifications Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              Auftragsbenachrichtigungen
+            </h4>
+            
+            <div className="space-y-3 pl-6">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="order_notifications"
+                  checked={emailPrefs.order_notifications}
+                  onCheckedChange={(checked) => handleEmailPrefChange('order_notifications', !!checked)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="order_notifications" className="cursor-pointer font-medium">
+                    Bestellbenachrichtigungen
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Bestätigungen für neue Aufträge
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 opacity-60">
+                <Checkbox
+                  id="order_updates"
+                  checked={true}
+                  disabled
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="order_updates" className="cursor-not-allowed font-medium flex items-center gap-2">
+                    Bestellupdates
+                    <Lock className="h-3 w-3" />
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Statusänderungen {t('zu deinen', 'zu Ihren')} Aufträgen
+                  </p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Diese Benachrichtigungen können nicht deaktiviert werden
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* General Info Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              Sonstiges
+            </h4>
+            
+            <div className="space-y-3 pl-6">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="general_info"
+                  checked={emailPrefs.general_info}
+                  onCheckedChange={(checked) => handleEmailPrefChange('general_info', !!checked)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="general_info" className="cursor-pointer font-medium">
+                    Allgemeine Informationen
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Wichtige Mitteilungen und Ankündigungen
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving || !hasUnsavedChanges}
           >
             {isSaving ? 'Wird gespeichert...' : 'Änderungen speichern'}
           </Button>

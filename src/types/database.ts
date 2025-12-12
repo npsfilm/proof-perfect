@@ -116,6 +116,10 @@ export interface Client {
   nachname: string;
   ansprache: 'Du' | 'Sie';
   company_id?: string;
+  email_newsletter_company?: boolean;
+  email_newsletter_marketing?: boolean;
+  email_order_notifications?: boolean;
+  email_general_info?: boolean;
   created_at: string;
   updated_at: string;
 }
