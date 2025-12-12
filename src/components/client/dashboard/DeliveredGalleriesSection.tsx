@@ -21,7 +21,7 @@ export function DeliveredGalleriesSection({
         Geliefert ({galleries.length})
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {galleries.map((gallery) => {
           const buttonConfig = getButtonConfig(
             gallery.status || 'Delivered',
@@ -46,7 +46,7 @@ export function DeliveredGalleriesSection({
               buttonAction={buttonConfig.action}
               buttonDisabled={buttonConfig.disabled}
               buttonVariant={buttonConfig.variant}
-              size="small"
+              size="mobile"
             />
           );
         })}
