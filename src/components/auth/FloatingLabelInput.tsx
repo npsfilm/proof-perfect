@@ -34,13 +34,14 @@ export const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLab
           className
         )}>
           {icon && (
-            <motion.div
-              animate={{ color: isFocused ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
-              transition={{ duration: 0.2 }}
-              className="absolute left-3 pointer-events-none"
+            <div
+              className={cn(
+                "absolute left-3 pointer-events-none transition-colors duration-200",
+                isFocused ? "text-primary" : "text-muted-foreground"
+              )}
             >
               {icon}
-            </motion.div>
+            </div>
           )}
           
           <input
