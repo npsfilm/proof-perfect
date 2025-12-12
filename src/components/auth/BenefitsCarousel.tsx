@@ -52,7 +52,12 @@ export function BenefitsCarousel() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Animated Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4d] via-[#233c63] to-[#2d4a7d] animate-gradient-shift" />
+      <div 
+        className="absolute inset-0 animate-gradient-shift"
+        style={{
+          background: 'linear-gradient(135deg, #1a2d4d 0%, #233c63 25%, #2d4a7d 50%, #233c63 75%, #1a2d4d 100%)'
+        }}
+      />
       
       {/* Plus-Sign Pattern Overlay */}
       <div 
