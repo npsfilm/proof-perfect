@@ -62,7 +62,7 @@ export default function FeatureRequest() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-6 min-h-[60vh]">
         <Card className="max-w-md w-full text-center">
           <CardContent className="pt-6">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -88,18 +88,8 @@ export default function FeatureRequest() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-2xl py-8 px-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(backPath)}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Zurück
-        </Button>
-
-        <Card>
+    <div className="container max-w-2xl py-6 px-4">
+      <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -226,7 +216,6 @@ export default function FeatureRequest() {
             </form>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }
