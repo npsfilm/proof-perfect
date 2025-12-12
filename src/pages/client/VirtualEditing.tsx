@@ -132,16 +132,15 @@ export default function VirtualEditing() {
             const iconColor = ICON_COLORS[service.slug] || 'text-primary';
             const priceInEuros = service.price_cents / 100;
             const features = Array.isArray(service.features) ? service.features : [];
-            const gradientClass = service.gradient_class || 'from-primary/20 via-primary/10 to-secondary/20';
 
             return (
               <Card 
                 key={service.id} 
-                className={`relative overflow-hidden animate-fade-in bg-gradient-to-br ${gradientClass}`}
+                className="relative overflow-hidden animate-fade-in bg-card hover:shadow-md transition-shadow"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-background/80 flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <Icon className={`h-6 w-6 ${iconColor}`} />
                   </div>
                   <CardTitle className="text-xl">{service.name}</CardTitle>
@@ -177,23 +176,38 @@ export default function VirtualEditing() {
       {/* Staging Styles Section */}
       <div className="mb-8 md:mb-12 animate-fade-in">
         <div className="text-center mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Einrichtungsstile</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Unsere Staging-Stile</h2>
           <p className="text-sm md:text-base text-muted-foreground">
-            Wählen Sie aus 8 professionellen Einrichtungsstilen
+            Von Modern bis Farmhouse – für jeden Geschmack der richtige Look
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
           {stylesLoading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-lg" />
+              <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
             ))
           ) : (
             stagingStyles?.map((style) => (
-              <Card key={style.id} className="p-3 md:p-4 text-center hover:shadow-md transition-shadow">
-                <div 
-                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full mx-auto mb-2 ${style.color_class || 'bg-primary'}`}
-                />
-                <p className="text-xs md:text-sm font-medium text-foreground">{style.name}</p>
+              <Card key={style.id} className="overflow-hidden hover:shadow-md transition-shadow group">
+                {style.thumbnail_url ? (
+                  <div className="aspect-[4/3] relative">
+                    <img 
+                      src={style.thumbnail_url} 
+                      alt={style.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                      <p className="font-medium text-white text-sm">{style.name}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] bg-muted flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <Palette className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="font-medium text-sm">{style.name}</p>
+                    </div>
+                  </div>
+                )}
               </Card>
             ))
           )}
