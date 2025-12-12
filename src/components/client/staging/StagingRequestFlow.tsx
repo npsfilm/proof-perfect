@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,15 @@ import { StagingPricingSummary } from './StagingPricingSummary';
 import { ReferenceImageUploader } from './ReferenceImageUploader';
 import { useCreateStagingRequest } from '@/hooks/useStagingRequests';
 import { useAnsprache } from '@/contexts/AnspracheContext';
+import { cn } from '@/lib/utils';
+
+const STEP_LABELS = [
+  'Galerie',
+  'Fotos',
+  'Stil',
+  'Referenzen',
+  'Absenden',
+];
 
 export function StagingRequestFlow() {
   const { t } = useAnsprache();
@@ -59,14 +68,46 @@ export function StagingRequestFlow() {
     : photoCount * basePrice;
 
   return (
-    <Card className="shadow-neu-flat">
-      <CardHeader>
-        <CardTitle>Nachträgliches Staging anfordern</CardTitle>
-        <CardDescription>
-          Schritt {step} von 5
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Card className="shadow-sm">
+      <CardContent className="pt-6 space-y-6">
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6">
+          {STEP_LABELS.map((label, i) => {
+            const stepNum = i + 1;
+            const isActive = stepNum === step;
+            const isCompleted = stepNum < step;
+            
+            return (
+              <div key={label} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                      isActive && "bg-primary text-primary-foreground",
+                      isCompleted && "bg-primary/20 text-primary",
+                      !isActive && !isCompleted && "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {stepNum}
+                  </div>
+                  <span className={cn(
+                    "text-xs mt-1 hidden sm:block",
+                    isActive ? "text-foreground font-medium" : "text-muted-foreground"
+                  )}>
+                    {label}
+                  </span>
+                </div>
+                {i < STEP_LABELS.length - 1 && (
+                  <div className={cn(
+                    "w-6 sm:w-10 h-0.5 mx-1 sm:mx-2",
+                    isCompleted ? "bg-primary/40" : "bg-muted"
+                  )} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         {step === 1 && (
           <div className="space-y-4">
             <div>
@@ -152,7 +193,6 @@ export function StagingRequestFlow() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="shadow-neu-pressed"
               />
             </div>
 
@@ -182,6 +222,7 @@ export function StagingRequestFlow() {
                 (step === 2 && selectedPhotoIds.length === 0) ||
                 (step === 3 && !stagingStyle)
               }
+              className="bg-gradient-to-r from-primary to-primary/80"
             >
               Weiter
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -190,6 +231,7 @@ export function StagingRequestFlow() {
             <Button
               onClick={handleSubmit}
               disabled={createRequest.isPending}
+              className="bg-gradient-to-r from-primary to-primary/80"
             >
               <Send className="mr-2 h-4 w-4" />
               Staging-Anfrage absenden
