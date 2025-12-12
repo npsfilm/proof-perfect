@@ -19,7 +19,7 @@ const corsHeaders = {
 };
 
 interface VerificationRequest {
-  user_id: string;
+  user_id?: string;
   email: string;
 }
 
@@ -63,20 +63,43 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { user_id, email }: VerificationRequest = await req.json();
     
-    console.log(`Sending verification email to ${email} for user ${user_id}`);
-
-    if (!user_id || !email) {
+    if (!email) {
       return new Response(
-        JSON.stringify({ error: "user_id and email are required" }),
+        JSON.stringify({ error: "email is required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log(`Processing verification email request for ${normalizedEmail}`);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
+
+    // If user_id not provided, look it up by email from profiles
+    let userId = user_id;
+    if (!userId) {
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+      
+      if (profileError || !profile) {
+        console.log(`No profile found for email ${normalizedEmail}`);
+        // Return success anyway to prevent email enumeration
+        return new Response(
+          JSON.stringify({ success: true, message: "If the email exists, a verification link has been sent" }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+      userId = profile.id;
+    }
+    
+    console.log(`Sending verification email to ${normalizedEmail} for user ${userId}`);
 
     // Load email template and design settings from database
     const template = await getEmailTemplate(supabaseAdmin, "verification");
@@ -108,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     await supabaseAdmin
       .from("email_verification_tokens")
       .delete()
-      .eq("user_id", user_id);
+      .eq("user_id", userId);
 
     // Generate new token with 24h expiry
     const token = generateToken();
@@ -117,8 +140,8 @@ const handler = async (req: Request): Promise<Response> => {
     const { error: insertError } = await supabaseAdmin
       .from("email_verification_tokens")
       .insert({
-        user_id,
-        email: email.toLowerCase(),
+        user_id: userId,
+        email: normalizedEmail,
         token,
         expires_at: expiresAt,
       });
