@@ -72,9 +72,11 @@ export function BenefitsCarousel() {
       <div className="relative z-10 h-full flex flex-col justify-center p-12">
         {/* Logo Area */}
         <div className="mb-12">
-          <span className="text-2xl font-bold text-white tracking-tight">
-            Immo<span className="text-blue-300">On</span>Point
-          </span>
+          <img 
+            src="https://ttepglsqnbevhtxrqayq.supabase.co/storage/v1/object/public/branding/logo-dark-1765489216433.png" 
+            alt="ImmoOnPoint" 
+            className="h-10 w-auto"
+          />
         </div>
 
         {/* Benefit Content */}
@@ -95,16 +97,6 @@ export function BenefitsCarousel() {
               className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
             >
               <Icon className="w-8 h-8 text-white" />
-            </motion.div>
-
-            {/* Stats Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm"
-            >
-              <span className="text-2xl font-bold text-white">{currentBenefit.stat}</span>
             </motion.div>
 
             {/* Title & Description */}
