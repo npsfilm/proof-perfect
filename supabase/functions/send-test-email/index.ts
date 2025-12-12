@@ -118,11 +118,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (designSettings?.use_branding_logo) {
       const { data: seoSettings } = await supabaseAdmin
         .from("seo_settings")
-        .select("logo_dark_url, logo_url")
+        .select("logo_url, logo_dark_url")
         .limit(1)
         .single();
       
-      brandingLogoUrl = seoSettings?.logo_dark_url || seoSettings?.logo_url || undefined;
+      // E-Mails haben helle Hintergründe, daher schwarzes Logo (logo_url) bevorzugen
+      brandingLogoUrl = seoSettings?.logo_url || seoSettings?.logo_dark_url || undefined;
       console.log(`Using branding logo: ${brandingLogoUrl}`);
     }
     

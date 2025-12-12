@@ -18,9 +18,10 @@ export function EmailPreview({
 }: EmailPreviewProps) {
   const { settings: seoSettings } = useSeoSettings();
   
-  // Determine effective logo URL: prefer branding logo (dark version for emails) if flag is set
+  // Determine effective logo URL: prefer branding logo (light/black version for emails) if flag is set
+  // E-Mails haben helle Hintergründe, daher schwarzes Logo (logo_url) bevorzugen
   const effectiveLogoUrl = settings.use_branding_logo 
-    ? (seoSettings?.logo_dark_url || seoSettings?.logo_url) 
+    ? (seoSettings?.logo_url || seoSettings?.logo_dark_url) 
     : settings.logo_url;
 
   const defaultPlaceholders: Record<string, string> = {
