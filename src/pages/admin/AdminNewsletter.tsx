@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Plus, Send, Clock, Users } from 'lucide-react';
 import { EmailTemplateList } from '@/components/admin/email-settings/EmailTemplateList';
+import { TagList } from '@/components/admin/newsletter';
 
 export default function AdminNewsletter() {
   return (
@@ -131,40 +132,7 @@ export default function AdminNewsletter() {
           </TabsContent>
 
           <TabsContent value="segments">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Kundensegmente & Tags</CardTitle>
-                    <CardDescription>
-                      Segmentiere Kunden nach Verhalten und Eigenschaften
-                    </CardDescription>
-                  </div>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Neuer Tag
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="rounded-full bg-muted p-4 mb-4">
-                    <Tags className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Keine Segmente definiert</h3>
-                  <p className="text-muted-foreground max-w-md mb-4">
-                    Erstelle Tags und Segmente, um Kunden nach Kriterien wie Umsatz, Buchungsverhalten oder Servicenutzung zu gruppieren.
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center mt-4">
-                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm">Vielbucher</span>
-                    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm">Hoher Umsatz</span>
-                    <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm">Staging-Kunde</span>
-                    <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm">Inaktiv</span>
-                    <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm">Blue Hour</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <TagList />
           </TabsContent>
 
           <TabsContent value="templates">
