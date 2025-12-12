@@ -363,8 +363,11 @@ export function buildEmailText(
     text += `\n${physicalAddress}`;
   }
   
-  // Email reason
-  text += `\n\n⚠️ Warum erhalten Sie diese E-Mail?\n${emailReason}`;
+  // Separator
+  text += "\n\n---";
+  
+  // Email reason (no emoji)
+  text += `\n\nWarum erhalten Sie diese E-Mail?\n${emailReason}`;
   
   // Email settings link
   text += "\n\nE-Mail-Einstellungen verwalten: https://app.immoonpoint.de/dashboard?tab=settings";
@@ -373,7 +376,7 @@ export function buildEmailText(
   if (settings.include_confidentiality_notice) {
     const notice = settings.confidentiality_notice || 
       'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.';
-    text += `\n\n---\n${notice}`;
+    text += `\n\n${notice}`;
   }
   
   return text;
@@ -471,23 +474,12 @@ export function buildEmailHtml(
     : "";
 
   const emailReasonHtml = `
-    <div style="margin: 20px 0 0; padding: 15px; background-color: ${settings.background_color}; border-radius: 8px;">
-      <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">
-        <strong style="color: ${settings.text_color};">⚠️ Warum erhalten Sie diese E-Mail?</strong><br>
-        ${emailReason}
-      </p>
-    </div>
+    <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 11px; text-align: center;">
+      <strong style="color: ${settings.text_color};">Warum erhalten Sie diese E-Mail?</strong><br>
+      ${emailReason}
+    </p>
   `;
 
-  const confidentialityHtml = settings.include_confidentiality_notice
-    ? `
-      <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid ${settings.border_color};">
-        <p style="margin: 0; color: ${settings.text_muted_color}; font-size: 10px; text-align: justify; line-height: 1.4;">
-          ${settings.confidentiality_notice || 'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.'}
-        </p>
-      </div>
-    `
-    : "";
 
   return `
 <!DOCTYPE html>
@@ -536,14 +528,22 @@ export function buildEmailHtml(
               ${brandHtml}
               ${legalHtml}
               ${physicalAddressHtml}
-              ${emailReasonHtml}
-              <p style="margin: 15px 0 0; text-align: center;">
-                <a href="https://app.immoonpoint.de/dashboard?tab=settings" 
-                   style="color: ${settings.text_muted_color}; font-size: 11px; text-decoration: underline;">
-                  E-Mail-Einstellungen verwalten
-                </a>
-              </p>
-              ${confidentialityHtml}
+              
+              <!-- Separator before reason/settings/confidentiality -->
+              <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid ${settings.border_color};">
+                ${emailReasonHtml}
+                <p style="margin: 15px 0 0; text-align: center;">
+                  <a href="https://app.immoonpoint.de/dashboard?tab=settings" 
+                     style="color: ${settings.text_muted_color}; font-size: 11px; text-decoration: underline;">
+                    E-Mail-Einstellungen verwalten
+                  </a>
+                </p>
+                ${settings.include_confidentiality_notice ? `
+                <p style="margin: 15px 0 0; color: ${settings.text_muted_color}; font-size: 10px; text-align: justify; line-height: 1.4;">
+                  ${settings.confidentiality_notice || 'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.'}
+                </p>
+                ` : ""}
+              </div>
             </td>
           </tr>
         </table>

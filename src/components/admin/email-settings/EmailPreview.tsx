@@ -254,15 +254,15 @@ export function EmailPreview({
               </p>
             )}
 
-            {/* Email Reason Box */}
+            {/* Separator Line */}
             <div
               style={{
                 marginTop: '20px',
-                padding: '15px',
-                backgroundColor: settings.container_bg_color || '#ffffff',
-                borderRadius: '8px',
+                borderTop: `1px solid ${settings.border_color || '#e4e4e7'}`,
+                paddingTop: '15px',
               }}
             >
+              {/* Email Reason - Plain text, no box, no emoji */}
               <p
                 style={{
                   fontSize: '11px',
@@ -272,49 +272,41 @@ export function EmailPreview({
                 }}
               >
                 <strong style={{ color: settings.text_color || '#18181b' }}>
-                  ⚠️ Warum erhalten Sie diese E-Mail?
+                  Warum erhalten Sie diese E-Mail?
                 </strong>
                 <br />
                 {emailReason}
               </p>
-            </div>
 
-            {/* Email Settings Link */}
-            <p style={{ marginTop: '15px' }}>
-              <a
-                href="#"
-                style={{
-                  fontSize: '11px',
-                  color: settings.text_muted_color || '#71717a',
-                  textDecoration: 'underline',
-                }}
-              >
-                E-Mail-Einstellungen verwalten
-              </a>
-            </p>
+              {/* Email Settings Link */}
+              <p style={{ marginTop: '15px', marginBottom: 0, textAlign: 'center' }}>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '11px',
+                    color: settings.text_muted_color || '#71717a',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  E-Mail-Einstellungen verwalten
+                </a>
+              </p>
 
-            {/* Confidentiality Notice */}
-            {settings.include_confidentiality_notice && (
-              <div
-                style={{
-                  marginTop: '20px',
-                  paddingTop: '15px',
-                  borderTop: `1px solid ${settings.border_color || '#e4e4e7'}`,
-                }}
-              >
+              {/* Confidentiality Notice */}
+              {settings.include_confidentiality_notice && (
                 <p
                   style={{
                     fontSize: '10px',
                     color: settings.text_muted_color || '#71717a',
-                    margin: 0,
+                    margin: '15px 0 0',
                     textAlign: 'justify',
                     lineHeight: 1.4,
                   }}
                 >
                   {confidentialityNotice}
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
