@@ -162,6 +162,10 @@ export default {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -171,6 +175,7 @@ export default {
         scroll: "scroll 20s linear infinite",
         "fade-in": "fade-in 0.3s ease-out forwards",
         "scale-in": "scale-in 0.2s ease-out forwards",
+        "gradient-shift": "gradient-shift 15s ease infinite",
       },
     },
   },

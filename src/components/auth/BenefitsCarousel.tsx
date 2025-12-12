@@ -55,7 +55,8 @@ export function BenefitsCarousel() {
       <div 
         className="absolute inset-0 animate-gradient-shift"
         style={{
-          background: 'linear-gradient(135deg, #1a2d4d 0%, #233c63 25%, #2d4a7d 50%, #233c63 75%, #1a2d4d 100%)'
+          background: 'linear-gradient(135deg, #1a2d4d 0%, #233c63 25%, #2d4a7d 50%, #233c63 75%, #1a2d4d 100%)',
+          backgroundSize: '200% 200%'
         }}
       />
       
