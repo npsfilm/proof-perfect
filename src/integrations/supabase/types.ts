@@ -732,6 +732,7 @@ export type Database = {
           background_color: string
           body_font_size: number
           border_color: string
+          brand_trademark_notice: string | null
           button_bg_color: string
           button_border_radius: number
           button_padding_x: number
@@ -786,6 +787,7 @@ export type Database = {
           background_color?: string
           body_font_size?: number
           border_color?: string
+          brand_trademark_notice?: string | null
           button_bg_color?: string
           button_border_radius?: number
           button_padding_x?: number
@@ -840,6 +842,7 @@ export type Database = {
           background_color?: string
           body_font_size?: number
           border_color?: string
+          brand_trademark_notice?: string | null
           button_bg_color?: string
           button_border_radius?: number
           button_padding_x?: number

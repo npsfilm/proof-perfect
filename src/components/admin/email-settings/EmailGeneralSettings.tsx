@@ -208,6 +208,21 @@ export function EmailGeneralSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="brand_trademark_notice">Markenhinweis</Label>
+            <Input
+              id="brand_trademark_notice"
+              value={settings.brand_trademark_notice || ''}
+              onChange={(e) => handleChange('brand_trademark_notice', e.target.value)}
+              placeholder="ImmoOnPoint ist eine Marke der NPS Media GmbH"
+            />
+            <p className="text-xs text-muted-foreground">
+              Wird kursiv unter dem Copyright-Text angezeigt
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
             <Label htmlFor="legal_company_name">Firma (rechtlich)</Label>
             <Input
               id="legal_company_name"
@@ -240,6 +255,9 @@ export function EmailGeneralSettings() {
           {/* Legal Preview */}
           <div className="rounded-lg bg-muted p-4 text-center text-sm">
             <div className="text-muted-foreground">Footer-Vorschau:</div>
+            <div className="mt-2 italic text-xs">
+              {settings.brand_trademark_notice || 'ImmoOnPoint ist eine Marke der NPS Media GmbH'}
+            </div>
             <div className="mt-2">
               <span className="font-medium">{settings.legal_company_name || 'NPS Media GmbH'}</span>
               {settings.legal_register_info && (

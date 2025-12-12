@@ -5,13 +5,15 @@ interface EmailPreviewProps {
   template?: EmailTemplate;
   salutation?: SalutationType;
   placeholderValues?: Record<string, string>;
+  emailType?: 'transactional' | 'newsletter';
 }
 
 export function EmailPreview({ 
   settings, 
   template,
   salutation = 'sie',
-  placeholderValues = {} 
+  placeholderValues = {},
+  emailType = 'transactional'
 }: EmailPreviewProps) {
   const defaultPlaceholders: Record<string, string> = {
     vorname: 'Max',
@@ -50,6 +52,32 @@ export function EmailPreview({
     : 'Zum Dashboard';
 
   const footerText = replacePlaceholders(settings.footer_text || '© {year} ImmoOnPoint');
+
+  // Build legal info string
+  const legalParts: string[] = [];
+  if (settings.legal_company_name) legalParts.push(settings.legal_company_name);
+  if (settings.legal_register_info) legalParts.push(settings.legal_register_info);
+  if (settings.legal_vat_id) legalParts.push(`USt-IdNr.: ${settings.legal_vat_id}`);
+  const legalInfo = legalParts.join(' | ');
+
+  // Build physical address string
+  const addressParts: string[] = [];
+  if (settings.physical_address_line1) addressParts.push(settings.physical_address_line1);
+  if (settings.physical_address_line2) addressParts.push(settings.physical_address_line2);
+  if (settings.physical_address_country) addressParts.push(settings.physical_address_country);
+  const physicalAddress = addressParts.join(' | ');
+
+  // Get email reason based on type
+  const emailReason = emailType === 'newsletter'
+    ? (settings.reason_newsletter || 'Sie erhalten diese E-Mail, weil Sie in der Vergangenheit eine Marketingdienstleistung von ImmoOnPoint in Anspruch genommen oder sich für den Newsletter angemeldet haben.')
+    : (settings.reason_transactional || 'Sie erhalten diese E-Mail, weil Sie eine Bestellung über ImmoOnPoint aufgegeben haben.');
+
+  // Brand trademark notice
+  const brandNotice = settings.brand_trademark_notice || 'ImmoOnPoint ist eine Marke der NPS Media GmbH';
+
+  // Confidentiality notice
+  const confidentialityNotice = settings.confidentiality_notice || 
+    'Diese E-Mail enthält vertrauliche und/oder rechtlich geschützte Informationen. Wenn Sie nicht der richtige Adressat sind oder diese E-Mail irrtümlich erhalten haben, informieren Sie bitte sofort den Absender und vernichten Sie diese E-Mail. Das unerlaubte Kopieren sowie die unbefugte Weitergabe dieser E-Mail ist nicht gestattet. Bitte behalten Sie für die schnellere Bearbeitung den Verlauf der E-Mail bei.';
 
   return (
     <div 
@@ -156,6 +184,7 @@ export function EmailPreview({
               textAlign: 'center',
             }}
           >
+            {/* Social Links */}
             {settings.show_social_links && (
               <div style={{ marginBottom: '16px' }}>
                 {settings.social_facebook && (
@@ -175,6 +204,8 @@ export function EmailPreview({
                 )}
               </div>
             )}
+
+            {/* Footer Text (Copyright) */}
             <p
               style={{
                 fontSize: '12px',
@@ -184,6 +215,106 @@ export function EmailPreview({
             >
               {footerText}
             </p>
+
+            {/* Brand Trademark Notice */}
+            <p
+              style={{
+                fontSize: '11px',
+                color: settings.text_muted_color || '#71717a',
+                margin: '10px 0 0',
+                fontStyle: 'italic',
+              }}
+            >
+              {brandNotice}
+            </p>
+
+            {/* Legal Company Info */}
+            {legalInfo && (
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: settings.text_muted_color || '#71717a',
+                  margin: '10px 0 0',
+                }}
+              >
+                {legalInfo}
+              </p>
+            )}
+
+            {/* Physical Address */}
+            {settings.include_physical_address && physicalAddress && (
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: settings.text_muted_color || '#71717a',
+                  margin: '5px 0 0',
+                }}
+              >
+                {physicalAddress}
+              </p>
+            )}
+
+            {/* Email Reason Box */}
+            <div
+              style={{
+                marginTop: '20px',
+                padding: '15px',
+                backgroundColor: settings.container_bg_color || '#ffffff',
+                borderRadius: '8px',
+              }}
+            >
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: settings.text_muted_color || '#71717a',
+                  margin: 0,
+                  textAlign: 'center',
+                }}
+              >
+                <strong style={{ color: settings.text_color || '#18181b' }}>
+                  ⚠️ Warum erhalten Sie diese E-Mail?
+                </strong>
+                <br />
+                {emailReason}
+              </p>
+            </div>
+
+            {/* Email Settings Link */}
+            <p style={{ marginTop: '15px' }}>
+              <a
+                href="#"
+                style={{
+                  fontSize: '11px',
+                  color: settings.text_muted_color || '#71717a',
+                  textDecoration: 'underline',
+                }}
+              >
+                E-Mail-Einstellungen verwalten
+              </a>
+            </p>
+
+            {/* Confidentiality Notice */}
+            {settings.include_confidentiality_notice && (
+              <div
+                style={{
+                  marginTop: '20px',
+                  paddingTop: '15px',
+                  borderTop: `1px solid ${settings.border_color || '#e4e4e7'}`,
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: '10px',
+                    color: settings.text_muted_color || '#71717a',
+                    margin: 0,
+                    textAlign: 'justify',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {confidentialityNotice}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

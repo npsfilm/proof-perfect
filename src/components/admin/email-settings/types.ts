@@ -27,6 +27,7 @@ export interface EmailDesignSettings {
   social_facebook: string | null;
   social_instagram: string | null;
   social_linkedin: string | null;
+  brand_trademark_notice: string | null;
   use_branding_logo: boolean;
   // Sender settings
   default_from_name: string | null;
