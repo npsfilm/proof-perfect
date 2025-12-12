@@ -45,6 +45,16 @@ export interface EmailDesignSettings {
   physical_address_line2: string | null;
   physical_address_country: string | null;
   include_physical_address: boolean;
+  // Legal information
+  legal_company_name: string | null;
+  legal_register_info: string | null;
+  legal_vat_id: string | null;
+  // Confidentiality notice
+  include_confidentiality_notice: boolean;
+  confidentiality_notice: string | null;
+  // Email reason texts
+  reason_transactional: string | null;
+  reason_newsletter: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -145,14 +145,16 @@ const handler = async (req: Request): Promise<Response> => {
         designSettings,
         "sie",
         { action_url: resetLink },
-        resetLink
+        resetLink,
+        'transactional'
       );
       emailText = buildEmailText(
         template,
         designSettings,
         "sie",
         { action_url: resetLink },
-        resetLink
+        resetLink,
+        'transactional'
       );
       emailSubject = template.subject_sie;
     } else {

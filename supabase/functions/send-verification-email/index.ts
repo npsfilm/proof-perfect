@@ -128,14 +128,16 @@ const handler = async (req: Request): Promise<Response> => {
         designSettings,
         "sie",
         { action_url: verificationLink },
-        verificationLink
+        verificationLink,
+        'transactional'
       );
       emailText = buildEmailText(
         template,
         designSettings,
         "sie",
         { action_url: verificationLink },
-        verificationLink
+        verificationLink,
+        'transactional'
       );
       emailSubject = template.subject_sie;
     } else {

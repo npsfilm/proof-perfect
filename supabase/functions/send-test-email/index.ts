@@ -9,7 +9,8 @@ import {
   getEmailHeaders,
   buildEmailHtml, 
   buildEmailText,
-  replacePlaceholders 
+  replacePlaceholders,
+  getEmailTypeFromCategory
 } from "../_shared/email-helpers.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -120,13 +121,17 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Using from address: ${fromAddress}`);
     if (replyTo) console.log(`Using reply-to: ${replyTo}`);
 
+    // Determine email type from template category
+    const emailType = getEmailTypeFromCategory(template.category || 'customer');
+
     // Build email HTML and text with test placeholders
     const emailHtml = buildEmailHtml(
       template,
       designSettings,
       salutation || "sie",
       TEST_PLACEHOLDERS,
-      TEST_PLACEHOLDERS.action_url
+      TEST_PLACEHOLDERS.action_url,
+      emailType
     );
 
     const emailText = buildEmailText(
@@ -134,7 +139,8 @@ const handler = async (req: Request): Promise<Response> => {
       designSettings,
       salutation || "sie",
       TEST_PLACEHOLDERS,
-      TEST_PLACEHOLDERS.action_url
+      TEST_PLACEHOLDERS.action_url,
+      emailType
     );
 
     // Get subject with placeholders replaced
