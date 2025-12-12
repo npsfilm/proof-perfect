@@ -12,7 +12,7 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean; loggedIn?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
-  resendVerificationEmail: (userId: string, email: string) => Promise<{ error: any }>;
+  resendVerificationEmail: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -114,88 +114,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     
-    // Check email verification via Edge Function (bypasses RLS)
-    try {
-      const { data: checkResult, error: checkError } = await supabase.functions.invoke('check-email-verified', {
-        body: { email: normalizedEmail },
-      });
-
-      if (!checkError && checkResult?.exists && !checkResult?.verified) {
+    // Attempt login directly - Supabase handles the error messages
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+    
+    if (error) {
+      return { error };
+    }
+    
+    // After successful auth, check if email is verified via our custom system
+    if (data.user) {
+      const isVerified = await checkEmailVerified(data.user.id);
+      
+      if (!isVerified) {
+        // Sign out immediately - they need to verify first
+        await supabase.auth.signOut();
         return { 
           error: { 
             message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Prüfen Sie Ihr Postfach.',
             code: 'email_not_verified',
-            userId: checkResult.userId,
             email: normalizedEmail
           } 
         };
       }
-    } catch (e) {
-      console.error('Error checking email verification:', e);
-      // Continue with login attempt if check fails
     }
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
-    });
-    return { error };
+    
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string) => {
     const normalizedEmail = email.toLowerCase().trim();
     
-    // 1. Zuerst prüfen, ob Benutzer bereits existiert
-    try {
-      const { data: checkResult, error: checkError } = await supabase.functions.invoke('check-email-verified', {
-        body: { email: normalizedEmail },
-      });
-
-      if (!checkError && checkResult?.exists) {
-        // Benutzer existiert bereits
-        if (checkResult?.verified) {
-          // E-Mail ist verifiziert - versuche mit Passwort einzuloggen
-          const { error: loginError } = await supabase.auth.signInWithPassword({
-            email: normalizedEmail,
-            password,
-          });
-          
-          if (loginError) {
-            // Falsches Passwort
-            return { 
-              error: { 
-                message: 'Das Passwort ist nicht korrekt.',
-                code: 'invalid_password',
-              } 
-            };
-          }
-          
-          // Erfolgreich eingeloggt!
-          return { error: null, loggedIn: true };
-        } else {
-          // Benutzer existiert aber E-Mail nicht verifiziert
-          return { 
-            error: { 
-              message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.',
-              code: 'email_not_verified',
-              userId: checkResult.userId,
-              email: normalizedEmail
-            } 
-          };
-        }
-      }
-    } catch (e) {
-      console.error('Error checking existing user:', e);
-      // Continue with signup if check fails
-    }
-
-    // 2. Neuer Benutzer - normale Registrierung
+    // Attempt signup directly - Supabase will return error if user exists
     const { data, error } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
     });
 
     if (error) {
+      // Handle "User already registered" error
+      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+        // Try to sign in instead
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+        
+        if (loginError) {
+          // Check if it's a verification issue by checking profiles (only works if user can read their own profile)
+          // If login failed, could be wrong password or unverified email
+          if (loginError.message?.includes('Invalid login credentials')) {
+            return { 
+              error: { 
+                message: 'Ein Konto mit dieser E-Mail existiert bereits. Das Passwort ist nicht korrekt.',
+                code: 'invalid_password',
+              } 
+            };
+          }
+          return { error: loginError };
+        }
+        
+        // Login succeeded - but check if email is verified
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const isVerified = await checkEmailVerified(session.user.id);
+          if (!isVerified) {
+            await supabase.auth.signOut();
+            return { 
+              error: { 
+                message: 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.',
+                code: 'email_not_verified',
+                email: normalizedEmail
+              } 
+            };
+          }
+        }
+        
+        // Successfully logged in with verified email
+        return { error: null, loggedIn: true };
+      }
+      
       return { error };
     }
 
@@ -247,9 +247,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const resendVerificationEmail = async (userId: string, email: string) => {
+  const resendVerificationEmail = async (email: string) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // We need the user ID to resend - try to look it up via edge function
+    // Since we removed userId from the check endpoint for security,
+    // the send-verification-email function needs to handle lookup by email
     const { data, error } = await supabase.functions.invoke('send-verification-email', {
-      body: { user_id: userId, email },
+      body: { email: normalizedEmail },
     });
 
     if (error) {

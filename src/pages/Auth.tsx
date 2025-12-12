@@ -20,7 +20,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
-  const [unverifiedUser, setUnverifiedUser] = useState<{ userId: string; email: string } | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
@@ -45,14 +45,14 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     setShowVerificationMessage(false);
-    setUnverifiedUser(null);
+    setUnverifiedEmail(null);
 
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.code === 'email_not_verified') {
-            setUnverifiedUser({ userId: error.userId, email: error.email });
+            setUnverifiedEmail(error.email);
           } else {
             toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
           }
@@ -66,7 +66,7 @@ export default function Auth() {
             toast({ title: 'Passwort falsch', description: 'Das eingegebene Passwort ist nicht korrekt.', variant: 'destructive' });
             setIsLogin(true);
           } else if (error.code === 'email_not_verified') {
-            setUnverifiedUser({ userId: error.userId, email: error.email });
+            setUnverifiedEmail(error.email);
           } else {
             toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
           }
@@ -105,10 +105,10 @@ export default function Auth() {
   };
 
   const handleResendVerification = async () => {
-    if (!unverifiedUser || resendCooldown > 0) return;
+    if (!unverifiedEmail || resendCooldown > 0) return;
     setResendLoading(true);
     try {
-      await resendVerificationEmail(unverifiedUser.userId, unverifiedUser.email);
+      await resendVerificationEmail(unverifiedEmail);
       setResendCooldown(60);
     } finally {
       setResendLoading(false);
@@ -117,7 +117,7 @@ export default function Auth() {
 
   const handleModeSwitch = () => {
     setIsLogin(!isLogin);
-    setUnverifiedUser(null);
+    setUnverifiedEmail(null);
     setPassword('');
     setShowPasswordRequirements(false);
   };
@@ -211,7 +211,7 @@ export default function Auth() {
               </AnimatePresence>
 
               {/* Unverified User Alert */}
-              {unverifiedUser && (
+              {unverifiedEmail && (
                 <Alert className="mb-4">
                   <Mail className="h-4 w-4" />
                   <AlertDescription className="flex flex-col gap-2">
