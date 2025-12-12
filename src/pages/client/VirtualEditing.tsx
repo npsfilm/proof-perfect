@@ -181,30 +181,30 @@ export default function VirtualEditing() {
             Von Modern bis Farmhouse – für jeden Geschmack der richtige Look
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-4 gap-2">
           {stylesLoading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
+              <Skeleton key={i} className="aspect-square rounded-lg" />
             ))
           ) : (
             stagingStyles?.map((style) => (
               <Card key={style.id} className="overflow-hidden hover:shadow-md transition-shadow group">
                 {style.thumbnail_url ? (
-                  <div className="aspect-[4/3] relative">
+                  <div className="aspect-square relative">
                     <img 
                       src={style.thumbnail_url} 
                       alt={style.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                      <p className="font-medium text-white text-sm">{style.name}</p>
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                      <p className="font-medium text-white text-[10px] md:text-xs truncate">{style.name}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="aspect-[4/3] bg-muted flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <Palette className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="font-medium text-sm">{style.name}</p>
+                  <div className="aspect-square bg-muted flex items-center justify-center">
+                    <div className="text-center p-2">
+                      <Palette className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mx-auto mb-1" />
+                      <p className="font-medium text-[9px] md:text-[10px] truncate">{style.name}</p>
                     </div>
                   </div>
                 )}
