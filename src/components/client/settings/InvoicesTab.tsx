@@ -8,6 +8,7 @@ import { InvoiceStatus } from '@/types/company';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useAnsprache } from '@/contexts/AnspracheContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface InvoicesTabProps {
   companyId: string;
@@ -22,6 +23,7 @@ const STATUS_CONFIG: Record<InvoiceStatus, { label: string; icon: React.ElementT
 
 export function InvoicesTab({ companyId }: InvoicesTabProps) {
   const { t } = useAnsprache();
+  const isMobile = useIsMobile();
   const { data: invoices = [], isLoading } = useInvoices(companyId);
 
   const formatAmount = (cents: number) => {
@@ -88,14 +90,56 @@ export function InvoicesTab({ companyId }: InvoicesTabProps) {
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Noch keine Rechnungen vorhanden</p>
             </div>
+          ) : isMobile ? (
+            // Mobile: Card-based layout
+            <div className="space-y-3">
+              {invoices.map((invoice) => {
+                const statusConfig = STATUS_CONFIG[invoice.status];
+                const StatusIcon = statusConfig.icon;
+                
+                return (
+                  <div key={invoice.id} className="border rounded-lg p-4 bg-card">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-medium">{invoice.invoice_number}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(invoice.invoice_date), 'dd.MM.yyyy', { locale: de })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-lg">{formatAmount(invoice.amount_cents)}</p>
+                        <Badge variant={statusConfig.variant} className="gap-1 mt-1">
+                          <StatusIcon className="h-3 w-3" />
+                          {statusConfig.label}
+                        </Badge>
+                      </div>
+                    </div>
+                    {invoice.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {invoice.description}
+                      </p>
+                    )}
+                    {invoice.pdf_url && (
+                      <Button variant="outline" className="w-full" asChild>
+                        <a href={invoice.pdf_url} target="_blank" rel="noopener noreferrer">
+                          <Download className="h-4 w-4 mr-2" />
+                          PDF herunterladen
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
+            // Desktop: Table layout
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Rechnungsnr.</TableHead>
                     <TableHead>Datum</TableHead>
-                    <TableHead className="hidden sm:table-cell">Beschreibung</TableHead>
+                    <TableHead>Beschreibung</TableHead>
                     <TableHead className="text-right">Betrag</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
@@ -114,7 +158,7 @@ export function InvoicesTab({ companyId }: InvoicesTabProps) {
                         <TableCell>
                           {format(new Date(invoice.invoice_date), 'dd.MM.yyyy', { locale: de })}
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell text-muted-foreground max-w-[200px] truncate">
+                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
                           {invoice.description || '-'}
                         </TableCell>
                         <TableCell className="text-right font-medium">
