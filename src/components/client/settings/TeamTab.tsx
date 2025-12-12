@@ -14,6 +14,7 @@ import { InviteMemberDialog } from './InviteMemberDialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useAnsprache } from '@/contexts/AnspracheContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TeamTabProps {
   companyId: string;
@@ -21,6 +22,7 @@ interface TeamTabProps {
 
 export function TeamTab({ companyId }: TeamTabProps) {
   const { t } = useAnsprache();
+  const isMobile = useIsMobile();
   const { data: team = [], isLoading: teamLoading } = useCompanyTeam(companyId);
   const { data: invitations = [], isLoading: invitationsLoading } = useTeamInvitations(companyId);
   const updateRole = useUpdateMemberRole();
@@ -108,66 +110,118 @@ export function TeamTab({ companyId }: TeamTabProps) {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>E-Mail</TableHead>
-                  <TableHead>Rolle</TableHead>
-                  <TableHead className="hidden sm:table-cell">Beigetreten</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {team.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">
-                      {member.profiles?.email}
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={member.role}
-                        onValueChange={(value) => handleRoleChange(member.id, value as CompanyRoleType)}
-                        disabled={member.role === 'owner' || updateRole.isPending}
+          {isMobile ? (
+            // Mobile: Card-based layout
+            <div className="space-y-3">
+              {team.map((member) => (
+                <div key={member.id} className="border rounded-lg p-4 bg-card">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{member.profiles?.email}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        Seit {format(new Date(member.created_at), 'dd.MM.yyyy', { locale: de })}
+                      </p>
+                    </div>
+                    {member.role !== 'owner' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 -mr-2"
+                        onClick={() => {
+                          setSelectedMember(member);
+                          setRemoveDialogOpen(true);
+                        }}
                       >
-                        <SelectTrigger className="w-[160px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="owner" disabled>
-                            {COMPANY_ROLE_LABELS.owner}
-                          </SelectItem>
-                          <SelectItem value="company_admin">
-                            {COMPANY_ROLE_LABELS.company_admin}
-                          </SelectItem>
-                          <SelectItem value="employee">
-                            {COMPANY_ROLE_LABELS.employee}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {format(new Date(member.created_at), 'dd.MM.yyyy', { locale: de })}
-                    </TableCell>
-                    <TableCell>
-                      {member.role !== 'owner' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedMember(member);
-                            setRemoveDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </TableCell>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                  <Select
+                    value={member.role}
+                    onValueChange={(value) => handleRoleChange(member.id, value as CompanyRoleType)}
+                    disabled={member.role === 'owner' || updateRole.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="owner" disabled>
+                        {COMPANY_ROLE_LABELS.owner}
+                      </SelectItem>
+                      <SelectItem value="company_admin">
+                        {COMPANY_ROLE_LABELS.company_admin}
+                      </SelectItem>
+                      <SelectItem value="employee">
+                        {COMPANY_ROLE_LABELS.employee}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Desktop: Table layout
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>E-Mail</TableHead>
+                    <TableHead>Rolle</TableHead>
+                    <TableHead>Beigetreten</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {team.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">
+                        {member.profiles?.email}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={member.role}
+                          onValueChange={(value) => handleRoleChange(member.id, value as CompanyRoleType)}
+                          disabled={member.role === 'owner' || updateRole.isPending}
+                        >
+                          <SelectTrigger className="w-[160px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="owner" disabled>
+                              {COMPANY_ROLE_LABELS.owner}
+                            </SelectItem>
+                            <SelectItem value="company_admin">
+                              {COMPANY_ROLE_LABELS.company_admin}
+                            </SelectItem>
+                            <SelectItem value="employee">
+                              {COMPANY_ROLE_LABELS.employee}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(member.created_at), 'dd.MM.yyyy', { locale: de })}
+                      </TableCell>
+                      <TableCell>
+                        {member.role !== 'owner' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setRemoveDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
