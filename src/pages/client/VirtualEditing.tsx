@@ -1,9 +1,10 @@
-import { Moon, CloudSun, Check, Sofa, Bed, ChefHat, Bath, Briefcase, UtensilsCrossed, Upload, Palette, Send, ImageDown, ArrowRight } from 'lucide-react';
+import { Moon, CloudSun, Check, Sofa, Bed, ChefHat, Bath, Briefcase, UtensilsCrossed, Upload, Palette, Send, ImageDown, ArrowRight, Gift, Sparkles } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BlueHourSlider } from '@/components/client/BlueHourSlider';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
@@ -45,10 +46,10 @@ const ROOM_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }
 
 // Process steps
 const PROCESS_STEPS = [
-  { icon: Upload, title: 'Fotos auswählen', description: 'Wählen Sie die Bilder aus Ihrer Galerie' },
-  { icon: Palette, title: 'Stil wählen', description: 'Bestimmen Sie Raumtyp und Einrichtungsstil' },
-  { icon: Send, title: 'Anfrage senden', description: 'Wir bearbeiten Ihre Bestellung' },
-  { icon: ImageDown, title: 'Ergebnis erhalten', description: 'Fertige Bilder in 24-48h' },
+  { icon: Upload, title: 'Fotos auswählen' },
+  { icon: Palette, title: 'Stil wählen' },
+  { icon: Send, title: 'Anfrage senden' },
+  { icon: ImageDown, title: 'Ergebnis erhalten' },
 ];
 
 export default function VirtualEditing() {
@@ -64,178 +65,134 @@ export default function VirtualEditing() {
   );
 
   return (
-    <div className="container max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-8 md:mb-12 animate-fade-in">
-        <Badge variant="secondary" className="mb-3 md:mb-4">
-          <CloudSun className="h-3 w-3 mr-1" />
+    <div className="container max-w-5xl mx-auto px-3 md:px-4 py-4 md:py-8">
+      {/* Hero Section with CTA */}
+      <div className="text-center mb-10 md:mb-14 animate-fade-in">
+        <Badge variant="secondary" className="mb-4">
+          <Sparkles className="h-3 w-3 mr-1" />
           Virtuelle Bearbeitung
         </Badge>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
           Verwandeln Sie Ihre Immobilienfotos
         </h1>
-        <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
-          Professionelle Bildbearbeitung für maximale Wirkung. 
-          Blaue Stunde, Jahreszeiten-Transformation und mehr.
+        <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto mb-6">
+          Professionelle Bildbearbeitung für maximale Wirkung – 
+          Blaue Stunde, virtuelles Staging und mehr.
         </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button onClick={() => navigate('/?tab=staging')} size="lg" className="gap-2">
+            Jetzt Staging anfordern
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => navigate('#services')} variant="outline" size="lg">
+            Preise ansehen
+          </Button>
+        </div>
       </div>
 
       {/* Blue Hour Demo */}
-      <Card className="mb-8 md:mb-12 overflow-hidden animate-fade-in">
-        <CardHeader className="text-center pb-2 px-4 md:px-6">
-          <CardTitle className="flex items-center justify-center gap-2 text-base md:text-lg">
-            <Moon className="h-4 w-4 md:h-5 md:w-5 text-info" />
-            Virtuelle Blaue Stunde – Vorher / Nachher
-          </CardTitle>
-          <CardDescription className="text-xs md:text-sm">
-            Ziehen Sie den Regler, um den Unterschied zu sehen
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-3 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <BlueHourSlider
-              beforeImage={blueHourBefore1}
-              afterImage={blueHourAfter1}
-            />
-            <BlueHourSlider
-              beforeImage={blueHourBefore2}
-              afterImage={blueHourAfter2}
-            />
+      <div className="mb-10 md:mb-14 animate-fade-in">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 text-info mb-2">
+            <Moon className="h-5 w-5" />
+            <span className="font-semibold">Virtuelle Blaue Stunde</span>
           </div>
-        </CardContent>
-      </Card>
+          <p className="text-sm text-muted-foreground">
+            Ziehen Sie den Regler, um den Unterschied zu sehen
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <BlueHourSlider
+            beforeImage={blueHourBefore1}
+            afterImage={blueHourAfter1}
+          />
+          <BlueHourSlider
+            beforeImage={blueHourBefore2}
+            afterImage={blueHourAfter2}
+          />
+        </div>
+        <div className="text-center mt-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/?tab=staging')} className="text-info hover:text-info">
+            Blue Hour für meine Fotos anfordern →
+          </Button>
+        </div>
+      </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
-        {isLoading ? (
-          // Loading skeletons
-          [1, 2, 3, 4].map(i => (
-            <Card key={i} className="relative overflow-hidden">
-              <CardHeader className="p-4">
-                <Skeleton className="w-10 h-10 rounded-full mb-3" />
-                <Skeleton className="h-5 w-32 mb-2" />
-                <Skeleton className="h-3 w-full" />
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <Skeleton className="h-6 w-20 mb-3" />
-                <div className="space-y-1.5">
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-3/4" />
+      {/* Services Section */}
+      <div id="services" className="mb-10 md:mb-14 animate-fade-in scroll-mt-20">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Unsere Services</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Professionelle Bildbearbeitung für jede Anforderung
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          {isLoading ? (
+            [1, 2].map(i => (
+              <Card key={i} className="p-6">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="w-14 h-14 rounded-xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-6 w-40 mb-2" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <Skeleton className="h-10 w-20" />
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          services?.map((service, index) => {
-            const Icon = getIconComponent(service.icon_name);
-            const iconColor = ICON_COLORS[service.slug] || 'text-primary';
-            const priceInEuros = service.price_cents / 100;
-            const features = Array.isArray(service.features) ? service.features : [];
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full mt-4" />
+              </Card>
+            ))
+          ) : (
+            services?.map((service, index) => {
+              const Icon = getIconComponent(service.icon_name);
+              const iconColor = ICON_COLORS[service.slug] || 'text-primary';
+              const priceInEuros = service.price_cents / 100;
+              const features = Array.isArray(service.features) ? service.features : [];
 
-            return (
-              <Card 
-                key={service.id} 
-                className="relative overflow-hidden animate-fade-in bg-card hover:shadow-md transition-shadow"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardHeader className="p-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                    <Icon className={`h-5 w-5 ${iconColor}`} />
+              return (
+                <Card 
+                  key={service.id} 
+                  className="p-5 md:p-6 animate-fade-in hover:shadow-md transition-shadow"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className={`h-6 w-6 md:h-7 md:w-7 ${iconColor}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg md:text-xl font-semibold text-foreground">{service.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{service.description}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-2xl md:text-3xl font-bold text-foreground">{priceInEuros}€</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {service.price_type === 'per_image' ? 'pro Bild' : 
+                         service.price_type === 'per_room' ? 'pro Raum' : ''}
+                      </span>
+                    </div>
                   </div>
-                  <CardTitle className="text-base md:text-lg">{service.name}</CardTitle>
-                  <CardDescription className="text-xs">
-                    {service.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <div className="mb-3">
-                    <span className="text-2xl font-bold text-foreground">{priceInEuros}€</span>
-                    <span className="text-muted-foreground text-xs ml-1">
-                      {service.price_type === 'per_image' ? 'pro Bild' : 
-                       service.price_type === 'per_room' ? 'pro Raum' : ''}
-                    </span>
-                  </div>
+                  
                   {features.length > 0 && (
-                    <ul className="space-y-1.5">
-                      {features.map((feature, i) => (
-                        <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Check className="h-3 w-3 text-success flex-shrink-0" />
-                          {String(feature)}
+                    <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-4">
+                      {features.slice(0, 4).map((feature, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-success flex-shrink-0" />
+                          <span className="truncate">{String(feature)}</span>
                         </li>
                       ))}
                     </ul>
                   )}
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
-
-      {/* Staging Styles Section */}
-      <div className="mb-8 md:mb-12 animate-fade-in">
-        <div className="text-center mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Unsere Staging-Stile</h2>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Von Modern bis Farmhouse – für jeden Geschmack der richtige Look
-          </p>
-        </div>
-        <div className="grid grid-cols-4 gap-2">
-          {stylesLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-lg" />
-            ))
-          ) : (
-            stagingStyles?.map((style) => (
-              <Card key={style.id} className="overflow-hidden hover:shadow-md transition-shadow group">
-                {style.thumbnail_url ? (
-                  <div className="aspect-square relative">
-                    <img 
-                      src={style.thumbnail_url} 
-                      alt={style.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                      <p className="font-medium text-white text-[10px] md:text-xs truncate">{style.name}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="aspect-square bg-muted flex items-center justify-center">
-                    <div className="text-center p-2">
-                      <Palette className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mx-auto mb-1" />
-                      <p className="font-medium text-[9px] md:text-[10px] truncate">{style.name}</p>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Room Types Section */}
-      <div className="mb-8 md:mb-12 animate-fade-in">
-        <div className="text-center mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Unterstützte Raumtypen</h2>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Virtuelles Staging für alle Räume Ihrer Immobilie
-          </p>
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
-          {roomsLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-lg" />
-            ))
-          ) : (
-            roomTypes?.map((room) => {
-              const Icon = ROOM_TYPE_ICONS[room.slug] || Sofa;
-              return (
-                <Card key={room.id} className="p-3 md:p-4 text-center hover:shadow-md transition-shadow">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-                  </div>
-                  <p className="text-xs md:text-sm font-medium text-foreground">{room.name}</p>
+                  
+                  <Button 
+                    className="w-full" 
+                    onClick={() => navigate('/?tab=staging')}
+                  >
+                    Jetzt buchen
+                  </Button>
                 </Card>
               );
             })
@@ -243,61 +200,133 @@ export default function VirtualEditing() {
         </div>
       </div>
 
-      {/* Process Section */}
-      <Card className="mb-8 md:mb-12 animate-fade-in">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="text-xl md:text-2xl">So funktioniert's</CardTitle>
-          <CardDescription>In 4 einfachen Schritten zu Ihren virtuell eingerichteten Bildern</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {PROCESS_STEPS.map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <step.icon className="h-6 w-6 md:h-7 md:w-7 text-primary" />
-                </div>
-                <div className="text-xs md:text-sm font-semibold text-primary mb-1">Schritt {index + 1}</div>
-                <h4 className="text-sm md:text-base font-medium text-foreground mb-1">{step.title}</h4>
-                <p className="text-xs text-muted-foreground">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pricing Info */}
+      {/* Bulk Discount Banner */}
       {bulkDiscount && (
-        <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 animate-fade-in mb-8 md:mb-12">
-          <CardContent className="p-4 md:p-8 text-center">
-            <h3 className="text-lg md:text-xl font-semibold mb-2">Mengenrabatt</h3>
-            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
-              Bei {bulkDiscount.buy_quantity} oder mehr Bildern erhalten Sie{' '}
-              <span className="font-semibold text-primary">{bulkDiscount.free_quantity} Bild gratis</span>!
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-xl p-5 md:p-6 text-center mb-10 md:mb-14 animate-fade-in">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Gift className="h-5 w-5 md:h-6 md:w-6" />
+            <span className="text-xl md:text-2xl font-bold">Mengenrabatt: {bulkDiscount.buy_quantity}+{bulkDiscount.free_quantity}</span>
+          </div>
+          <p className="text-sm md:text-base opacity-90">
+            Kaufen Sie {bulkDiscount.buy_quantity} Bilder und erhalten Sie {bulkDiscount.free_quantity} gratis!
+          </p>
+        </div>
       )}
 
-      {/* CTA Section */}
-      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10 animate-fade-in">
-        <CardContent className="p-6 md:p-10 text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">
-            Bereit für beeindruckende Immobilienfotos?
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground mb-6">
-            Starten Sie jetzt mit der virtuellen Bearbeitung Ihrer Bilder
+      {/* Staging Options with Tabs */}
+      <div className="mb-10 md:mb-14 animate-fade-in">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Staging-Optionen</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Wählen Sie aus verschiedenen Stilen und Raumtypen
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button onClick={() => navigate('/?tab=staging')} size="lg" className="gap-2">
-              Jetzt Staging anfordern
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => navigate('/')} variant="outline" size="lg">
-              Meine Galerien
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        
+        <Tabs defaultValue="styles" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
+            <TabsTrigger value="styles">Einrichtungsstile</TabsTrigger>
+            <TabsTrigger value="rooms">Raumtypen</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="styles">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
+              {stylesLoading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-lg" />
+                ))
+              ) : (
+                stagingStyles?.map((style) => (
+                  <div key={style.id} className="group cursor-pointer">
+                    {style.thumbnail_url ? (
+                      <div className="aspect-square relative rounded-lg overflow-hidden">
+                        <img 
+                          src={style.thumbnail_url} 
+                          alt={style.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-1.5 md:p-2">
+                          <p className="font-medium text-white text-[9px] md:text-xs truncate text-center">{style.name}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                        <div className="text-center p-1">
+                          <Palette className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                          <p className="font-medium text-[8px] md:text-[10px] truncate">{style.name}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="rooms">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
+              {roomsLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-lg" />
+                ))
+              ) : (
+                roomTypes?.map((room) => {
+                  const Icon = ROOM_TYPE_ICONS[room.slug] || Sofa;
+                  return (
+                    <Card key={room.id} className="p-3 md:p-4 text-center hover:shadow-md transition-shadow cursor-pointer">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                        <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                      </div>
+                      <p className="text-xs md:text-sm font-medium text-foreground">{room.name}</p>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Horizontal Process Steps */}
+      <div className="mb-10 md:mb-14 animate-fade-in">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">So funktioniert's</h2>
+        </div>
+        <div className="flex items-center justify-between max-w-2xl mx-auto px-4">
+          {PROCESS_STEPS.map((step, index) => (
+            <div key={index} className="flex items-center">
+              <div className="text-center">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-2 shadow-sm">
+                  <step.icon className="h-5 w-5 md:h-6 md:w-6" />
+                </div>
+                <p className="font-medium text-xs md:text-sm text-foreground">{step.title}</p>
+              </div>
+              {index < PROCESS_STEPS.length - 1 && (
+                <div className="flex-1 h-0.5 bg-primary/30 mx-2 md:mx-4 min-w-[20px] md:min-w-[40px]" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Final CTA Section */}
+      <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-secondary/15 rounded-2xl p-6 md:p-10 text-center animate-fade-in">
+        <Sparkles className="h-8 w-8 md:h-10 md:w-10 text-primary mx-auto mb-4" />
+        <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+          Bereit für beeindruckende Immobilienfotos?
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground mb-6 max-w-lg mx-auto">
+          Starten Sie jetzt mit der virtuellen Bearbeitung und überzeugen Sie Ihre Kunden mit professionellen Bildern.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button onClick={() => navigate('/?tab=staging')} size="lg" className="gap-2 shadow-lg">
+            Jetzt Staging anfordern
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => navigate('/')} variant="outline" size="lg">
+            Meine Galerien
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
