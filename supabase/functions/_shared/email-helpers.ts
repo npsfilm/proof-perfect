@@ -21,6 +21,8 @@ export interface EmailTemplate {
 export interface EmailDesignSettings {
   company_name: string;
   logo_url: string | null;
+  logo_width?: number;
+  use_branding_logo?: boolean;
   primary_color: string;
   secondary_color: string;
   background_color: string;
@@ -391,7 +393,8 @@ export function buildEmailHtml(
   salutation: "du" | "sie",
   placeholders: Record<string, string>,
   actionUrl?: string,
-  emailType: EmailType = 'transactional'
+  emailType: EmailType = 'transactional',
+  brandingLogoUrl?: string
 ): string {
   const settings = designSettings || {
     company_name: "ImmoOnPoint",
@@ -442,8 +445,14 @@ export function buildEmailHtml(
   const legalInfo = buildLegalInfo(settings);
   const emailReason = getEmailReason(settings, emailType);
 
-  const logoHtml = settings.logo_url
-    ? `<img src="${settings.logo_url}" alt="${settings.company_name}" style="max-width: 150px; height: auto;" />`
+  // Determine effective logo URL: prefer branding logo if flag is set and URL provided
+  const effectiveLogoUrl = (settings.use_branding_logo && brandingLogoUrl) 
+    ? brandingLogoUrl 
+    : settings.logo_url;
+  
+  const logoWidth = settings.logo_width || 150;
+  const logoHtml = effectiveLogoUrl
+    ? `<img src="${effectiveLogoUrl}" alt="${settings.company_name}" style="width: ${logoWidth}px; height: auto; display: block; margin: 0 auto;" />`
     : `<h1 style="margin: 0; color: ${settings.primary_color}; font-size: 28px; font-weight: 700;">${settings.company_name}</h1>`;
 
   const ctaHtml = ctaText && actionUrl

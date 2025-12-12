@@ -1,4 +1,5 @@
 import { EmailDesignSettings, EmailTemplate, SalutationType } from './types';
+import { useSeoSettings } from '@/hooks/useSeoSettings';
 
 interface EmailPreviewProps {
   settings: EmailDesignSettings;
@@ -15,6 +16,13 @@ export function EmailPreview({
   placeholderValues = {},
   emailType = 'transactional'
 }: EmailPreviewProps) {
+  const { settings: seoSettings } = useSeoSettings();
+  
+  // Determine effective logo URL: prefer branding logo (dark version for emails) if flag is set
+  const effectiveLogoUrl = settings.use_branding_logo 
+    ? (seoSettings?.logo_dark_url || seoSettings?.logo_url) 
+    : settings.logo_url;
+
   const defaultPlaceholders: Record<string, string> = {
     vorname: 'Max',
     nachname: 'Mustermann',
@@ -107,13 +115,15 @@ export function EmailPreview({
               borderBottom: `1px solid ${settings.border_color || '#e4e4e7'}`,
             }}
           >
-            {settings.logo_url ? (
+            {effectiveLogoUrl ? (
               <img
-                src={settings.logo_url}
+                src={effectiveLogoUrl}
                 alt={settings.company_name || 'Logo'}
                 style={{
                   width: `${settings.logo_width || 150}px`,
                   height: 'auto',
+                  display: 'block',
+                  margin: '0 auto',
                 }}
               />
             ) : (
