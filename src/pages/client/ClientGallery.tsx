@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGalleryBySlug } from '@/hooks/useGallery';
-import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
-import { useGalleryFinalization } from '@/hooks/useGalleryFinalization';
+import { useGalleryBySlug, useGalleryPhotos, useGalleryFinalization } from '@/hooks/galleries';
 import { PhotoLightbox } from '@/components/client/PhotoLightbox';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { VirtualizedPhotoGrid } from '@/components/client/VirtualizedPhotoGrid';
@@ -18,7 +16,7 @@ import { useComparisonMode } from '@/hooks/useComparisonMode';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useEventTracking } from '@/hooks/useEventTracking';
-import { useGalleryAnnotations } from '@/hooks/useGalleryAnnotations';
+import { useGalleryAnnotations } from '@/hooks/galleries';
 import { Button } from '@/components/ui/button';
 import {
   GalleryHeader,

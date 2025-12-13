@@ -12,7 +12,7 @@ import { Gallery } from '@/types/database';
 import { useLogDownload } from '@/hooks/useDownloadLogs';
 import { useCreateZipJob, useZipJob, useDownloadZipJob } from '@/hooks/useZipJobs';
 import { WatermarkEditor } from './WatermarkEditor';
-import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
+import { useGalleryPhotos } from '@/hooks/galleries';
 import { useSignedPhotoUrl } from '@/hooks/useSignedPhotoUrls';
 import { useAnsprache } from '@/contexts/AnspracheContext';
 

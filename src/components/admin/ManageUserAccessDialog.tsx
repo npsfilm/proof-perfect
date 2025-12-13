@@ -23,7 +23,7 @@ import {
   useAddUserGalleryAccess,
   useRemoveUserGalleryAccess,
 } from '@/hooks/useUserGalleryAccess';
-import { useGalleries } from '@/hooks/useGalleries';
+import { useGalleries } from '@/hooks/galleries';
 import { UserActivity } from '@/types/database';
 
 interface ManageUserAccessDialogProps {
