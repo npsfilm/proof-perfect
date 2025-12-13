@@ -51,7 +51,8 @@ export function DrawingOverlay({
       const scaleY = containerHeight / originalHeight;
       const scale = Math.min(scaleX, scaleY);
 
-      canvas.loadFromJSON(jsonData, () => {
+      // Fabric.js v6 uses Promise-based loadFromJSON
+      canvas.loadFromJSON(jsonData).then(() => {
         // Scale all objects if dimensions changed
         if (scale !== 1) {
           canvas.getObjects().forEach((obj) => {
@@ -90,14 +91,12 @@ export function DrawingOverlay({
   }
 
   return (
-    <div
-      className="absolute inset-0 pointer-events-none flex items-center justify-center"
-    >
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
       <canvas
         ref={canvasRef}
         style={{
-          width: containerWidth,
-          height: containerHeight,
+          width: '100%',
+          height: '100%',
           transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
           transformOrigin: 'center center',
         }}
