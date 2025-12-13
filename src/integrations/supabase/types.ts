@@ -140,33 +140,90 @@ export type Database = {
       booking_packages: {
         Row: {
           created_at: string | null
+          description: string | null
           duration_minutes: number
+          features: Json | null
           id: string
           is_active: boolean | null
+          is_popular: boolean | null
+          name: string | null
           package_type: string
           photo_count: number
           price_cents: number
           requires_additional_info: boolean | null
+          sort_order: number | null
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
           duration_minutes: number
+          features?: Json | null
           id?: string
           is_active?: boolean | null
+          is_popular?: boolean | null
+          name?: string | null
           package_type: string
           photo_count: number
           price_cents: number
           requires_additional_info?: boolean | null
+          sort_order?: number | null
         }
         Update: {
           created_at?: string | null
+          description?: string | null
           duration_minutes?: number
+          features?: Json | null
           id?: string
           is_active?: boolean | null
+          is_popular?: boolean | null
+          name?: string | null
           package_type?: string
           photo_count?: number
           price_cents?: number
           requires_additional_info?: boolean | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      booking_upgrades: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          is_per_image: boolean | null
+          max_quantity: number | null
+          min_quantity: number | null
+          name: string
+          price_cents: number
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_per_image?: boolean | null
+          max_quantity?: number | null
+          min_quantity?: number | null
+          name: string
+          price_cents?: number
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_per_image?: boolean | null
+          max_quantity?: number | null
+          min_quantity?: number | null
+          name?: string
+          price_cents?: number
+          sort_order?: number | null
         }
         Relationships: []
       }
