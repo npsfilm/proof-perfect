@@ -91,15 +91,16 @@ export function DrawingOverlay({
 
   return (
     <div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
-        transformOrigin: 'center center',
-      }}
+      className="absolute inset-0 pointer-events-none flex items-center justify-center"
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0"
+        style={{
+          width: containerWidth,
+          height: containerHeight,
+          transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
+          transformOrigin: 'center center',
+        }}
       />
     </div>
   );
