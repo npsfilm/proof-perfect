@@ -75,13 +75,13 @@ export function FabricAnnotationCanvas({
     return () => window.removeEventListener('resize', updateSize);
   }, [imageSize]);
 
-  // Initialize Fabric.js canvas
+  // Initialize Fabric.js canvas once
   useEffect(() => {
-    if (!canvasRef.current || canvasSize.width === 0) return;
+    if (!canvasRef.current) return;
 
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: canvasSize.width,
-      height: canvasSize.height,
+      width: 800,
+      height: 600,
       isDrawingMode: true,
       backgroundColor: 'transparent',
       selection: true,
@@ -89,22 +89,35 @@ export function FabricAnnotationCanvas({
 
     // Configure brush
     canvas.freeDrawingBrush = new PencilBrush(canvas);
-    canvas.freeDrawingBrush.color = activeColor;
-    canvas.freeDrawingBrush.width = brushWidth;
-
-    // Load existing drawing if present
-    if (existingDrawing && Object.keys(existingDrawing).length > 0) {
-      canvas.loadFromJSON(existingDrawing).then(() => {
-        canvas.renderAll();
-      });
-    }
+    // Ensure drawing stays within canvas bounds
+    (canvas.freeDrawingBrush as any).limitedToCanvasSize = true;
 
     setFabricCanvas(canvas);
 
     return () => {
       canvas.dispose();
     };
-  }, [canvasSize]);
+  }, []);
+
+  // Keep Fabric canvas in sync with calculated size
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    fabricCanvas.setDimensions({
+      width: canvasSize.width,
+      height: canvasSize.height,
+    });
+    fabricCanvas.renderAll();
+  }, [fabricCanvas, canvasSize]);
+
+  // Load existing drawing JSON when provided
+  useEffect(() => {
+    if (!fabricCanvas || !existingDrawing || Object.keys(existingDrawing).length === 0) return;
+
+    fabricCanvas.loadFromJSON(existingDrawing).then(() => {
+      fabricCanvas.renderAll();
+    });
+  }, [fabricCanvas, existingDrawing]);
 
   // Update brush settings when they change
   useEffect(() => {
@@ -117,6 +130,30 @@ export function FabricAnnotationCanvas({
       fabricCanvas.freeDrawingBrush.width = brushWidth;
     }
   }, [activeTool, activeColor, brushWidth, fabricCanvas]);
+
+  // Safety net: ensure Fabric receives pointer/mouse up events
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    const handlePointerUp = (event: PointerEvent | MouseEvent | TouchEvent) => {
+      const anyCanvas = fabricCanvas as any;
+      if (typeof anyCanvas._onPointerUp === 'function') {
+        anyCanvas._onPointerUp(event);
+      } else if (typeof anyCanvas._onMouseUp === 'function') {
+        anyCanvas._onMouseUp(event);
+      }
+    };
+
+    document.addEventListener('pointerup', handlePointerUp);
+    document.addEventListener('mouseup', handlePointerUp);
+    document.addEventListener('touchend', handlePointerUp);
+
+    return () => {
+      document.removeEventListener('pointerup', handlePointerUp);
+      document.removeEventListener('mouseup', handlePointerUp);
+      document.removeEventListener('touchend', handlePointerUp);
+    };
+  }, [fabricCanvas]);
 
   const handleToolChange = useCallback((tool: Tool) => {
     if (!fabricCanvas) return;
@@ -248,12 +285,6 @@ export function FabricAnnotationCanvas({
     <div 
       className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
       onClick={stopPropagation}
-      onMouseDown={stopPropagation}
-      onMouseUp={stopPropagation}
-      onTouchStart={stopPropagation}
-      onTouchEnd={stopPropagation}
-      onPointerDown={stopPropagation}
-      onPointerUp={stopPropagation}
     >
       {/* Toolbar */}
       <div className="bg-background/95 backdrop-blur-sm p-3 flex flex-wrap items-center justify-between gap-3 border-b shrink-0">
