@@ -8,7 +8,7 @@ import { PhotoLightbox } from '@/components/client/PhotoLightbox';
 import { FinalizeModals } from '@/components/client/FinalizeModals';
 import { VirtualizedPhotoGrid } from '@/components/client/VirtualizedPhotoGrid';
 import { GalleryFilterBar, PhotoFilter } from '@/components/client/GalleryFilterBar';
-import { ComparisonMode } from '@/components/client/ComparisonMode';
+import { ComparisonMode } from '@/components/client/comparison';
 import { WelcomeModal } from '@/components/client/WelcomeModal';
 import { SelectionSummary } from '@/components/client/SelectionSummary';
 import { AdminPreviewOverlay } from '@/components/client/AdminPreviewOverlay';
