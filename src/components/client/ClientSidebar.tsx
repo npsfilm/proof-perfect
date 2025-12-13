@@ -41,13 +41,27 @@ import {
 } from '@/components/ui/sidebar';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
-const navGroups = [
+interface NavItemType {
+  title: string;
+  url: string;
+  icon: typeof FolderOpen;
+  tabParam: string | null;
+  external?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItemType[];
+}
+
+const navGroups: NavGroup[] = [
   {
     label: 'Navigation',
     items: [
       { title: 'Meine Galerien', url: '/', icon: FolderOpen, tabParam: null },
       { title: 'Staging anfordern', url: '/', icon: Sofa, tabParam: 'staging' },
       { title: 'Virtuelle Bearbeitung', url: '/virtuelle-bearbeitung', icon: Sparkles, tabParam: null },
+      { title: 'Shooting buchen', url: '/buchung', icon: Camera, tabParam: null, external: true },
     ],
   },
   {
@@ -59,14 +73,14 @@ const navGroups = [
   },
 ];
 
-interface NavItemProps {
-  item: typeof navGroups[0]['items'][0];
+interface NavItemComponentProps {
+  item: NavItemType;
   isActive: boolean;
   showLabel: boolean;
   onItemClick?: () => void;
 }
 
-function NavItem({ item, isActive, showLabel, onItemClick }: NavItemProps) {
+function NavItemComponent({ item, isActive, showLabel, onItemClick }: NavItemComponentProps) {
   const getItemUrl = () => {
     if (item.tabParam) {
       return `${item.url}?tab=${item.tabParam}`;
@@ -74,10 +88,18 @@ function NavItem({ item, isActive, showLabel, onItemClick }: NavItemProps) {
     return item.url;
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (item.external) {
+      e.preventDefault();
+      window.location.href = item.url;
+    }
+    onItemClick?.();
+  };
+
   const content = (
     <NavLink
       to={getItemUrl()}
-      onClick={onItemClick}
+      onClick={handleClick}
       className={`flex items-center gap-2.5 px-3 py-2 rounded-md transition-all duration-200 ${
         isActive 
           ? 'bg-primary/10 text-primary border-l-2 border-primary -ml-[2px] pl-[calc(0.75rem+2px)]' 
@@ -131,7 +153,7 @@ function SidebarNavContent({ onItemClick, showLabels = true }: { onItemClick?: (
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="p-0">
-                    <NavItem 
+                    <NavItemComponent 
                       item={item} 
                       isActive={isItemActive(item)}
                       showLabel={showLabels}
@@ -318,9 +340,12 @@ export function ClientSidebar() {
             )}
           </div>
           
-          {/* User Card */}
+          {/* User Card - Klickbar für Einstellungen */}
           {open && (
-            <div className="flex items-center gap-2 p-1.5 mt-2 rounded-md bg-muted/30">
+            <button
+              onClick={() => navigate('/?tab=settings')}
+              className="flex items-center gap-2 p-1.5 mt-2 rounded-md bg-muted/30 w-full hover:bg-muted/50 transition-colors text-left group"
+            >
               <Avatar className="h-7 w-7 shrink-0">
                 <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
                   {userInitials}
@@ -330,7 +355,8 @@ export function ClientSidebar() {
                 <p className="text-xs font-medium text-foreground truncate leading-tight">{getDisplayName()}</p>
                 <p className="text-[10px] text-muted-foreground truncate leading-tight">{user?.email}</p>
               </div>
-            </div>
+              <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </button>
           )}
         </SidebarHeader>
         
@@ -353,7 +379,7 @@ export function ClientSidebar() {
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="top">Hilfe</TooltipContent>
+                <TooltipContent side="top">E-Mail an Support</TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -373,15 +399,21 @@ export function ClientSidebar() {
             <div className="flex flex-col items-center gap-1">
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <Avatar className="h-7 w-7 cursor-pointer">
-                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <button
+                    onClick={() => navigate('/?tab=settings')}
+                    className="rounded-full transition-transform hover:scale-105"
+                  >
+                    <Avatar className="h-7 w-7 cursor-pointer">
+                      <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <p className="font-medium">{getDisplayName()}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-primary mt-1">Klicken für Einstellungen</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={0}>
