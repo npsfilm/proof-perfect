@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface BookingPackage {
   id: string;
-  package_type: 'Foto' | 'Drohne' | 'Kombi';
+  package_type: string;
   name: string | null;
   description: string | null;
   photo_count: number;
