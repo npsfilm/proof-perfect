@@ -498,6 +498,11 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
             <Button
               onClick={(e) => {
                 e.stopPropagation();
+                // Ensure we have image dimensions before opening canvas
+                if (imageRef.current) {
+                  const rect = imageRef.current.getBoundingClientRect();
+                  setImageContainerSize({ width: rect.width, height: rect.height });
+                }
                 setShowDrawingCanvas(true);
               }}
               variant={drawingAnnotation ? 'secondary' : 'outline'}
