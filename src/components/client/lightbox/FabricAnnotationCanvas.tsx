@@ -260,7 +260,13 @@ export function FabricAnnotationCanvas({
     setIsSaving(true);
     try {
       const json = fabricCanvas.toJSON();
-      await onSave(json);
+      // Add original dimensions for correct scaling when loading
+      const jsonWithDimensions = {
+        ...json,
+        originalWidth: canvasSize.width,
+        originalHeight: canvasSize.height,
+      };
+      await onSave(jsonWithDimensions);
     } finally {
       setIsSaving(false);
     }

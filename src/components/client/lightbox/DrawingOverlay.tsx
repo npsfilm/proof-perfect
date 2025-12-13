@@ -5,18 +5,12 @@ interface DrawingOverlayProps {
   drawingData: object;
   containerWidth: number;
   containerHeight: number;
-  zoom?: number;
-  panX?: number;
-  panY?: number;
 }
 
 export function DrawingOverlay({
   drawingData,
   containerWidth,
   containerHeight,
-  zoom = 1,
-  panX = 0,
-  panY = 0,
 }: DrawingOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<FabricCanvas | null>(null);
@@ -30,53 +24,63 @@ export function DrawingOverlay({
       fabricRef.current = null;
     }
 
-    // Create canvas for display
+    // Extract original dimensions from saved data
+    const jsonData = drawingData as { 
+      version?: string; 
+      objects?: object[]; 
+      originalWidth?: number; 
+      originalHeight?: number 
+    };
+    
+    if (!jsonData || !jsonData.objects) return;
+
+    // Use original dimensions or fall back to current container
+    const originalWidth = jsonData.originalWidth || containerWidth;
+    const originalHeight = jsonData.originalHeight || containerHeight;
+
+    // Create canvas with CURRENT container dimensions (explicit pixel values)
     const canvas = new FabricCanvas(canvasRef.current, {
       width: containerWidth,
       height: containerHeight,
       selection: false,
       renderOnAddRemove: true,
+      backgroundColor: 'transparent',
     });
 
     fabricRef.current = canvas;
 
-    // Load the saved drawing data
-    const jsonData = drawingData as { version?: string; objects?: object[]; originalWidth?: number; originalHeight?: number };
-    
-    if (jsonData && jsonData.objects) {
-      // Calculate scale factor if original dimensions are stored
-      const originalWidth = jsonData.originalWidth || containerWidth;
-      const originalHeight = jsonData.originalHeight || containerHeight;
-      const scaleX = containerWidth / originalWidth;
-      const scaleY = containerHeight / originalHeight;
-      const scale = Math.min(scaleX, scaleY);
+    // Calculate scale factor for repositioning objects
+    const scaleX = containerWidth / originalWidth;
+    const scaleY = containerHeight / originalHeight;
+    const scale = Math.min(scaleX, scaleY);
 
-      // Fabric.js v6 uses Promise-based loadFromJSON
-      canvas.loadFromJSON(jsonData).then(() => {
-        // Scale all objects if dimensions changed
-        if (scale !== 1) {
-          canvas.getObjects().forEach((obj) => {
-            obj.scaleX = (obj.scaleX || 1) * scale;
-            obj.scaleY = (obj.scaleY || 1) * scale;
-            obj.left = (obj.left || 0) * scale;
-            obj.top = (obj.top || 0) * scale;
-            obj.setCoords();
-          });
-        }
+    // Load the saved drawing data
+    canvas.loadFromJSON(jsonData).then(() => {
+      // Scale all objects to fit current dimensions
+      canvas.getObjects().forEach((obj) => {
+        // Scale size
+        obj.scaleX = (obj.scaleX || 1) * scale;
+        obj.scaleY = (obj.scaleY || 1) * scale;
         
-        // Make all objects non-interactive
-        canvas.getObjects().forEach((obj) => {
-          obj.selectable = false;
-          obj.evented = false;
-          obj.hasControls = false;
-          obj.hasBorders = false;
-          obj.lockMovementX = true;
-          obj.lockMovementY = true;
-        });
+        // Scale position
+        obj.left = (obj.left || 0) * scale;
+        obj.top = (obj.top || 0) * scale;
         
-        canvas.renderAll();
+        // Make non-interactive
+        obj.selectable = false;
+        obj.evented = false;
+        obj.hasControls = false;
+        obj.hasBorders = false;
+        obj.lockMovementX = true;
+        obj.lockMovementY = true;
+        
+        obj.setCoords();
       });
-    }
+      
+      canvas.renderAll();
+    }).catch((error) => {
+      console.error('Error loading drawing:', error);
+    });
 
     return () => {
       if (fabricRef.current) {
@@ -91,16 +95,14 @@ export function DrawingOverlay({
   }
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
-          transformOrigin: 'center center',
-        }}
-      />
+    <div 
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        width: containerWidth,
+        height: containerHeight,
+      }}
+    >
+      <canvas ref={canvasRef} />
     </div>
   );
 }
