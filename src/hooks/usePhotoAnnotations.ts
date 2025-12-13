@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PhotoAnnotation } from '@/types/database';
 import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 export function usePhotoAnnotations(photoId: string | undefined) {
   const queryClient = useQueryClient();
@@ -23,6 +24,9 @@ export function usePhotoAnnotations(photoId: string | undefined) {
     },
     enabled: !!photoId,
   });
+
+  // Get existing drawing annotation for this photo
+  const existingDrawing = annotations?.find(a => a.annotation_type === 'drawing');
 
   const addAnnotation = useMutation({
     mutationFn: async ({
@@ -90,10 +94,62 @@ export function usePhotoAnnotations(photoId: string | undefined) {
     },
   });
 
+  // Add or update drawing annotation
+  const saveDrawingAnnotation = useMutation({
+    mutationFn: async ({ drawing_data }: { drawing_data: object }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Check if drawing annotation already exists for this photo
+      const existingDrawingAnnotation = annotations?.find(a => a.annotation_type === 'drawing');
+
+      if (existingDrawingAnnotation) {
+        // Update existing drawing
+        const { error } = await supabase
+          .from('photo_annotations')
+          .update({
+            drawing_data: drawing_data as Json,
+          })
+          .eq('id', existingDrawingAnnotation.id);
+        
+        if (error) throw error;
+      } else {
+        // Create new drawing annotation
+        const { error } = await supabase
+          .from('photo_annotations')
+          .insert({
+            photo_id: photoId!,
+            author_user_id: user.id,
+            annotation_type: 'drawing',
+            drawing_data: drawing_data as Json,
+          });
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['photo-annotations', photoId] });
+      toast({
+        title: 'Zeichnung gespeichert',
+        description: 'Ihre Markierungen wurden gespeichert.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Fehler',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     annotations: annotations || [],
+    markerAnnotations: annotations?.filter(a => a.annotation_type !== 'drawing') || [],
+    drawingAnnotation: existingDrawing,
     isLoading,
     addAnnotation,
     deleteAnnotation,
+    saveDrawingAnnotation,
   };
 }

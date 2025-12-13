@@ -132,6 +132,8 @@ export interface GalleryClient {
 }
 
 export interface PhotoAnnotation {
+  annotation_type?: 'marker' | 'drawing';
+  drawing_data?: object | null;
   id: string;
   photo_id: string;
   author_user_id: string;

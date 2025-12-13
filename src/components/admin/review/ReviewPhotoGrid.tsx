@@ -1,12 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MessageSquare, Wand2, MapPin, Sunrise } from 'lucide-react';
+import { MessageSquare, Wand2, MapPin, Sunrise, Pencil } from 'lucide-react';
 import { Photo } from '@/types/database';
+import { DrawingPreview } from '@/components/client/lightbox/DrawingPreview';
 
 interface ReviewPhotoGridProps {
   selectedPhotos: Photo[];
-  allAnnotations: any[];
+  allAnnotations: Array<{
+    id: string;
+    photo_id: string;
+    annotation_type?: string | null;
+    x_position?: number | null;
+    y_position?: number | null;
+    comment?: string | null;
+    drawing_data?: unknown;
+  }>;
   signedUrls: Record<string, string>;
 }
 
@@ -23,6 +32,8 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations, signedUrls }: 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
           {selectedPhotos.map((photo) => {
             const photoAnnotations = allAnnotations?.filter(a => a.photo_id === photo.id) || [];
+            const markerAnnotations = photoAnnotations.filter(a => a.annotation_type !== 'drawing');
+            const drawingAnnotation = photoAnnotations.find(a => a.annotation_type === 'drawing');
             
             let borderClass = 'border border-muted';
             if (photo.staging_requested) {
@@ -42,10 +53,10 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations, signedUrls }: 
                     />
                   </div>
                   
-                  {photoAnnotations.length > 0 && (
+                  {markerAnnotations.length > 0 && (
                     <TooltipProvider>
                       <div className="absolute inset-0 pointer-events-none">
-                        {photoAnnotations.map((annotation, idx) => (
+                        {markerAnnotations.map((annotation, idx) => (
                           <Tooltip key={annotation.id} delayDuration={0}>
                             <TooltipTrigger asChild>
                               <div
@@ -73,9 +84,19 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations, signedUrls }: 
                       </div>
                       
                       <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md">
-                        {photoAnnotations.length}
+                        {markerAnnotations.length}
                       </div>
                     </TooltipProvider>
+                  )}
+                  
+                  {/* Drawing annotation indicator */}
+                  {drawingAnnotation && (
+                    <div className="absolute top-1 left-1">
+                      <Badge variant="secondary" className="text-[9px] px-1 py-0 bg-orange-100 text-orange-700">
+                        <Pencil className="h-2 w-2 mr-0.5" />
+                        Zeichnung
+                      </Badge>
+                    </div>
                   )}
                 </div>
                 
@@ -105,15 +126,29 @@ export function ReviewPhotoGrid({ selectedPhotos, allAnnotations, signedUrls }: 
                     </div>
                   )}
 
-                  {photoAnnotations.length > 0 && (
+                  {markerAnnotations.length > 0 && (
                     <div className="space-y-1 mt-2 pt-2 border-t">
                       <div className="flex items-center gap-1 text-xs font-medium text-primary">
                         <MapPin className="h-3 w-3" />
-                        <span>{photoAnnotations.length} Markierung(en)</span>
+                        <span>{markerAnnotations.length} Punkt-Markierung(en)</span>
                       </div>
                       <p className="text-xs text-muted-foreground italic">
                         Hover über die Marker im Bild für Details
                       </p>
+                    </div>
+                  )}
+                  
+                  {/* Drawing Preview */}
+                  {drawingAnnotation?.drawing_data && (
+                    <div className="mt-2 pt-2 border-t">
+                      <div className="flex items-center gap-1 text-xs font-medium text-orange-600 mb-1">
+                        <Pencil className="h-3 w-3" />
+                        <span>Zeichnung</span>
+                      </div>
+                      <DrawingPreview 
+                        drawingData={drawingAnnotation.drawing_data as object} 
+                        className="w-full h-20"
+                      />
                     </div>
                   )}
                 </div>

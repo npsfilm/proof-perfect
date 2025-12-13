@@ -1814,34 +1814,40 @@ export type Database = {
       }
       photo_annotations: {
         Row: {
+          annotation_type: string | null
           author_user_id: string
-          comment: string
+          comment: string | null
           created_at: string
+          drawing_data: Json | null
           id: string
           photo_id: string
           updated_at: string
-          x_position: number
-          y_position: number
+          x_position: number | null
+          y_position: number | null
         }
         Insert: {
+          annotation_type?: string | null
           author_user_id: string
-          comment: string
+          comment?: string | null
           created_at?: string
+          drawing_data?: Json | null
           id?: string
           photo_id: string
           updated_at?: string
-          x_position: number
-          y_position: number
+          x_position?: number | null
+          y_position?: number | null
         }
         Update: {
+          annotation_type?: string | null
           author_user_id?: string
-          comment?: string
+          comment?: string | null
           created_at?: string
+          drawing_data?: Json | null
           id?: string
           photo_id?: string
           updated_at?: string
-          x_position?: number
-          y_position?: number
+          x_position?: number | null
+          y_position?: number | null
         }
         Relationships: [
           {

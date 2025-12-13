@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Check, Menu, MessageSquarePlus } from 'lucide-react';
+import { X, Check, Menu, MessageSquarePlus, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,7 @@ import { AnnotationLayer } from './lightbox/AnnotationLayer';
 import { LightboxNavigation } from './lightbox/LightboxNavigation';
 import { StagingControls } from './lightbox/StagingControls';
 import { KeyboardShortcuts } from './lightbox/KeyboardShortcuts';
+import { FabricAnnotationCanvas } from './lightbox/FabricAnnotationCanvas';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
 import { useAnsprache } from '@/contexts/AnspracheContext';
 
@@ -44,10 +45,11 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
   const [pendingAnnotation, setPendingAnnotation] = useState<{ x: number; y: number } | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [imageContainerSize, setImageContainerSize] = useState({ width: 0, height: 0 });
+  const [showDrawingCanvas, setShowDrawingCanvas] = useState(false);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { annotations, addAnnotation, deleteAnnotation } = usePhotoAnnotations(photo.id);
+  const { markerAnnotations, drawingAnnotation, addAnnotation, deleteAnnotation, saveDrawingAnnotation } = usePhotoAnnotations(photo.id);
   const imageRef = useRef<HTMLImageElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -149,6 +151,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
     resetPan();
     setAnnotationMode(false);
     setPendingAnnotation(null);
+    setShowDrawingCanvas(false);
   }, [photo.id]);
 
   // Preload adjacent images for smooth navigation
@@ -434,7 +437,7 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
 
             {/* Annotation Layer */}
             <AnnotationLayer
-              annotations={annotations}
+              annotations={markerAnnotations}
               pendingAnnotation={pendingAnnotation}
               annotationMode={annotationMode}
               zoom={zoom}
@@ -485,11 +488,27 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
           {/* Annotation Mode Toggle */}
           <div className="space-y-3 border-t pt-4">
             <div className="space-y-2">
-              <Label className="text-base">Anmerkung hinzufügen</Label>
+              <Label className="text-base">Anmerkungen</Label>
               <p className="text-xs text-muted-foreground">
-                {t('Klicke auf das Bild, um eine Anmerkung zu platzieren', 'Klicken Sie auf das Bild, um eine Anmerkung zu platzieren')}
+                {t('Markiere Stellen im Bild für Änderungswünsche', 'Markieren Sie Stellen im Bild für Änderungswünsche')}
               </p>
             </div>
+            
+            {/* Drawing Canvas Button */}
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDrawingCanvas(true);
+              }}
+              variant={drawingAnnotation ? 'secondary' : 'outline'}
+              className="w-full"
+              size="lg"
+            >
+              <Pencil className="h-5 w-5 mr-2" />
+              {drawingAnnotation ? 'Zeichnung bearbeiten' : 'Auf Bild zeichnen'}
+            </Button>
+            
+            {/* Point Annotation Mode */}
             <Button
               onClick={(e) => {
                 e.stopPropagation();
@@ -500,16 +519,16 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
               size="lg"
             >
               <MessageSquarePlus className="h-5 w-5 mr-2" />
-              {annotationMode ? 'Anmerkungs-Modus aktiv' : 'Anmerkungs-Modus aktivieren'}
+              {annotationMode ? 'Punkt-Modus aktiv' : 'Punkt-Anmerkung setzen'}
             </Button>
           </div>
 
           {/* Annotations List */}
-          {annotations.length > 0 && (
+          {markerAnnotations.length > 0 && (
             <div className="space-y-2 border-t pt-4">
-              <Label className="text-base">Anmerkungen ({annotations.length})</Label>
+              <Label className="text-base">Punkt-Anmerkungen ({markerAnnotations.length})</Label>
               <div className="space-y-2 max-h-40 overflow-y-auto">
-                {annotations.map((annotation, index) => (
+                {markerAnnotations.map((annotation, index) => (
                   <div key={annotation.id} className="text-sm p-2 bg-muted rounded-lg">
                     <div className="flex items-start gap-2">
                       <span className="font-bold text-primary">{index + 1}.</span>
@@ -549,10 +568,24 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
         onStagingStyleChange={handleStagingStyleChange}
         annotationMode={annotationMode}
         onAnnotationModeToggle={() => setAnnotationMode(!annotationMode)}
-        annotations={annotations}
+        annotations={markerAnnotations}
         currentUserId={currentUserId}
         onDeleteAnnotation={handleDeleteAnnotation}
       />
+
+      {/* Fabric.js Drawing Canvas */}
+      {showDrawingCanvas && (
+        <FabricAnnotationCanvas
+          imageUrl={signedUrl}
+          imageSize={imageContainerSize.width > 0 ? imageContainerSize : { width: 800, height: 600 }}
+          existingDrawing={drawingAnnotation?.drawing_data}
+          onSave={async (drawingData) => {
+            await saveDrawingAnnotation.mutateAsync({ drawing_data: drawingData });
+            setShowDrawingCanvas(false);
+          }}
+          onCancel={() => setShowDrawingCanvas(false)}
+        />
+      )}
     </div>
   );
 }
