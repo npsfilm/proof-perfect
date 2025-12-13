@@ -1,5 +1,6 @@
 import React from 'react';
 import { useBooking } from '@/contexts/BookingContext';
+import { useBookingPrice } from '@/contexts/hooks/useBookingPrice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Plane, Layers, MapPin, Clock, Calendar } from 'lucide-react';
@@ -19,7 +20,8 @@ const packageLabels = {
 };
 
 export function BookingSummaryCard() {
-  const { properties, selectedSlots, totalDuration, totalPrice, propertyCount, currentPropertyIndex } = useBooking();
+  const { properties, selectedSlots, propertyCount, currentPropertyIndex } = useBooking();
+  const { totalDuration, totalPrice } = useBookingPrice();
 
   const hasProperties = properties.length > 0;
 

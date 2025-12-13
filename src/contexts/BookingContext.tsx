@@ -26,55 +26,32 @@ export interface ContactDetails {
 }
 
 interface BookingState {
-  // Step tracking
   currentStep: number;
   scheduleType: 'single_day' | 'multiple_days' | null;
   propertyCount: number;
   currentPropertyIndex: number;
-  
-  // Property data
   properties: PropertyBooking[];
-  
-  // Slot selection
   selectedSlots: SlotSelection[];
-  
-  // Contact
   contact: ContactDetails;
-  
-  // Booking result
   batchId: string | null;
   isSubmitting: boolean;
   isComplete: boolean;
 }
 
 interface BookingContextType extends BookingState {
-  // Navigation
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
-  
-  // Schedule type
   setScheduleType: (type: 'single_day' | 'multiple_days') => void;
-  
-  // Properties
   setPropertyCount: (count: number) => void;
   setCurrentPropertyIndex: (index: number) => void;
   updateProperty: (index: number, property: Partial<PropertyBooking>) => void;
   addProperty: (property: PropertyBooking) => void;
-  
-  // Slots
   setSelectedSlots: (slots: SlotSelection[]) => void;
-  
-  // Contact
   setContact: (contact: ContactDetails) => void;
-  
-  // Actions
-  submitBooking: () => Promise<void>;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+  setBookingComplete: (batchId: string) => void;
   resetBooking: () => void;
-  
-  // Computed
-  totalDuration: number;
-  totalPrice: number;
 }
 
 const initialState: BookingState = {
@@ -91,13 +68,6 @@ const initialState: BookingState = {
 };
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
-
-// Package prices in cents
-const PACKAGE_PRICES: Record<string, Record<number, number>> = {
-  foto: { 6: 14900, 10: 19900, 15: 24900, 20: 29900 },
-  drohne: { 4: 14900, 6: 19900, 10: 24900 },
-  kombi: { 15: 29900, 20: 34900, 25: 39900, 30: 44900 },
-};
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<BookingState>(initialState);
@@ -151,68 +121,17 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, contact }));
   }, []);
 
-  const submitBooking = useCallback(async () => {
-    setState(prev => ({ ...prev, isSubmitting: true }));
-    
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const batchId = crypto.randomUUID();
+  const setIsSubmitting = useCallback((isSubmitting: boolean) => {
+    setState(prev => ({ ...prev, isSubmitting }));
+  }, []);
 
-      // Create bookings for each property
-      for (let i = 0; i < state.properties.length; i++) {
-        const property = state.properties[i];
-        const slot = state.selectedSlots[i] || state.selectedSlots[0];
-
-        const { error } = await supabase.from('bookings').insert({
-          batch_id: batchId,
-          property_index: i + 1,
-          contact_name: state.contact.name,
-          contact_email: state.contact.email,
-          contact_phone: state.contact.phone,
-          company_name: state.contact.companyName,
-          address: property.address,
-          latitude: property.lat,
-          longitude: property.lng,
-          package_type: property.packageType,
-          photo_count: property.photoCount,
-          property_type: property.propertyType,
-          square_meters: property.squareMeters,
-          scheduled_date: slot.date,
-          scheduled_start: slot.start,
-          scheduled_end: slot.end,
-          estimated_duration_minutes: property.durationMinutes,
-          status: slot.isWeekendRequest ? 'request' : 'confirmed',
-          is_weekend_request: slot.isWeekendRequest,
-          source: 'web',
-        });
-
-        if (error) throw error;
-      }
-
-      setState(prev => ({
-        ...prev,
-        batchId,
-        isSubmitting: false,
-        isComplete: true,
-      }));
-    } catch (error) {
-      console.error('Booking submission error:', error);
-      setState(prev => ({ ...prev, isSubmitting: false }));
-      throw error;
-    }
-  }, [state.properties, state.selectedSlots, state.contact]);
+  const setBookingComplete = useCallback((batchId: string) => {
+    setState(prev => ({ ...prev, batchId, isSubmitting: false, isComplete: true }));
+  }, []);
 
   const resetBooking = useCallback(() => {
     setState(initialState);
   }, []);
-
-  // Computed values
-  const totalDuration = state.properties.reduce((sum, p) => sum + (p.durationMinutes || 0), 0);
-  
-  const totalPrice = state.properties.reduce((sum, p) => {
-    const prices = PACKAGE_PRICES[p.packageType];
-    return sum + (prices?.[p.photoCount] || 0);
-  }, 0);
 
   return (
     <BookingContext.Provider
@@ -228,10 +147,9 @@ export function BookingProvider({ children }: { children: ReactNode }) {
         addProperty,
         setSelectedSlots,
         setContact,
-        submitBooking,
+        setIsSubmitting,
+        setBookingComplete,
         resetBooking,
-        totalDuration,
-        totalPrice,
       }}
     >
       {children}
