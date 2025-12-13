@@ -387,9 +387,6 @@ export function FabricAnnotationCanvas({
         <div 
           className="relative shadow-2xl rounded-lg overflow-hidden"
           style={{ width: canvasSize.width, height: canvasSize.height }}
-          onMouseDown={stopPropagation}
-          onTouchStart={stopPropagation}
-          onPointerDown={stopPropagation}
         >
           {/* Background Image */}
           <img 
@@ -403,8 +400,6 @@ export function FabricAnnotationCanvas({
           <canvas 
             ref={canvasRef} 
             className="absolute inset-0"
-            onMouseDown={stopPropagation}
-            onTouchStart={stopPropagation}
           />
         </div>
       </div>
