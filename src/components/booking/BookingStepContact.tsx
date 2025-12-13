@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useBooking } from '@/contexts/BookingContext';
+import { useBookingSubmit } from '@/contexts/hooks/useBookingSubmit';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +9,8 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function BookingStepContact() {
-  const { contact, setContact, submitBooking, prevStep, isSubmitting, selectedSlots } = useBooking();
+  const { contact, setContact, prevStep, isSubmitting, setIsSubmitting, setBookingComplete, selectedSlots, properties } = useBooking();
+  const submitBooking = useBookingSubmit();
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -38,8 +40,10 @@ export function BookingStepContact() {
   const handleSubmit = async () => {
     if (!validate()) return;
 
+    setIsSubmitting(true);
     try {
-      await submitBooking();
+      const batchId = await submitBooking.mutateAsync({ properties, selectedSlots, contact });
+      setBookingComplete(batchId);
       toast.success(
         hasWeekendRequest 
           ? 'Anfrage erfolgreich gesendet! Wir melden uns in Kürze.' 
@@ -47,6 +51,7 @@ export function BookingStepContact() {
       );
     } catch (error) {
       console.error('Booking error:', error);
+      setIsSubmitting(false);
       toast.error('Fehler bei der Buchung. Bitte versuchen Sie es erneut.');
     }
   };
