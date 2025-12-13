@@ -18,6 +18,7 @@ import { LightboxNavigation } from './lightbox/LightboxNavigation';
 import { StagingControls } from './lightbox/StagingControls';
 import { KeyboardShortcuts } from './lightbox/KeyboardShortcuts';
 import { FabricAnnotationCanvas } from './lightbox/FabricAnnotationCanvas';
+import { DrawingOverlay } from './lightbox/DrawingOverlay';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
 import { useAnsprache } from '@/contexts/AnspracheContext';
 
@@ -434,6 +435,18 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
                 draggable={false}
               />
             </div>
+
+            {/* Drawing Overlay - show saved drawing when not editing */}
+            {drawingAnnotation?.drawing_data && !showDrawingCanvas && (
+              <DrawingOverlay
+                drawingData={drawingAnnotation.drawing_data}
+                containerWidth={imageContainerSize.width}
+                containerHeight={imageContainerSize.height}
+                zoom={zoom}
+                panX={panX}
+                panY={panY}
+              />
+            )}
 
             {/* Annotation Layer */}
             <AnnotationLayer
