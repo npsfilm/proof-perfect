@@ -5,6 +5,7 @@ import { AddressInput } from './AddressInput';
 import { PackagePicker } from './PackagePicker';
 import { PropertyDetailsModal } from './PropertyDetailsModal';
 import { Check, ChevronRight } from 'lucide-react';
+import { type BookingPackage } from '@/hooks/useBookingPackages';
 
 export function BookingStepProperty() {
   const {
@@ -20,6 +21,7 @@ export function BookingStepProperty() {
 
   const [currentProperty, setCurrentProperty] = useState<Partial<PropertyBooking>>({});
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<string>();
 
   const isCurrentComplete = !!(
     currentProperty.address &&
@@ -32,20 +34,17 @@ export function BookingStepProperty() {
     setCurrentProperty(prev => ({ ...prev, address, lat, lng }));
   };
 
-  const handlePackageSelect = (
-    packageType: 'foto' | 'drohne' | 'kombi',
-    photoCount: number,
-    durationMinutes: number,
-    requiresAdditionalInfo: boolean
-  ) => {
+  const handlePackageSelect = (pkg: BookingPackage) => {
+    const packageType = pkg.package_type.toLowerCase() as 'foto' | 'drohne' | 'kombi';
+    setSelectedPackageId(pkg.id);
     setCurrentProperty(prev => ({
       ...prev,
       packageType,
-      photoCount,
-      durationMinutes,
+      photoCount: pkg.photo_count,
+      durationMinutes: pkg.duration_minutes,
     }));
 
-    if (requiresAdditionalInfo) {
+    if (pkg.requires_additional_info) {
       setShowDetailsModal(true);
     }
   };
@@ -110,8 +109,7 @@ export function BookingStepProperty() {
       <div className="space-y-2">
         <label className="text-sm font-medium">Paket auswählen</label>
         <PackagePicker
-          selectedType={currentProperty.packageType}
-          selectedCount={currentProperty.photoCount}
+          selectedPackageId={selectedPackageId}
           onSelect={handlePackageSelect}
         />
       </div>
