@@ -58,7 +58,7 @@ const App = () => (
                   <Route path="/auth/verify-email" element={<VerifyEmail />} />
                   
                   {/* Public booking page (no layout) */}
-                  <Route path="/buchen" element={<Buchung />} />
+                  <Route path="/buchung" element={<Buchung />} />
                   
                   {/* Client routes with ClientLayout */}
                   <Route element={<ClientLayout />}>
