@@ -436,6 +436,18 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
               />
             </div>
 
+            {/* Drawing Overlay - show saved drawing when not editing */}
+            {drawingAnnotation?.drawing_data && !showDrawingCanvas && (
+              <DrawingOverlay
+                drawingData={drawingAnnotation.drawing_data}
+                containerWidth={imageContainerSize.width}
+                containerHeight={imageContainerSize.height}
+                zoom={zoom}
+                panX={panX}
+                panY={panY}
+              />
+            )}
+
             {/* Annotation Layer */}
             <AnnotationLayer
               annotations={markerAnnotations}
@@ -449,18 +461,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
               onDeleteAnnotation={handleDeleteAnnotation}
             />
           </div>
-
-          {/* Drawing Overlay - show saved drawing when not editing */}
-          {drawingAnnotation?.drawing_data && !showDrawingCanvas && (
-            <DrawingOverlay
-              drawingData={drawingAnnotation.drawing_data}
-              containerWidth={imageContainerSize.width}
-              containerHeight={imageContainerSize.height}
-              zoom={zoom}
-              panX={panX}
-              panY={panY}
-            />
-          )}
         </div>
 
         {/* Controls (Desktop only) */}
