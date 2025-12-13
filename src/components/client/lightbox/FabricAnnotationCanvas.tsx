@@ -239,8 +239,22 @@ export function FabricAnnotationCanvas({
     }
   }, [fabricCanvas]);
 
+  // Stop all events from propagating to parent (lightbox)
+  const stopPropagation = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+    <div 
+      className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onMouseUp={stopPropagation}
+      onTouchStart={stopPropagation}
+      onTouchEnd={stopPropagation}
+      onPointerDown={stopPropagation}
+      onPointerUp={stopPropagation}
+    >
       {/* Toolbar */}
       <div className="bg-background/95 backdrop-blur-sm p-3 flex flex-wrap items-center justify-between gap-3 border-b shrink-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -373,6 +387,9 @@ export function FabricAnnotationCanvas({
         <div 
           className="relative shadow-2xl rounded-lg overflow-hidden"
           style={{ width: canvasSize.width, height: canvasSize.height }}
+          onMouseDown={stopPropagation}
+          onTouchStart={stopPropagation}
+          onPointerDown={stopPropagation}
         >
           {/* Background Image */}
           <img 
@@ -386,6 +403,8 @@ export function FabricAnnotationCanvas({
           <canvas 
             ref={canvasRef} 
             className="absolute inset-0"
+            onMouseDown={stopPropagation}
+            onTouchStart={stopPropagation}
           />
         </div>
       </div>
