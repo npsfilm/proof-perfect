@@ -418,6 +418,12 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
               }}
               onContextMenu={(e) => e.preventDefault()}
               draggable={false}
+              onLoad={() => {
+                if (imageRef.current) {
+                  const rect = imageRef.current.getBoundingClientRect();
+                  setImageContainerSize({ width: rect.width, height: rect.height });
+                }
+              }}
             />
             
             {/* Watermark */}
@@ -442,9 +448,6 @@ export function PhotoLightbox({ photo, photos, onClose, onNavigate, galleryId, s
                 drawingData={drawingAnnotation.drawing_data}
                 containerWidth={imageContainerSize.width}
                 containerHeight={imageContainerSize.height}
-                zoom={zoom}
-                panX={panX}
-                panY={panY}
               />
             )}
 
