@@ -7,7 +7,7 @@ import { StagingPricingSummary } from './StagingPricingSummary';
 import { useStagingForm } from './hooks/useStagingForm';
 import { useStagingPricing } from './hooks/useStagingPricing';
 import { useDeliveredGalleries } from '@/hooks/useDeliveredGalleries';
-import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
+import { useGalleryPhotos } from '@/hooks/galleries';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useCreateStagingRequest } from '@/hooks/useStagingRequests';
 import { useStagingStyles } from '@/hooks/useStagingStyles';

@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useStagingRequests } from '@/hooks/useStagingRequests';
-import { useGalleryCoverPhotos } from '@/hooks/useGalleryCoverPhotos';
+import { useGalleryCoverPhotos } from '@/hooks/galleries';
 import { GallerySelectionStats } from '@/types/database';
 import { GalleryButtonConfig, GallerySections, ReopenModalState } from './types';
 

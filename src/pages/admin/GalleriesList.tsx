@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useGalleries, useDeleteGallery } from '@/hooks/useGalleries';
+import { useGalleries, useDeleteGallery, useGalleryFilters } from '@/hooks/galleries';
 import { useBatchGalleryOperations } from '@/hooks/useBatchGalleryOperations';
-import { useGalleryFilters } from '@/hooks/useGalleryFilters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

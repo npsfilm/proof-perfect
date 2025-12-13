@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGalleryPhotos } from '@/hooks/useGalleryPhotos';
+import { useGalleryPhotos } from '@/hooks/galleries';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { LoadingState } from '@/components/ui/loading-state';
 import { Checkbox } from '@/components/ui/checkbox';

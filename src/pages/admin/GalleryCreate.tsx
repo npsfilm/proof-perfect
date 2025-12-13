@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCreateGallery } from '@/hooks/useGalleries';
+import { useCreateGallery } from '@/hooks/galleries';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Client } from '@/types/database';
 import { Button } from '@/components/ui/button';
