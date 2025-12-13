@@ -18,6 +18,7 @@ import { useComparisonMode } from '@/hooks/useComparisonMode';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useSignedPhotoUrls } from '@/hooks/useSignedPhotoUrls';
 import { useEventTracking } from '@/hooks/useEventTracking';
+import { useGalleryAnnotations } from '@/hooks/useGalleryAnnotations';
 import { Button } from '@/components/ui/button';
 import {
   GalleryHeader,
@@ -46,6 +47,10 @@ export default function ClientGallery() {
   const { orientations, detectOrientation } = usePhotoOrientations(photos);
   const { trackGalleryView, trackPhotoClick, trackSelectionToggle, trackFinalizationStarted } = useEventTracking();
   const galleryViewTracked = useRef(false);
+  
+  // Fetch drawing annotations for all photos
+  const photoIds = photos?.map(p => p.id);
+  const { data: photoDrawings } = useGalleryAnnotations(photoIds);
 
   const {
     isComparisonMode,
@@ -244,6 +249,7 @@ export default function ClientGallery() {
           photoOrientations={orientations}
           allowedOrientation={firstComparisonOrientation}
           onOrientationDetected={detectOrientation}
+          photoDrawings={photoDrawings}
         />
       </main>
 

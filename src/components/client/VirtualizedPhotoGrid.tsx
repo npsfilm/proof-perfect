@@ -17,6 +17,7 @@ interface VirtualizedPhotoGridProps {
   photoOrientations?: Record<string, Orientation>;
   allowedOrientation?: Orientation | null;
   onOrientationDetected?: (photoId: string, width: number, height: number) => void;
+  photoDrawings?: Record<string, boolean>;
 }
 
 export function VirtualizedPhotoGrid({ 
@@ -29,7 +30,8 @@ export function VirtualizedPhotoGrid({
   isComparisonMode = false,
   photoOrientations = {},
   allowedOrientation = null,
-  onOrientationDetected
+  onOrientationDetected,
+  photoDrawings = {},
 }: VirtualizedPhotoGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -163,6 +165,7 @@ export function VirtualizedPhotoGrid({
                     comparisonIndex={comparisonIndex}
                     orientation={orientation}
                     allowedOrientation={allowedOrientation}
+                    hasDrawing={photoDrawings[photo.id]}
                     onClick={() => onPhotoClick(photo.id)}
                     onCheckClick={handleCheckClick}
                     onImageLoad={handleImageLoad(photo.id)}

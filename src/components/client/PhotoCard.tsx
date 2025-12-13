@@ -1,5 +1,5 @@
 import { Photo } from '@/types/database';
-import { Check, RectangleVertical, RectangleHorizontal, Square } from 'lucide-react';
+import { Check, RectangleVertical, RectangleHorizontal, Square, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Orientation } from '@/hooks/usePhotoOrientations';
 import watermarkLogo from '@/assets/immoonpoint-watermark.webp';
@@ -13,6 +13,7 @@ interface PhotoCardProps {
   comparisonIndex?: number;
   orientation?: Orientation;
   allowedOrientation?: Orientation | null;
+  hasDrawing?: boolean;
   onClick: () => void;
   onCheckClick: (e: React.MouseEvent, photo: Photo) => void;
   onImageLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
@@ -27,6 +28,7 @@ export function PhotoCard({
   comparisonIndex,
   orientation,
   allowedOrientation = null,
+  hasDrawing = false,
   onClick,
   onCheckClick,
   onImageLoad,
@@ -100,7 +102,15 @@ export function PhotoCard({
           </div>
         )}
         
-        {/* Other Badges */}
+        {/* Drawing Badge */}
+        {!isComparisonMode && hasDrawing && (
+          <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+            <Pencil className="h-3 w-3" />
+            Zeichnung
+          </div>
+        )}
+        
+        {/* Comment Badge */}
         {!isComparisonMode && photo.client_comment && (
           <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
             Kommentar
