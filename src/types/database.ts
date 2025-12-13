@@ -132,14 +132,14 @@ export interface GalleryClient {
 }
 
 export interface PhotoAnnotation {
-  annotation_type?: 'marker' | 'drawing';
-  drawing_data?: object | null;
   id: string;
   photo_id: string;
   author_user_id: string;
-  x_position: number; // 0-100 percentage
-  y_position: number; // 0-100 percentage
-  comment: string;
+  annotation_type?: 'marker' | 'drawing' | null;
+  drawing_data?: object | null;
+  x_position?: number | null; // 0-100 percentage, nullable for drawings
+  y_position?: number | null; // 0-100 percentage, nullable for drawings
+  comment?: string | null; // nullable for drawings
   created_at: string;
   updated_at: string;
 }
