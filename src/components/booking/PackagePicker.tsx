@@ -67,7 +67,7 @@ export function PackagePicker({ selectedPackageId, onSelect }: PackagePickerProp
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {packages
-              ?.filter((p) => p.package_type === type)
+              ?.filter((p) => p.package_type.toLowerCase() === type.toLowerCase())
               .map((pkg) => {
                 const isSelected = selectedPackageId === pkg.id;
                 const features = pkg.features || [];
