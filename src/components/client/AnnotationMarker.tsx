@@ -19,9 +19,9 @@ export function AnnotationMarker({
   onDelete,
   containerSize,
 }: AnnotationMarkerProps) {
-  // Calculate position as percentage of container
-  const left = `${annotation.x_position}%`;
-  const top = `${annotation.y_position}%`;
+  // Calculate position as percentage of container (fallback to 0 for null-safety)
+  const left = `${annotation.x_position ?? 0}%`;
+  const top = `${annotation.y_position ?? 0}%`;
 
   return (
     <Popover>
@@ -51,7 +51,7 @@ export function AnnotationMarker({
       >
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm flex-1">{annotation.comment}</p>
+            <p className="text-sm flex-1">{annotation.comment ?? ''}</p>
             {isOwner && (
               <Button
                 variant="ghost"
